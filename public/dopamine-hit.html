@@ -540,8 +540,33 @@ function onMotion(e) {
   state.accelZ = (a.z || 0) * 0.2;
 }
 
+// ─── SHAKE DETECTION ───
+let lastShakeTime = 0;
+const SHAKE_THRESHOLD = 25;
+
+function onMotionShake(e) {
+  if (!state.holding) return;
+  const a = e.accelerationIncludingGravity;
+  if (!a) return;
+  const force = Math.abs(a.x) + Math.abs(a.y) + Math.abs(a.z);
+  const now = performance.now();
+  if (force > SHAKE_THRESHOLD && now - lastShakeTime > 300) {
+    lastShakeTime = now;
+    // big burst of stars on shake
+    burstParticles(80 + Math.floor(state.intensity * 120));
+    // flash vibration
+    if (navigator.vibrate) navigator.vibrate([50, 20, 80]);
+  }
+}
+
+window.addEventListener('devicemotion', onMotionShake);
+
+// ─── BUTTON TEXT HINT ───
+let hintTimeout = null;
+
 // ─── BUTTON ───
 const btn = document.getElementById('hold-btn');
+const btnText = btn.querySelector('.btn-text');
 const timerEl = document.getElementById('timer');
 const edgeGlow = document.getElementById('edge-glow');
 
@@ -559,12 +584,25 @@ function onHoldStart(e) {
   startSound();
   startVibration();
   initAccel();
+
+  // Change button text after 2 seconds
+  if (hintTimeout) clearTimeout(hintTimeout);
+  hintTimeout = setTimeout(() => {
+    if (state.holding) {
+      btnText.innerHTML = 'SHAKE<br>THE PHONE';
+    }
+  }, 2000);
 }
 
 function onHoldEnd(e) {
   e.preventDefault();
   if (!state.holding) return;
   state.holding = false;
+
+  // Reset button text
+  if (hintTimeout) clearTimeout(hintTimeout);
+  hintTimeout = null;
+  btnText.innerHTML = 'HOLD FOR<br>DOPAMINE HIT';
 
   btn.classList.remove('active');
   timerEl.classList.remove('active');
