@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { RoomLayout } from '../components/RoomLayout'
 import { SketchBook } from '../components/SketchBook'
 
@@ -28,25 +27,7 @@ const SKETCHES = [
 export function Making() {
   return (
     <RoomLayout>
-      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column' }}>
-        <SketchBook sketches={SKETCHES} />
-        <Link
-          to="/"
-          style={{
-            position: 'fixed',
-            bottom: '1.5rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)',
-            opacity: 0.35,
-            borderBottom: '1px solid rgba(0,0,0,0.15)',
-            paddingBottom: '2px',
-            zIndex: 10,
-          }}
-        >
-          back
-        </Link>
-      </div>
+      <SketchBook sketches={SKETCHES} />
     </RoomLayout>
   )
 }
