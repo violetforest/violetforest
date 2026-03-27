@@ -401,9 +401,17 @@ function drawVortex(t) {
 }
 
 // ─── AUDIO ───
-function initAudio() {
-  if (state.audioCtx) return;
+async function initAudio() {
+  if (state.audioCtx) {
+    if (state.audioCtx.state === 'suspended') {
+      await state.audioCtx.resume();
+    }
+    return;
+  }
   state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (state.audioCtx.state === 'suspended') {
+    await state.audioCtx.resume();
+  }
   state.gainNode = state.audioCtx.createGain();
   state.gainNode.gain.value = 0;
   state.gainNode.connect(state.audioCtx.destination);
