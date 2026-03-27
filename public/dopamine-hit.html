@@ -570,7 +570,7 @@ const btnText = btn.querySelector('.btn-text');
 const timerEl = document.getElementById('timer');
 const edgeGlow = document.getElementById('edge-glow');
 
-function onHoldStart(e) {
+async function onHoldStart(e) {
   e.preventDefault();
   if (state.holding) return;
   state.holding = true;
@@ -580,7 +580,7 @@ function onHoldStart(e) {
   timerEl.classList.add('active');
   edgeGlow.classList.add('active');
 
-  initAudio();
+  await initAudio();
   startSound();
   startVibration();
   initAccel();
