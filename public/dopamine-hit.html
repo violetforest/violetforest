@@ -657,7 +657,7 @@ function animate() {
 
     // apply acceleration from device motion
     v.x += accelForceX * dt * 5;
-    v.y -= accelForceY * dt * 5;
+    v.y += accelForceY * dt * 5;
 
     // slight drag
     v.x *= 0.99;
