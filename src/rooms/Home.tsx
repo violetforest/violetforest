@@ -52,6 +52,7 @@ export function Home() {
           }}
         >
           {[
+            { to: '/dopamine-hit', label: 'dopamine hit' },
             { to: '/listening', label: 'what i\'m listening to' },
             { to: '/thinking', label: 'what i\'m thinking about' },
             { to: '/making', label: 'what i\'m making' },

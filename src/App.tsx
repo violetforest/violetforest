@@ -5,6 +5,7 @@ import { Home } from './rooms/Home'
 import { Listening } from './rooms/Listening'
 import { Thinking } from './rooms/Thinking'
 import { Making } from './rooms/Making'
+import { DopamineHit } from './rooms/DopamineHit'
 import { useSpaceStore } from './store'
 import { useEffect } from 'react'
 
@@ -13,6 +14,7 @@ const ROOM_MAP: Record<string, number> = {
   '/listening': 1,
   '/thinking': 2,
   '/making': 3,
+  '/dopamine-hit': 3,
 }
 
 export default function App() {
@@ -37,6 +39,7 @@ export default function App() {
           <Route path="/listening" element={<Listening />} />
           <Route path="/thinking" element={<Thinking />} />
           <Route path="/making" element={<Making />} />
+          <Route path="/dopamine-hit" element={<DopamineHit />} />
         </Routes>
       </AnimatePresence>
     </>

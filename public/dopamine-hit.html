@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DOPAMINE HIT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+  canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+  #ui-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 10; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+
+  #hold-btn {
+    pointer-events: all;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: radial-gradient(circle at 40% 40%, rgba(40,0,60,0.9), rgba(0,0,0,0.95));
+    color: #fff;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease, border-color 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 0 40px rgba(120, 0, 255, 0.15), inset 0 0 30px rgba(0,0,0,0.5);
+  }
+
+  #hold-btn::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+    animation: orbit-ring 8s linear infinite;
+  }
+
+  #hold-btn::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.04);
+    animation: orbit-ring 15s linear infinite reverse;
+  }
+
+  @keyframes orbit-ring {
+    to { transform: rotate(360deg); }
+  }
+
+  #hold-btn.active {
+    border-color: rgba(255, 100, 255, 0.6);
+    box-shadow: 0 0 80px rgba(255, 0, 200, 0.4), 0 0 160px rgba(100, 0, 255, 0.2), inset 0 0 40px rgba(255,0,150,0.15);
+  }
+
+  #hold-btn .btn-text { position: relative; z-index: 2; padding: 0 20px; }
+
+  #timer {
+    position: fixed; bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    left: 50%; transform: translateX(-50%);
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px; letter-spacing: 3px;
+    color: rgba(255,255,255,0.2);
+    z-index: 11;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
+  }
+
+  #timer.active {
+    color: rgba(255,200,255,0.7);
+    text-shadow: 0 0 10px rgba(255,0,200,0.4);
+  }
+
+  #edge-glow {
+    position: fixed; inset: 0; z-index: 5;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.3s ease;
+    box-shadow: inset 0 0 80px 20px rgba(255,0,150,0.3),
+                inset 0 0 160px 40px rgba(100,0,255,0.15);
+  }
+
+  #edge-glow.active { opacity: 1; }
+
+  #vortex-overlay {
+    position: fixed; inset: 0; z-index: 3;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  #vortex-overlay canvas {
+    width: 100% !important; height: 100% !important;
+  }
+
+
+</style>
+</head>
+<body>
+
+<div id="ui-layer">
+  <button id="hold-btn">
+    <span class="btn-text">HOLD FOR<br>DOPAMINE HIT</span>
+  </button>
+</div>
+
+<div id="edge-glow"></div>
+<div id="vortex-overlay"><canvas id="vortex-canvas"></canvas></div>
+<div id="timer">0.000s</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ─── STATE ───
+const state = {
+  holding: false,
+  holdStart: 0,
+  holdDuration: 0,
+  intensity: 0,       // 0→1 ramps up over ~3s
+  accelX: 0,
+  accelY: 0,
+  accelZ: 0,
+  particles: [],
+  burstQueue: 0,
+  audioCtx: null,
+  oscillators: [],
+  gainNode: null,
+  vibrating: false,
+};
+
+// ─── THREE.JS SETUP ───
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 1);
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 5;
+
+// ─── PARTICLE SYSTEM ───
+const MAX_PARTICLES = 2000;
+const positions = new Float32Array(MAX_PARTICLES * 3);
+const colors = new Float32Array(MAX_PARTICLES * 3);
+const sizes = new Float32Array(MAX_PARTICLES);
+const alphas = new Float32Array(MAX_PARTICLES);
+const rotations = new Float32Array(MAX_PARTICLES);
+const velocities = [];
+
+for (let i = 0; i < MAX_PARTICLES; i++) {
+  positions[i * 3] = 0;
+  positions[i * 3 + 1] = 0;
+  positions[i * 3 + 2] = -100;
+  colors[i * 3] = 1;
+  colors[i * 3 + 1] = 1;
+  colors[i * 3 + 2] = 1;
+  sizes[i] = 0;
+  alphas[i] = 0;
+  rotations[i] = 0;
+  velocities.push({ x: 0, y: 0, z: 0, life: 0, maxLife: 0, spin: 0 });
+}
+
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+geo.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
+geo.setAttribute('rotation', new THREE.BufferAttribute(rotations, 1));
+
+const particleMat = new THREE.ShaderMaterial({
+  vertexShader: `
+    attribute float size;
+    attribute float alpha;
+    attribute float rotation;
+    attribute vec3 color;
+    varying float vAlpha;
+    varying vec3 vColor;
+    varying float vRotation;
+    void main() {
+      vAlpha = alpha;
+      vColor = color;
+      vRotation = rotation;
+      vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = size * (800.0 / -mvPos.z);
+      gl_Position = projectionMatrix * mvPos;
+    }
+  `,
+  fragmentShader: `
+    #define PI 3.14159265359
+    varying float vAlpha;
+    varying vec3 vColor;
+    varying float vRotation;
+
+    void main() {
+      vec2 uv = gl_PointCoord - vec2(0.5);
+      // rotate the UV by per-particle rotation
+      float cs = cos(vRotation);
+      float sn = sin(vRotation);
+      uv = vec2(uv.x * cs - uv.y * sn, uv.x * sn + uv.y * cs);
+      
+      // SDF star using polar folding
+      float angle = atan(uv.y, uv.x);
+      float r = length(uv);
+      float points = 5.0;
+      float seg = PI * 2.0 / points;
+      float halfSeg = seg * 0.5;
+      float a = mod(angle + halfSeg, seg) - halfSeg;
+      // outer and inner radius define the star shape
+      float outerR = 0.45;
+      float innerR = 0.18;
+      // interpolate between outer and inner based on fold angle
+      float starR = mix(innerR, outerR, (cos(a) - cos(halfSeg)) / (1.0 - cos(halfSeg)));
+      float star = 1.0 - smoothstep(starR - 0.04, starR, r);
+      
+      if (star < 0.01) discard;
+
+      // glow halo around star
+      float glow = 1.0 - smoothstep(0.0, 0.48, r);
+      glow *= 0.4;
+
+      // bright core
+      float core = 1.0 - smoothstep(0.0, 0.12, r);
+      
+      vec3 col = mix(vColor, vec3(1.0), core * 0.8);
+      float finalAlpha = max(star, glow) * vAlpha;
+      gl_FragColor = vec4(col, finalAlpha);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+
+const particleSystem = new THREE.Points(geo, particleMat);
+scene.add(particleSystem);
+
+// ─── AMBIENT STAR FIELD ───
+const starCount = 300;
+const starGeo = new THREE.BufferGeometry();
+const starPos = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  starPos[i * 3] = (Math.random() - 0.5) * 20;
+  starPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
+  starPos[i * 3 + 2] = (Math.random() - 0.5) * 15 - 2;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({
+  size: 0.02, color: 0x444466, transparent: true, opacity: 0.5,
+  blending: THREE.AdditiveBlending,
+});
+scene.add(new THREE.Points(starGeo, starMat));
+
+// ─── RAINBOW COLORS ───
+const RAINBOW = [
+  [1.0, 0.0, 0.4],   // hot pink
+  [1.0, 0.2, 0.0],   // orange-red
+  [1.0, 0.8, 0.0],   // yellow
+  [0.0, 1.0, 0.4],   // green
+  [0.0, 0.6, 1.0],   // cyan-blue
+  [0.4, 0.0, 1.0],   // violet
+  [1.0, 0.0, 1.0],   // magenta
+  [0.0, 1.0, 1.0],   // cyan
+];
+
+function randomRainbow() {
+  return RAINBOW[Math.floor(Math.random() * RAINBOW.length)];
+}
+
+// ─── BURST PARTICLES ───
+let nextParticle = 0;
+
+function burstParticles(count) {
+  for (let i = 0; i < count; i++) {
+    const idx = nextParticle % MAX_PARTICLES;
+    nextParticle++;
+
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI - Math.PI / 2;
+    const speed = 1.5 + Math.random() * 4 * (0.5 + state.intensity * 0.5);
+
+    velocities[idx].x = Math.cos(phi) * Math.cos(theta) * speed;
+    velocities[idx].y = Math.cos(phi) * Math.sin(theta) * speed;
+    velocities[idx].z = Math.sin(phi) * speed * 0.3;
+    velocities[idx].life = 1.0;
+    velocities[idx].maxLife = 1.5 + Math.random() * 2.5;
+
+    positions[idx * 3] = 0;
+    positions[idx * 3 + 1] = 0;
+    positions[idx * 3 + 2] = 0;
+
+    const col = randomRainbow();
+    colors[idx * 3] = col[0];
+    colors[idx * 3 + 1] = col[1];
+    colors[idx * 3 + 2] = col[2];
+
+    sizes[idx] = 0.18 + Math.random() * 0.3;
+    alphas[idx] = 1.0;
+    rotations[idx] = Math.random() * Math.PI * 2;
+    velocities[idx].spin = (Math.random() - 0.5) * 6;
+  }
+}
+
+// ─── VORTEX 2D CANVAS ───
+const vortexCanvas = document.getElementById('vortex-canvas');
+const vCtx = vortexCanvas.getContext('2d');
+const vortexOverlay = document.getElementById('vortex-overlay');
+
+function resizeVortex() {
+  vortexCanvas.width = window.innerWidth;
+  vortexCanvas.height = window.innerHeight;
+}
+resizeVortex();
+
+const VORTEX_COLORS = [
+  'rgba(255,0,100,', 'rgba(255,50,0,', 'rgba(255,200,0,',
+  'rgba(0,255,100,', 'rgba(0,150,255,', 'rgba(130,0,255,',
+  'rgba(255,0,255,', 'rgba(0,255,255,',
+];
+
+function drawVortex(t) {
+  const w = vortexCanvas.width, h = vortexCanvas.height;
+  const cx = w / 2, cy = h / 2;
+  const maxR = Math.sqrt(cx * cx + cy * cy);
+
+  vCtx.clearRect(0, 0, w, h);
+
+  const ringCount = 18;
+  const speed = 2.5 + state.intensity * 4;
+
+  for (let i = 0; i < ringCount; i++) {
+    const phase = (t * speed * 0.001 + i * 0.35) % (Math.PI * 2);
+    const r = (phase / (Math.PI * 2)) * maxR;
+    const colorIdx = i % VORTEX_COLORS.length;
+    const alpha = (0.15 + state.intensity * 0.35) * (1 - r / maxR);
+
+    if (alpha <= 0) continue;
+
+    const thickness = 8 + state.intensity * 25;
+
+    vCtx.beginPath();
+    vCtx.arc(cx, cy, Math.max(0, r), 0, Math.PI * 2);
+    vCtx.strokeStyle = VORTEX_COLORS[colorIdx] + alpha.toFixed(3) + ')';
+    vCtx.lineWidth = thickness;
+    vCtx.stroke();
+
+    // secondary distorted ring
+    if (state.intensity > 0.3) {
+      vCtx.beginPath();
+      const wobble = Math.sin(t * 0.003 + i) * 15 * state.intensity;
+      vCtx.ellipse(cx + wobble, cy - wobble * 0.5, Math.max(0, r * 1.02), Math.max(0, r * 0.98), t * 0.0005, 0, Math.PI * 2);
+      vCtx.strokeStyle = VORTEX_COLORS[(colorIdx + 3) % VORTEX_COLORS.length] + (alpha * 0.4).toFixed(3) + ')';
+      vCtx.lineWidth = thickness * 0.5;
+      vCtx.stroke();
+    }
+  }
+
+  // center flash
+  if (state.intensity > 0.2) {
+    const flashAlpha = (Math.sin(t * 0.015) * 0.5 + 0.5) * state.intensity * 0.3;
+    const grad = vCtx.createRadialGradient(cx, cy, 0, cx, cy, 120 + state.intensity * 80);
+    grad.addColorStop(0, `rgba(255,255,255,${flashAlpha})`);
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    vCtx.fillStyle = grad;
+    vCtx.fillRect(0, 0, w, h);
+  }
+}
+
+// ─── AUDIO ───
+function initAudio() {
+  if (state.audioCtx) return;
+  state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  state.gainNode = state.audioCtx.createGain();
+  state.gainNode.gain.value = 0;
+  state.gainNode.connect(state.audioCtx.destination);
+}
+
+function startSound() {
+  if (!state.audioCtx) initAudio();
+  stopSound();
+
+  const now = state.audioCtx.currentTime;
+
+  // deep bass drone
+  const bass = state.audioCtx.createOscillator();
+  bass.type = 'sine';
+  bass.frequency.setValueAtTime(55, now);
+  const bassGain = state.audioCtx.createGain();
+  bassGain.gain.setValueAtTime(0, now);
+  bassGain.gain.linearRampToValueAtTime(0.15, now + 0.3);
+  bass.connect(bassGain);
+  bassGain.connect(state.audioCtx.destination);
+  bass.start(now);
+
+  // rising synth
+  const osc = state.audioCtx.createOscillator();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(80, now);
+  osc.frequency.exponentialRampToValueAtTime(800, now + 5);
+  const filter = state.audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(200, now);
+  filter.frequency.exponentialRampToValueAtTime(4000, now + 5);
+  filter.Q.value = 8;
+  const oscGain = state.audioCtx.createGain();
+  oscGain.gain.setValueAtTime(0, now);
+  oscGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+  osc.connect(filter);
+  filter.connect(oscGain);
+  oscGain.connect(state.audioCtx.destination);
+  osc.start(now);
+
+  // shimmer
+  const shimmer = state.audioCtx.createOscillator();
+  shimmer.type = 'sine';
+  shimmer.frequency.setValueAtTime(1200, now);
+  shimmer.frequency.exponentialRampToValueAtTime(3000, now + 4);
+  const shimGain = state.audioCtx.createGain();
+  shimGain.gain.setValueAtTime(0, now);
+  shimGain.gain.linearRampToValueAtTime(0.03, now + 1);
+  shimmer.connect(shimGain);
+  shimGain.connect(state.audioCtx.destination);
+  shimmer.start(now);
+
+  state.oscillators = [
+    { node: bass, gain: bassGain },
+    { node: osc, gain: oscGain, filter },
+    { node: shimmer, gain: shimGain },
+  ];
+}
+
+function updateSound() {
+  if (!state.audioCtx || state.oscillators.length === 0) return;
+  const now = state.audioCtx.currentTime;
+  const int = state.intensity;
+
+  // ramp bass frequency with intensity
+  state.oscillators[0].node.frequency.setTargetAtTime(55 + int * 60, now, 0.1);
+  state.oscillators[0].gain.gain.setTargetAtTime(0.1 + int * 0.15, now, 0.1);
+
+  // rising synth gets louder/brighter
+  if (state.oscillators[1].filter) {
+    state.oscillators[1].filter.frequency.setTargetAtTime(300 + int * 3500, now, 0.2);
+  }
+  state.oscillators[1].gain.gain.setTargetAtTime(0.04 + int * 0.1, now, 0.1);
+
+  // shimmer
+  state.oscillators[2].gain.gain.setTargetAtTime(int * 0.06, now, 0.1);
+}
+
+function stopSound() {
+  if (!state.audioCtx) return;
+  const now = state.audioCtx.currentTime;
+  state.oscillators.forEach(o => {
+    o.gain.gain.setTargetAtTime(0, now, 0.15);
+    try { o.node.stop(now + 0.5); } catch(e) {}
+  });
+  state.oscillators = [];
+}
+
+// ─── VIBRATION ───
+function startVibration() {
+  if (!navigator.vibrate) return;
+  state.vibrating = true;
+  vibrateLoop();
+}
+
+function vibrateLoop() {
+  if (!state.vibrating) return;
+  const int = state.intensity;
+  const on = Math.floor(20 + int * 40);
+  const off = Math.floor(60 - int * 40);
+  navigator.vibrate([on, Math.max(10, off)]);
+  setTimeout(vibrateLoop, on + off + 10);
+}
+
+function stopVibration() {
+  state.vibrating = false;
+  if (navigator.vibrate) navigator.vibrate(0);
+}
+
+// ─── ACCELEROMETER ───
+function initAccel() {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(p => {
+      if (p === 'granted') window.addEventListener('devicemotion', onMotion);
+    }).catch(() => {});
+  } else {
+    window.addEventListener('devicemotion', onMotion);
+  }
+}
+
+function onMotion(e) {
+  const a = e.accelerationIncludingGravity;
+  if (!a) return;
+  state.accelX = (a.x || 0) * 0.4;
+  state.accelY = (a.y || 0) * 0.4;
+  state.accelZ = (a.z || 0) * 0.2;
+}
+
+// ─── BUTTON ───
+const btn = document.getElementById('hold-btn');
+const timerEl = document.getElementById('timer');
+const edgeGlow = document.getElementById('edge-glow');
+
+function onHoldStart(e) {
+  e.preventDefault();
+  if (state.holding) return;
+  state.holding = true;
+  state.holdStart = performance.now();
+
+  btn.classList.add('active');
+  timerEl.classList.add('active');
+  edgeGlow.classList.add('active');
+
+  initAudio();
+  startSound();
+  startVibration();
+  initAccel();
+}
+
+function onHoldEnd(e) {
+  e.preventDefault();
+  if (!state.holding) return;
+  state.holding = false;
+
+  btn.classList.remove('active');
+  timerEl.classList.remove('active');
+  edgeGlow.classList.remove('active');
+
+  // bass drop on release
+  if (state.audioCtx && state.intensity > 0.3) {
+    const now = state.audioCtx.currentTime;
+    const drop = state.audioCtx.createOscillator();
+    drop.type = 'sine';
+    drop.frequency.setValueAtTime(120, now);
+    drop.frequency.exponentialRampToValueAtTime(30, now + 0.8);
+    const dg = state.audioCtx.createGain();
+    dg.gain.setValueAtTime(0.3, now);
+    dg.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+    drop.connect(dg); dg.connect(state.audioCtx.destination);
+    drop.start(now); drop.stop(now + 1);
+
+    // final big vibration
+    if (navigator.vibrate) navigator.vibrate([80, 30, 120]);
+  }
+
+  stopSound();
+  stopVibration();
+}
+
+btn.addEventListener('touchstart', onHoldStart, { passive: false });
+btn.addEventListener('touchend', onHoldEnd, { passive: false });
+btn.addEventListener('touchcancel', onHoldEnd, { passive: false });
+btn.addEventListener('mousedown', onHoldStart);
+btn.addEventListener('mouseup', onHoldEnd);
+btn.addEventListener('mouseleave', onHoldEnd);
+
+// ─── ANIMATION LOOP ───
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = performance.now();
+
+  // update intensity
+  if (state.holding) {
+    state.holdDuration = (t - state.holdStart) / 1000;
+    state.intensity = Math.min(1, state.holdDuration / 3);
+    timerEl.textContent = state.holdDuration.toFixed(3) + 's';
+
+    // spawn particles
+    const rate = 3 + Math.floor(state.intensity * 30);
+    burstParticles(rate);
+
+    // update sound
+    updateSound();
+
+    // warp button
+    const scale = 1 + Math.sin(t * 0.008) * 0.06 * state.intensity;
+    const skew = Math.sin(t * 0.005) * 2 * state.intensity;
+    btn.style.transform = `scale(${scale}) skew(${skew}deg)`;
+
+    // update vortex
+    vortexOverlay.style.opacity = state.intensity;
+    drawVortex(t);
+
+    // edge glow intensity
+    const glowInt = state.intensity;
+    edgeGlow.style.boxShadow = `
+      inset 0 0 ${80 + glowInt * 60}px ${20 + glowInt * 30}px rgba(255,0,150,${0.2 + glowInt * 0.3}),
+      inset 0 0 ${160 + glowInt * 100}px ${40 + glowInt * 50}px rgba(100,0,255,${0.1 + glowInt * 0.2})
+    `;
+  } else {
+    // decay
+    state.intensity *= 0.96;
+    if (state.intensity < 0.005) state.intensity = 0;
+    btn.style.transform = `scale(1)`;
+
+    if (state.intensity > 0) {
+      vortexOverlay.style.opacity = state.intensity;
+      drawVortex(t);
+    } else {
+      vortexOverlay.style.opacity = 0;
+    }
+  }
+
+  // update particles
+  const accelForceX = state.accelX;
+  const accelForceY = state.accelY;
+
+  for (let i = 0; i < MAX_PARTICLES; i++) {
+    const v = velocities[i];
+    if (v.life <= 0) continue;
+
+    v.life -= dt / v.maxLife;
+    if (v.life <= 0) {
+      alphas[i] = 0;
+      positions[i * 3 + 2] = -100;
+      continue;
+    }
+
+    // apply acceleration from device motion
+    v.x += accelForceX * dt * 5;
+    v.y -= accelForceY * dt * 5;
+
+    // slight drag
+    v.x *= 0.99;
+    v.y *= 0.99;
+    v.z *= 0.99;
+
+    positions[i * 3] += v.x * dt;
+    positions[i * 3 + 1] += v.y * dt;
+    positions[i * 3 + 2] += v.z * dt;
+
+    // fade
+    const lifeFrac = v.life;
+    alphas[i] = lifeFrac * lifeFrac;
+
+    // twinkle for stars
+    sizes[i] = (0.16 + Math.sin(t * 0.01 + i) * 0.04) * (0.5 + lifeFrac);
+
+    // spin stars
+    rotations[i] += v.spin * dt;
+  }
+
+  geo.attributes.position.needsUpdate = true;
+  geo.attributes.color.needsUpdate = true;
+  geo.attributes.size.needsUpdate = true;
+  geo.attributes.alpha.needsUpdate = true;
+  geo.attributes.rotation.needsUpdate = true;
+
+  // subtle camera sway
+  if (state.intensity > 0) {
+    camera.position.x = Math.sin(t * 0.002) * 0.1 * state.intensity;
+    camera.position.y = Math.cos(t * 0.0015) * 0.08 * state.intensity;
+    camera.rotation.z = Math.sin(t * 0.001) * 0.02 * state.intensity;
+  } else {
+    camera.position.x *= 0.95;
+    camera.position.y *= 0.95;
+    camera.rotation.z *= 0.95;
+  }
+
+  // background pulse
+  const bg = state.intensity * 0.04;
+  renderer.setClearColor(new THREE.Color(bg * 0.5, 0, bg), 1);
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// ─── RESIZE ───
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  resizeVortex();
+});
+</script>
+</body>
+</html>
