@@ -203,6 +203,9 @@ geo.setAttribute('alpha', new THREE.BufferAttribute(alphas, 1));
 geo.setAttribute('rotation', new THREE.BufferAttribute(rotations, 1));
 
 const particleMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uHueShift: { value: 0.0 },
+  },
   vertexShader: `
     attribute float size;
     attribute float alpha;
@@ -225,6 +228,22 @@ const particleMat = new THREE.ShaderMaterial({
     varying float vAlpha;
     varying vec3 vColor;
     varying float vRotation;
+    uniform float uHueShift;
+
+    vec3 rgb2hsv(vec3 c) {
+      vec4 K = vec4(0.0, -1.0/3.0, 2.0/3.0, -1.0);
+      vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+      vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+      float d = q.x - min(q.w, q.y);
+      float e = 1.0e-10;
+      return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+    }
+
+    vec3 hsv2rgb(vec3 c) {
+      vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
+      vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+      return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
 
     void main() {
       vec2 uv = gl_PointCoord - vec2(0.5);
@@ -232,7 +251,7 @@ const particleMat = new THREE.ShaderMaterial({
       float cs = cos(vRotation);
       float sn = sin(vRotation);
       uv = vec2(uv.x * cs - uv.y * sn, uv.x * sn + uv.y * cs);
-      
+
       // SDF star using polar folding
       float angle = atan(uv.y, uv.x);
       float r = length(uv);
@@ -246,7 +265,7 @@ const particleMat = new THREE.ShaderMaterial({
       // interpolate between outer and inner based on fold angle
       float starR = mix(innerR, outerR, (cos(a) - cos(halfSeg)) / (1.0 - cos(halfSeg)));
       float star = 1.0 - smoothstep(starR - 0.04, starR, r);
-      
+
       if (star < 0.01) discard;
 
       // glow halo around star
@@ -255,8 +274,16 @@ const particleMat = new THREE.ShaderMaterial({
 
       // bright core
       float core = 1.0 - smoothstep(0.0, 0.12, r);
-      
-      vec3 col = mix(vColor, vec3(1.0), core * 0.8);
+
+      // hue shift the color based on shake
+      vec3 shifted = vColor;
+      if (uHueShift > 0.001) {
+        vec3 hsv = rgb2hsv(vColor);
+        hsv.x = fract(hsv.x + uHueShift);
+        shifted = hsv2rgb(hsv);
+      }
+
+      vec3 col = mix(shifted, vec3(1.0), core * 0.8);
       float finalAlpha = max(star, glow) * vAlpha;
       gl_FragColor = vec4(col, finalAlpha);
     }
@@ -346,11 +373,15 @@ function resizeVortex() {
 }
 resizeVortex();
 
-const VORTEX_COLORS = [
-  'rgba(255,0,100,', 'rgba(255,50,0,', 'rgba(255,200,0,',
-  'rgba(0,255,100,', 'rgba(0,150,255,', 'rgba(130,0,255,',
-  'rgba(255,0,255,', 'rgba(0,255,255,',
-];
+const BASE_VORTEX_HUES = [340, 15, 47, 150, 210, 270, 300, 180];
+
+function getVortexColors(hueShift) {
+  const shift = (hueShift % 1.0) * 360;
+  return BASE_VORTEX_HUES.map(h => {
+    const hue = (h + shift) % 360;
+    return `hsla(${hue}, 100%, 50%,`;
+  });
+}
 
 function drawVortex(t) {
   const w = vortexCanvas.width, h = vortexCanvas.height;
@@ -359,13 +390,14 @@ function drawVortex(t) {
 
   vCtx.clearRect(0, 0, w, h);
 
+  const vortexColors = getVortexColors(state.hueShift);
   const ringCount = 18;
   const speed = 2.5 + state.intensity * 4;
 
   for (let i = 0; i < ringCount; i++) {
     const phase = (t * speed * 0.001 + i * 0.35) % (Math.PI * 2);
     const r = (phase / (Math.PI * 2)) * maxR;
-    const colorIdx = i % VORTEX_COLORS.length;
+    const colorIdx = i % vortexColors.length;
     const alpha = (0.15 + state.intensity * 0.35) * (1 - r / maxR);
 
     if (alpha <= 0) continue;
@@ -374,7 +406,7 @@ function drawVortex(t) {
 
     vCtx.beginPath();
     vCtx.arc(cx, cy, Math.max(0, r), 0, Math.PI * 2);
-    vCtx.strokeStyle = VORTEX_COLORS[colorIdx] + alpha.toFixed(3) + ')';
+    vCtx.strokeStyle = vortexColors[colorIdx] + alpha.toFixed(3) + ')';
     vCtx.lineWidth = thickness;
     vCtx.stroke();
 
@@ -383,7 +415,7 @@ function drawVortex(t) {
       vCtx.beginPath();
       const wobble = Math.sin(t * 0.003 + i) * 15 * state.intensity;
       vCtx.ellipse(cx + wobble, cy - wobble * 0.5, Math.max(0, r * 1.02), Math.max(0, r * 0.98), t * 0.0005, 0, Math.PI * 2);
-      vCtx.strokeStyle = VORTEX_COLORS[(colorIdx + 3) % VORTEX_COLORS.length] + (alpha * 0.4).toFixed(3) + ')';
+      vCtx.strokeStyle = vortexColors[(colorIdx + 3) % vortexColors.length] + (alpha * 0.4).toFixed(3) + ')';
       vCtx.lineWidth = thickness * 0.5;
       vCtx.stroke();
     }
@@ -544,6 +576,7 @@ function onMotion(e) {
 let lastShakeTime = 0;
 const SHAKE_THRESHOLD = 20;
 state.shakeBoost = 0;
+state.hueShift = 0;
 
 function onMotionShake(e) {
   if (!state.holding) return;
@@ -558,6 +591,8 @@ function onMotionShake(e) {
     burstParticles(100 + Math.floor(shakeForce * 200));
     // boost intensity temporarily
     state.shakeBoost = Math.min(1, state.shakeBoost + shakeForce * 0.5);
+    // shift hue — each shake pushes the colors further around the wheel
+    state.hueShift += shakeForce * 0.15;
     // boost sound
     if (state.audioCtx && state.oscillators.length > 0) {
       const t = state.audioCtx.currentTime;
@@ -665,6 +700,9 @@ function animate() {
   state.shakeBoost *= 0.95;
   if (state.shakeBoost < 0.005) state.shakeBoost = 0;
 
+  // update hue shift uniform (wraps around 0-1)
+  particleMat.uniforms.uHueShift.value = state.hueShift % 1.0;
+
   // combined intensity = hold ramp + shake boost
   const totalIntensity = Math.min(1, state.intensity + state.shakeBoost);
 
@@ -690,11 +728,13 @@ function animate() {
     vortexOverlay.style.opacity = totalIntensity;
     drawVortex(t);
 
-    // edge glow — shake amplifies it
+    // edge glow — shake amplifies it and hue shifts it
     const glowInt = totalIntensity;
+    const glowHue1 = (330 + (state.hueShift % 1.0) * 360) % 360;
+    const glowHue2 = (270 + (state.hueShift % 1.0) * 360) % 360;
     edgeGlow.style.boxShadow = `
-      inset 0 0 ${80 + glowInt * 100}px ${20 + glowInt * 50}px rgba(255,0,150,${0.2 + glowInt * 0.5}),
-      inset 0 0 ${160 + glowInt * 140}px ${40 + glowInt * 70}px rgba(100,0,255,${0.1 + glowInt * 0.4})
+      inset 0 0 ${80 + glowInt * 100}px ${20 + glowInt * 50}px hsla(${glowHue1},100%,50%,${0.2 + glowInt * 0.5}),
+      inset 0 0 ${160 + glowInt * 140}px ${40 + glowInt * 70}px hsla(${glowHue2},100%,30%,${0.1 + glowInt * 0.4})
     `;
   } else {
     // decay
