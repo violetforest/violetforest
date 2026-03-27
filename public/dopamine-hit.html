@@ -660,6 +660,11 @@ function onHoldEnd(e) {
   timerEl.classList.remove('active');
   edgeGlow.classList.remove('active');
 
+  // tell the parent page we're done (only if we actually held for a bit)
+  if (state.holdDuration > 0.5) {
+    window.parent.postMessage({ type: 'dopamine-hit-done' }, '*');
+  }
+
   // bass drop on release
   if (state.audioCtx && state.intensity > 0.3) {
     const now = state.audioCtx.currentTime;
