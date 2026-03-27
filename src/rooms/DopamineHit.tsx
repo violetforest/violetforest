@@ -1,8 +1,78 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { RoomLayout } from '../components/RoomLayout'
 
 export function DopamineHit() {
   const base = import.meta.env.BASE_URL
+  const [entered, setEntered] = useState(false)
+
+  const enter = async () => {
+    // Request motion permission from the top-level page (required on iOS)
+    try {
+      if (
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof (DeviceMotionEvent as any).requestPermission === 'function'
+      ) {
+        await (DeviceMotionEvent as any).requestPermission()
+      }
+    } catch {}
+    setEntered(true)
+  }
+
+  if (!entered) {
+    return (
+      <RoomLayout>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '2rem',
+            gap: '2rem',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
+              fontWeight: 400,
+              fontStyle: 'italic',
+            }}
+          >
+            dopamine hit
+          </h2>
+          <button
+            onClick={enter}
+            style={{
+              background: 'none',
+              border: '1px solid rgba(0,0,0,0.15)',
+              padding: '0.8rem 2rem',
+              fontSize: '1rem',
+              fontFamily: 'Georgia, serif',
+              fontStyle: 'italic',
+              cursor: 'pointer',
+              opacity: 0.6,
+              borderRadius: '4px',
+            }}
+          >
+            enter
+          </button>
+          <Link
+            to="/"
+            style={{
+              fontSize: '0.8rem',
+              opacity: 0.3,
+              borderBottom: '1px solid rgba(0,0,0,0.1)',
+              paddingBottom: '2px',
+            }}
+          >
+            back
+          </Link>
+        </div>
+      </RoomLayout>
+    )
+  }
 
   return (
     <RoomLayout>
@@ -45,7 +115,7 @@ export function DopamineHit() {
               height: '100%',
               border: 'none',
             }}
-            allow="autoplay; encrypted-media"
+            allow="autoplay; encrypted-media; accelerometer; gyroscope; vibrate"
             allowFullScreen
           />
         </div>
