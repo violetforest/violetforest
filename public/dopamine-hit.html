@@ -542,7 +542,8 @@ function onMotion(e) {
 
 // ─── SHAKE DETECTION ───
 let lastShakeTime = 0;
-const SHAKE_THRESHOLD = 25;
+const SHAKE_THRESHOLD = 20;
+state.shakeBoost = 0;
 
 function onMotionShake(e) {
   if (!state.holding) return;
@@ -550,10 +551,26 @@ function onMotionShake(e) {
   if (!a) return;
   const force = Math.abs(a.x) + Math.abs(a.y) + Math.abs(a.z);
   const now = performance.now();
-  if (force > SHAKE_THRESHOLD && now - lastShakeTime > 300) {
+  if (force > SHAKE_THRESHOLD && now - lastShakeTime > 200) {
     lastShakeTime = now;
-    // big burst of stars on shake
-    burstParticles(80 + Math.floor(state.intensity * 120));
+    const shakeForce = Math.min(1, (force - SHAKE_THRESHOLD) / 40);
+    // massive star burst scaled to shake force
+    burstParticles(100 + Math.floor(shakeForce * 200));
+    // boost intensity temporarily
+    state.shakeBoost = Math.min(1, state.shakeBoost + shakeForce * 0.5);
+    // boost sound
+    if (state.audioCtx && state.oscillators.length > 0) {
+      const t = state.audioCtx.currentTime;
+      // spike the filter and volume
+      if (state.oscillators[1] && state.oscillators[1].filter) {
+        state.oscillators[1].filter.frequency.setTargetAtTime(2000 + shakeForce * 6000, t, 0.05);
+      }
+      state.oscillators[0].gain.gain.setTargetAtTime(0.2 + shakeForce * 0.2, t, 0.05);
+    }
+    // camera jolt
+    camera.rotation.z += (Math.random() - 0.5) * 0.1 * shakeForce;
+    camera.position.x += (Math.random() - 0.5) * 0.5 * shakeForce;
+    camera.position.y += (Math.random() - 0.5) * 0.5 * shakeForce;
     // flash vibration
     if (navigator.vibrate) navigator.vibrate([50, 20, 80]);
   }
@@ -644,33 +661,40 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = performance.now();
 
+  // decay shake boost
+  state.shakeBoost *= 0.95;
+  if (state.shakeBoost < 0.005) state.shakeBoost = 0;
+
+  // combined intensity = hold ramp + shake boost
+  const totalIntensity = Math.min(1, state.intensity + state.shakeBoost);
+
   // update intensity
   if (state.holding) {
     state.holdDuration = (t - state.holdStart) / 1000;
     state.intensity = Math.min(1, state.holdDuration / 3);
     timerEl.textContent = state.holdDuration.toFixed(3) + 's';
 
-    // spawn particles
-    const rate = 3 + Math.floor(state.intensity * 30);
+    // spawn particles — shake boost adds way more
+    const rate = 3 + Math.floor(totalIntensity * 50);
     burstParticles(rate);
 
     // update sound
     updateSound();
 
-    // warp button
-    const scale = 1 + Math.sin(t * 0.008) * 0.06 * state.intensity;
-    const skew = Math.sin(t * 0.005) * 2 * state.intensity;
+    // warp button — shake makes it jitter harder
+    const scale = 1 + Math.sin(t * 0.008) * 0.06 * totalIntensity + state.shakeBoost * 0.1;
+    const skew = Math.sin(t * 0.005) * 2 * totalIntensity + (Math.random() - 0.5) * state.shakeBoost * 8;
     btn.style.transform = `scale(${scale}) skew(${skew}deg)`;
 
-    // update vortex
-    vortexOverlay.style.opacity = state.intensity;
+    // update vortex — shake makes it way more intense
+    vortexOverlay.style.opacity = totalIntensity;
     drawVortex(t);
 
-    // edge glow intensity
-    const glowInt = state.intensity;
+    // edge glow — shake amplifies it
+    const glowInt = totalIntensity;
     edgeGlow.style.boxShadow = `
-      inset 0 0 ${80 + glowInt * 60}px ${20 + glowInt * 30}px rgba(255,0,150,${0.2 + glowInt * 0.3}),
-      inset 0 0 ${160 + glowInt * 100}px ${40 + glowInt * 50}px rgba(100,0,255,${0.1 + glowInt * 0.2})
+      inset 0 0 ${80 + glowInt * 100}px ${20 + glowInt * 50}px rgba(255,0,150,${0.2 + glowInt * 0.5}),
+      inset 0 0 ${160 + glowInt * 140}px ${40 + glowInt * 70}px rgba(100,0,255,${0.1 + glowInt * 0.4})
     `;
   } else {
     // decay
@@ -678,8 +702,8 @@ function animate() {
     if (state.intensity < 0.005) state.intensity = 0;
     btn.style.transform = `scale(1)`;
 
-    if (state.intensity > 0) {
-      vortexOverlay.style.opacity = state.intensity;
+    if (totalIntensity > 0) {
+      vortexOverlay.style.opacity = totalIntensity;
       drawVortex(t);
     } else {
       vortexOverlay.style.opacity = 0;
@@ -731,20 +755,25 @@ function animate() {
   geo.attributes.alpha.needsUpdate = true;
   geo.attributes.rotation.needsUpdate = true;
 
-  // subtle camera sway
-  if (state.intensity > 0) {
-    camera.position.x = Math.sin(t * 0.002) * 0.1 * state.intensity;
-    camera.position.y = Math.cos(t * 0.0015) * 0.08 * state.intensity;
-    camera.rotation.z = Math.sin(t * 0.001) * 0.02 * state.intensity;
+  // camera sway — shake makes it violent
+  if (totalIntensity > 0) {
+    camera.position.x += (Math.sin(t * 0.002) * 0.1 * totalIntensity - camera.position.x) * 0.1;
+    camera.position.y += (Math.cos(t * 0.0015) * 0.08 * totalIntensity - camera.position.y) * 0.1;
+    camera.rotation.z += (Math.sin(t * 0.001) * 0.02 * totalIntensity - camera.rotation.z) * 0.1;
+    // shake jitter on top
+    if (state.shakeBoost > 0.05) {
+      camera.position.x += (Math.random() - 0.5) * state.shakeBoost * 0.3;
+      camera.position.y += (Math.random() - 0.5) * state.shakeBoost * 0.3;
+    }
   } else {
     camera.position.x *= 0.95;
     camera.position.y *= 0.95;
     camera.rotation.z *= 0.95;
   }
 
-  // background pulse
-  const bg = state.intensity * 0.04;
-  renderer.setClearColor(new THREE.Color(bg * 0.5, 0, bg), 1);
+  // background pulse — shake makes it brighter
+  const bg = totalIntensity * 0.06;
+  renderer.setClearColor(new THREE.Color(bg * 0.5 + state.shakeBoost * 0.05, state.shakeBoost * 0.02, bg), 1);
 
   renderer.render(scene, camera);
 }
