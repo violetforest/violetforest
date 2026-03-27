@@ -1,64 +1,47 @@
 import { Link } from 'react-router-dom'
 import { RoomLayout } from '../components/RoomLayout'
+import { SketchBook } from '../components/SketchBook'
+
+const SKETCHES = [
+  { title: 'umru.miami', url: 'https://umru.miami' },
+  { title: 'tones', url: 'https://violetforest.com/tones' },
+  { title: 'lipstick', url: 'https://violetforest.com/lipstick' },
+  { title: 'flowers', url: 'https://violetforest.com/flowers' },
+  {
+    title: 'fxhash #1',
+    url: 'https://gateway.fxhash2.xyz/ipfs/QmPvBJb5aMHQDcTYhHuzkLz25hY9mRaZ6XnJTbnhEkaPW2/?cid=ipfs%3A%2F%2FQmPvBJb5aMHQDcTYhHuzkLz25hY9mRaZ6XnJTbnhEkaPW2&fxhash=ooKQPrjw3sHouaHookoRH4yHbbZi1ykD2GELL6DVzbfvjPp2hhH&fxminter=tz1Sb1yoMGWguDKrZmwcuCJe46Qe1ftW4zc4&fxiteration=1&fxcontext=standalone&fxchain=TEZOS&legacy=false',
+  },
+  {
+    title: 'fxhash #2',
+    url: 'https://gateway.fxhash2.xyz/ipfs/QmaA49t9Royuyof1Wc3N2Zj3X37cFs4aVFKbPn1KXrzsec/?cid=ipfs%3A%2F%2FQmaA49t9Royuyof1Wc3N2Zj3X37cFs4aVFKbPn1KXrzsec&fxhash=ooyyDwZLYd1XuPSDoszTJogKAgh77ajQFnGEiKE9kPxw7Ya4J2G&fxminter=tz1B8VRsccdBLnpv8fQBMwvV1cTKuGraehUE&fxiteration=1&fxcontext=standalone&fxchain=TEZOS&legacy=false',
+  },
+  {
+    title: 'fxhash #3',
+    url: 'https://gateway.fxhash2.xyz/ipfs/QmWs3JZryNzhxBNJE3VkREws8HnzDRnQWDUaFfzG81phjM/?cid=ipfs%3A%2F%2FQmWs3JZryNzhxBNJE3VkREws8HnzDRnQWDUaFfzG81phjM&fxhash=ooGnyANRk1nrJrAG6Tp9u1LAVZREWeYDJcLSK1gbrhpZ797X9ZP&fxminter=tz1o8cQFjzFwCS5CiTSEZwJGKz6Uqw6un7Vq&fxiteration=1&fxcontext=standalone&fxchain=TEZOS&legacy=false',
+  },
+  {
+    title: 'fxhash #4',
+    url: 'https://gateway.fxhash2.xyz/ipfs/QmPEYFRzKQLRfZVe7YApGZ6iV7Cf6sTKgJCRNDdB4pp8YD/?cid=QmPEYFRzKQLRfZVe7YApGZ6iV7Cf6sTKgJCRNDdB4pp8YD&fxhash=op8K9RnUCFW4oFUgPX2yFGuZyUegCZEp4w6iHkWYP3T3JBb4ADW&fxminter=tz1WRboGJrpU2iUz537rwwaShwtQFA3KmUd2&fxiteration=7&fxcontext=standalone&fxchain=TEZOS&legacy=false',
+  },
+]
 
 export function Making() {
   return (
     <RoomLayout>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          padding: '2rem',
-          maxWidth: '480px',
-        }}
-      >
-        <p
-          style={{
-            fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)',
-            letterSpacing: '0.15em',
-            textTransform: 'lowercase',
-            opacity: 0.35,
-            marginBottom: '1rem',
-          }}
-        >
-          making
-        </p>
-
-        <h2
-          style={{
-            fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
-            fontWeight: 400,
-            fontStyle: 'italic',
-            lineHeight: 1.3,
-            marginBottom: '0.5rem',
-          }}
-        >
-          whatever i'm working on right now
-        </h2>
-
-        <p
-          style={{
-            fontSize: 'clamp(0.85rem, 2vw, 1rem)',
-            opacity: 0.4,
-            lineHeight: 1.6,
-            marginBottom: '3rem',
-          }}
-        >
-          a sketch. a shader. a half-finished thing.
-          <br />
-          it lives here until it's done or abandoned.
-        </p>
-
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column' }}>
+        <SketchBook sketches={SKETCHES} />
         <Link
           to="/"
           style={{
-            fontSize: 'clamp(0.75rem, 1.5vw, 0.85rem)',
+            position: 'fixed',
+            bottom: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)',
             opacity: 0.35,
             borderBottom: '1px solid rgba(0,0,0,0.15)',
             paddingBottom: '2px',
+            zIndex: 10,
           }}
         >
           back
