@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { ScrollableRoomLayout } from '../components/ScrollableRoomLayout'
+import { RoomLayout } from '../components/RoomLayout'
 
 interface Story {
   id: string
@@ -14,9 +14,80 @@ function hoursLeft(created_at: string) {
   const ms = 24 * 60 * 60 * 1000 - (Date.now() - new Date(created_at).getTime())
   const hours = Math.floor(ms / (60 * 60 * 1000))
   const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000))
-  if (hours > 0) return `${hours}h left`
-  if (minutes > 0) return `${minutes}m left`
-  return 'fading...'
+  if (hours > 0) return `${hours}h`
+  if (minutes > 0) return `${minutes}m`
+  return '...'
+}
+
+// deterministic random from string seed
+function seededRandom(seed: string) {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(31, h) + seed.charCodeAt(i) | 0
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b)
+    h = Math.imul(h ^ (h >>> 13), 0x45d9f3b)
+    h = h ^ (h >>> 16)
+    return (h >>> 0) / 0xffffffff
+  }
+}
+
+function StoryCard({ story, index, total }: { story: Story; index: number; total: number }) {
+  const rand = useMemo(() => seededRandom(story.id), [story.id])
+
+  const offsetX = useMemo(() => (rand() - 0.5) * 40, [rand])
+  const rotation = useMemo(() => (rand() - 0.5) * 6, [rand])
+  const animDelay = useMemo(() => rand() * 3, [rand])
+  const animDuration = useMemo(() => 4 + rand() * 3, [rand])
+
+  // fade based on time remaining
+  const ms = 24 * 60 * 60 * 1000 - (Date.now() - new Date(story.created_at).getTime())
+  const lifePercent = Math.max(0, Math.min(1, ms / (24 * 60 * 60 * 1000)))
+  const fadeOpacity = 0.4 + lifePercent * 0.5
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        transform: `translateX(${offsetX}px) rotate(${rotation}deg)`,
+        opacity: fadeOpacity,
+        animation: `storyFloat ${animDuration}s ease-in-out ${animDelay}s infinite`,
+        padding: '1.2rem',
+        background: 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        borderRadius: '8px',
+        border: '1px solid rgba(0,0,0,0.04)',
+        maxWidth: '85%',
+        alignSelf: index % 2 === 0 ? 'flex-start' : 'flex-end',
+      }}
+    >
+      {story.image_url && (
+        <img
+          src={story.image_url}
+          alt=""
+          style={{
+            width: '100%',
+            borderRadius: '4px',
+            marginBottom: story.body ? '0.5rem' : 0,
+          }}
+        />
+      )}
+      {story.body && (
+        <p style={{
+          fontSize: '1.35rem',
+          lineHeight: 1.5,
+          whiteSpace: 'pre-wrap',
+        }}>
+          {story.body}
+        </p>
+      )}
+      <p style={{ fontSize: '0.85rem', opacity: 0.4, marginTop: '0.4rem' }}>
+        {hoursLeft(story.created_at)}
+      </p>
+    </div>
+  )
 }
 
 export function Stories() {
@@ -37,14 +108,32 @@ export function Stories() {
   }, [])
 
   return (
-    <ScrollableRoomLayout>
-      <div style={{ width: '100%' }}>
+    <RoomLayout>
+      <style>{`
+        @keyframes storyFloat {
+          0%, 100% { transform: translateX(var(--ox)) rotate(var(--rot)) translateY(0); }
+          50% { transform: translateX(var(--ox)) rotate(var(--rot)) translateY(-8px); }
+        }
+      `}</style>
+
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {/* header */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '2rem',
+            padding: '1rem 1.5rem',
+            zIndex: 2,
           }}
         >
           <Link
@@ -59,43 +148,37 @@ export function Stories() {
           <div style={{ width: '2rem' }} />
         </div>
 
-        {loading && (
-          <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic' }}>loading...</p>
-        )}
-
-        {!loading && stories.length === 0 && (
-          <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic' }}>
-            nothing right now
-          </p>
-        )}
-
-        {stories.map(story => (
-          <div
-            key={story.id}
-            style={{
-              width: '100%',
-              padding: '1.5rem 0',
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-            }}
-          >
-            {story.image_url && (
-              <img
-                src={story.image_url}
-                alt=""
-                style={{ width: '100%', borderRadius: '4px', marginBottom: '0.75rem' }}
-              />
-            )}
-            {story.body && (
-              <p style={{ fontSize: '1.5rem', lineHeight: 1.6, opacity: 0.85, whiteSpace: 'pre-wrap' }}>
-                {story.body}
-              </p>
-            )}
-            <p style={{ fontSize: '1.05rem', opacity: 0.45, marginTop: '0.5rem' }}>
-              {hoursLeft(story.created_at)}
+        {/* stories area */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: stories.length <= 3 ? 'center' : 'flex-start',
+            alignItems: 'stretch',
+            gap: '1.2rem',
+            padding: '1rem 1.5rem 2rem',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {loading && (
+            <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic', alignSelf: 'center' }}>
+              ...
             </p>
-          </div>
-        ))}
+          )}
+
+          {!loading && stories.length === 0 && (
+            <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic', alignSelf: 'center' }}>
+              nothing right now
+            </p>
+          )}
+
+          {stories.map((story, i) => (
+            <StoryCard key={story.id} story={story} index={i} total={stories.length} />
+          ))}
+        </div>
       </div>
-    </ScrollableRoomLayout>
+    </RoomLayout>
   )
 }
