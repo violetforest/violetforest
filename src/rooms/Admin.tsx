@@ -202,7 +202,126 @@ function PostComposer({ onPost }: { onPost: () => void }) {
   )
 }
 
-function DmList() {
+function DeleteButton({ onDelete }: { onDelete: () => void }) {
+  const [confirming, setConfirming] = useState(false)
+
+  if (confirming) {
+    return (
+      <span style={{ fontSize: '0.9rem' }}>
+        <button
+          onClick={() => { onDelete(); setConfirming(false) }}
+          style={{ ...deleteStyle, color: '#c44' }}
+        >
+          yes, delete
+        </button>
+        <button
+          onClick={() => setConfirming(false)}
+          style={{ ...deleteStyle, marginLeft: '0.5rem' }}
+        >
+          cancel
+        </button>
+      </span>
+    )
+  }
+
+  return (
+    <button onClick={() => setConfirming(true)} style={deleteStyle}>
+      delete
+    </button>
+  )
+}
+
+function PostList({ refreshKey }: { refreshKey: number }) {
+  const [posts, setPosts] = useState<any[]>([])
+  const [stories, setStories] = useState<any[]>([])
+
+  useEffect(() => {
+    supabase.from('posts').select('*').order('created_at', { ascending: false }).then(({ data }) => setPosts(data || []))
+    supabase.from('stories').select('*').order('created_at', { ascending: false }).then(({ data }) => setStories(data || []))
+  }, [refreshKey])
+
+  const deletePost = async (id: string) => {
+    await supabase.from('posts').delete().eq('id', id)
+    setPosts(posts.filter(p => p.id !== id))
+  }
+
+  const deleteStory = async (id: string) => {
+    await supabase.from('stories').delete().eq('id', id)
+    setStories(stories.filter(s => s.id !== id))
+  }
+
+  return (
+    <div style={{ width: '100%', marginTop: '2rem' }}>
+      {stories.length > 0 && (
+        <>
+          <p style={{ fontSize: '1.2rem', opacity: 0.55, fontStyle: 'italic', marginBottom: '1rem' }}>
+            stories ({stories.length})
+          </p>
+          {stories.map(story => (
+            <div key={story.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+              <p style={{ fontSize: '1.13rem', lineHeight: 1.5, opacity: 0.7 }}>{story.body || '(image)'}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+                <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{new Date(story.created_at).toLocaleString()}</p>
+                <DeleteButton onDelete={() => deleteStory(story.id)} />
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {posts.length > 0 && (
+        <>
+          <p style={{ fontSize: '1.2rem', opacity: 0.55, fontStyle: 'italic', marginBottom: '1rem', marginTop: '1.5rem' }}>
+            posts ({posts.length})
+          </p>
+          {posts.map(post => (
+            <div key={post.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+              <p style={{ fontSize: '1.13rem', lineHeight: 1.5, opacity: 0.7 }}>{post.body || '(image)'}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+                <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
+                <DeleteButton onDelete={() => deletePost(post.id)} />
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  )
+}
+
+function GuestbookList({ refreshKey }: { refreshKey: number }) {
+  const [entries, setEntries] = useState<any[]>([])
+
+  useEffect(() => {
+    supabase.from('guestbook_entries').select('*').order('created_at', { ascending: false }).then(({ data }) => setEntries(data || []))
+  }, [refreshKey])
+
+  const deleteEntry = async (id: string) => {
+    await supabase.from('guestbook_entries').delete().eq('id', id)
+    setEntries(entries.filter(e => e.id !== id))
+  }
+
+  if (entries.length === 0) return null
+
+  return (
+    <div style={{ width: '100%', marginTop: '2rem' }}>
+      <p style={{ fontSize: '1.2rem', opacity: 0.55, fontStyle: 'italic', marginBottom: '1rem' }}>
+        guestbook ({entries.length})
+      </p>
+      {entries.map(entry => (
+        <div key={entry.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+          <p style={{ fontSize: '1.13rem', lineHeight: 1.5, opacity: 0.7 }}>{entry.message}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+            <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{entry.name || 'someone'} · {new Date(entry.created_at).toLocaleString()}</p>
+            <DeleteButton onDelete={() => deleteEntry(entry.id)} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DmList({ refreshKey }: { refreshKey: number }) {
   const [dms, setDms] = useState<any[]>([])
 
   useEffect(() => {
@@ -211,7 +330,12 @@ function DmList() {
       .select('*')
       .order('created_at', { ascending: false })
       .then(({ data }) => setDms(data || []))
-  }, [])
+  }, [refreshKey])
+
+  const deleteDm = async (id: string) => {
+    await supabase.from('dms').delete().eq('id', id)
+    setDms(dms.filter(d => d.id !== id))
+  }
 
   if (dms.length === 0) return null
 
@@ -230,16 +354,19 @@ function DmList() {
           }}
         >
           <p style={{ fontSize: '1.28rem', lineHeight: 1.5 }}>{dm.message}</p>
-          <p style={{ fontSize: '1.05rem', opacity: 0.5, marginTop: '0.25rem' }}>
-            {dm.name || 'anonymous'} · {new Date(dm.created_at).toLocaleDateString()}
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+            <p style={{ fontSize: '1.05rem', opacity: 0.5 }}>
+              {dm.name || 'anonymous'} · {new Date(dm.created_at).toLocaleDateString()}
+            </p>
+            <DeleteButton onDelete={() => deleteDm(dm.id)} />
+          </div>
         </div>
       ))}
     </div>
   )
 }
 
-function AskList() {
+function AskList({ refreshKey }: { refreshKey: number }) {
   const [asks, setAsks] = useState<any[]>([])
 
   useEffect(() => {
@@ -248,10 +375,9 @@ function AskList() {
       .select('*')
       .order('created_at', { ascending: false })
       .then(({ data }) => setAsks(data || []))
-  }, [])
+  }, [refreshKey])
 
   const unanswered = asks.filter(a => !a.answer)
-  if (unanswered.length === 0) return null
 
   const answerAsk = async (id: string, answer: string) => {
     await supabase
@@ -260,6 +386,13 @@ function AskList() {
       .eq('id', id)
     setAsks(asks.map(a => a.id === id ? { ...a, answer, answered_at: new Date().toISOString() } : a))
   }
+
+  const deleteAsk = async (id: string) => {
+    await supabase.from('asks').delete().eq('id', id)
+    setAsks(asks.filter(a => a.id !== id))
+  }
+
+  if (unanswered.length === 0) return null
 
   return (
     <div style={{ width: '100%', marginTop: '2rem' }}>
@@ -277,9 +410,12 @@ function AskList() {
           <p style={{ fontSize: '1.28rem', lineHeight: 1.5, fontStyle: 'italic' }}>
             "{ask.question}"
           </p>
-          <p style={{ fontSize: '1.05rem', opacity: 0.5, marginTop: '0.25rem' }}>
-            {ask.anonymous ? 'anonymous' : ask.name} · {new Date(ask.created_at).toLocaleDateString()}
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+            <p style={{ fontSize: '1.05rem', opacity: 0.5 }}>
+              {ask.anonymous ? 'anonymous' : ask.name} · {new Date(ask.created_at).toLocaleDateString()}
+            </p>
+            <DeleteButton onDelete={() => deleteAsk(ask.id)} />
+          </div>
           <AnswerForm onAnswer={(answer) => answerAsk(ask.id, answer)} />
         </div>
       ))}
@@ -389,8 +525,10 @@ export function Admin() {
         </div>
 
         <PostComposer onPost={() => setRefreshKey(k => k + 1)} />
-        <DmList key={`dms-${refreshKey}`} />
-        <AskList key={`asks-${refreshKey}`} />
+        <PostList refreshKey={refreshKey} />
+        <DmList refreshKey={refreshKey} />
+        <AskList refreshKey={refreshKey} />
+        <GuestbookList refreshKey={refreshKey} />
       </div>
     </ScrollableRoomLayout>
   )
@@ -416,4 +554,15 @@ const buttonStyle: React.CSSProperties = {
   fontStyle: 'italic',
   cursor: 'pointer',
   borderRadius: '4px',
+}
+
+const deleteStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  fontSize: '0.85rem',
+  fontFamily: 'Georgia, serif',
+  fontStyle: 'italic',
+  cursor: 'pointer',
+  opacity: 0.4,
+  padding: 0,
 }
