@@ -15,7 +15,7 @@ export default defineConfig({
         theme_color: '#f0eaf5',
         background_color: '#f0eaf5',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/violetforest/',
         icons: [
           {
             src: '/icon-192.png',

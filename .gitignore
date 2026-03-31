@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Data exports (personal, don't commit)
+src/data/instagram-export/
+src/data/facebook-export/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

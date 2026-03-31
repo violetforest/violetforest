@@ -53,9 +53,15 @@ export function Home() {
         >
           {[
             { to: '/dopamine-hit', label: 'dopamine hit' },
+            { to: '/feed', label: 'feed' },
+            { to: '/stories', label: 'now' },
             { to: '/listening', label: 'what i\'m listening to' },
             { to: '/thinking', label: 'what i\'m thinking about' },
             { to: '/making', label: 'what i\'m making' },
+            { to: '/guestbook', label: 'guestbook' },
+            { to: '/ask', label: 'ask me anything' },
+            { to: '/dm', label: 'message me' },
+            { to: '/links', label: 'links' },
           ].map(({ to, label }) => (
             <Link
               key={to}
