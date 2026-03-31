@@ -33,7 +33,7 @@ function seededRandom(seed: string) {
   }
 }
 
-function StoryCard({ story, index, total }: { story: Story; index: number; total: number }) {
+function StoryCard({ story, index }: { story: Story; index: number }) {
   const rand = useMemo(() => seededRandom(story.id), [story.id])
 
   const offsetX = useMemo(() => (rand() - 0.5) * 40, [rand])
@@ -175,7 +175,7 @@ export function Stories() {
           )}
 
           {stories.map((story, i) => (
-            <StoryCard key={story.id} story={story} index={i} total={stories.length} />
+            <StoryCard key={story.id} story={story} index={i} />
           ))}
         </div>
       </div>
