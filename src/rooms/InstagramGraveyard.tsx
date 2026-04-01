@@ -135,7 +135,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
         height: '100%',
         objectFit: 'cover',
         display: 'block',
-        filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+        filter: 'brightness(0.7)',
       }}
     />
   ) : (
@@ -148,7 +148,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
         height: '100%',
         objectFit: 'cover',
         display: 'block',
-        filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+        filter: 'brightness(0.7)',
       }}
     />
   )
