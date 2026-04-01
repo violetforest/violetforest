@@ -545,7 +545,7 @@ export function InstagramGraveyard() {
             position: 'sticky',
             top: 0,
             zIndex: 35,
-            background: 'rgba(10, 10, 10, 0.92)',
+            background: 'rgba(10, 10, 10, 0.5)',
             backdropFilter: 'blur(12px)',
             padding: '1.2rem 1rem',
             textAlign: 'center',
