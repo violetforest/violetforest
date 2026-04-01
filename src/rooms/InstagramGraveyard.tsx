@@ -495,48 +495,21 @@ export function InstagramGraveyard() {
             ))}
           </div>
 
-          {/* parallax columns (3 on desktop, 1 on mobile) */}
-          {(() => {
-            const posts: Post[] = (data as any).posts || []
-            const isMobile = typeof window !== 'undefined' && window.innerWidth < 600
-            const numCols = isMobile ? 1 : 3
-            const cols: Post[][] = Array.from({ length: numCols }, () => [])
-            posts.forEach((p, i) => cols[i % numCols].push(p))
-            const speeds = isMobile ? [0] : [0, -0.08, -0.15]
-
-            return (
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                padding: isMobile ? '0 16px 4rem' : '0 8px 4rem',
-                position: 'relative',
-                zIndex: 2,
-                alignItems: 'flex-start',
-                justifyContent: 'center',
-              }}>
-                {cols.map((col, colIdx) => (
-                  <div
-                    key={colIdx}
-                    style={{
-                      flex: isMobile ? 'none' : 1,
-                      width: isMobile ? '100%' : 'auto',
-                      maxWidth: isMobile ? '300px' : 'none',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: isMobile ? '16px' : '8px',
-                      transform: `translateY(${scrollY * speeds[colIdx]}px)`,
-                      willChange: 'transform',
-                      paddingBottom: `${Math.abs(speeds[colIdx]) * col.length * 150}px`,
-                    }}
-                  >
-                    {col.map((post, i) => (
-                      <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} index={colIdx * 100 + i} />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )
-          })()}
+          {/* photo grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '8px',
+              padding: '0 8px 4rem',
+              position: 'relative',
+              zIndex: 2,
+            }}
+          >
+            {((data as any).posts || []).map((post: Post, i: number) => (
+              <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} index={i} />
+            ))}
+          </div>
 
           {/* ghosts weaving between tombstones */}
           <div
