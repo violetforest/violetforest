@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { RoomLayout } from '../components/RoomLayout'
+import { supabase } from '../lib/supabase'
 
 interface MediaItem {
   name: string
@@ -335,6 +336,8 @@ export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
   const [ghosts, setGhosts] = useState<Ghost[]>([])
   const [openPost, setOpenPost] = useState<Post | null>(null)
+  const [roseCount, setRoseCount] = useState(0)
+  const [leftRose, setLeftRose] = useState(false)
 
 
   const allGhostsRef = useRef<Ghost[]>([])
@@ -366,6 +369,22 @@ export function InstagramGraveyard() {
     const picked = available.slice(0, count)
     picked.forEach(({ idx }) => usedIndicesRef.current.add(idx))
     return picked.map(({ ghost }) => ghost)
+  }
+
+  useEffect(() => {
+    supabase.from('graveyard_roses').select('count').single().then(({ data }) => {
+      if (data) setRoseCount(data.count)
+    })
+    setLeftRose(localStorage.getItem('left-rose') === 'true')
+  }, [])
+
+  const leaveRose = async () => {
+    if (leftRose) return
+    setLeftRose(true)
+    localStorage.setItem('left-rose', 'true')
+    const newCount = roseCount + 1
+    setRoseCount(newCount)
+    await supabase.from('graveyard_roses').upsert({ id: 1, count: newCount })
   }
 
   useEffect(() => {
@@ -568,6 +587,24 @@ export function InstagramGraveyard() {
           }}>
             2015 — 2026
           </p>
+          <button
+            onClick={leaveRose}
+            disabled={leftRose}
+            style={{
+              background: 'none',
+              border: 'none',
+              marginTop: '1rem',
+              cursor: leftRose ? 'default' : 'pointer',
+              fontSize: '1.1rem',
+              fontFamily: 'Georgia, serif',
+              fontStyle: 'italic',
+              color: 'rgba(255,255,255,0.35)',
+              opacity: leftRose ? 0.5 : 0.8,
+              transition: 'opacity 0.3s',
+            }}
+          >
+            {leftRose ? `🥀 ${roseCount} roses left` : '🥀 leave a rose'}
+          </button>
         </div>
 
         {/* scrollable area with grid + ghosts */}
