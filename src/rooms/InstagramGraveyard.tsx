@@ -209,31 +209,82 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
   const brightness = useMemo(() => 0.7 + depth * 0.3, [depth])
   const zIndex = useMemo(() => 2 + Math.floor(depth * 20), [depth])
 
+  const tiltX = useMemo(() => isMobile ? 5 + rand() * 5 : 8 + rand() * 10, [rand, isMobile])
+
   return (
     <div
-      onClick={onOpen}
       style={{
-        position: 'relative',
-        overflow: 'visible',
-        borderRadius: '40% 40% 4px 4px',
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: '#111',
-        padding: '3px',
-        cursor: 'pointer',
-        transform: `scale(${scale}) translate(${nudgeX}px, ${nudgeY}px) rotate(${rotation}deg)`,
-        transformOrigin: 'center top',
-        filter: blur > 0.1 ? `blur(${blur}px) brightness(${brightness})` : `brightness(${brightness})`,
+        perspective: '600px',
+        perspectiveOrigin: 'center 30%',
         zIndex,
-        boxShadow: `0 ${4 + depth * 10}px ${10 + depth * 20}px rgba(0,0,0,${0.3 + depth * 0.3})`,
       }}
     >
-      <div style={{
-        borderRadius: '38% 38% 2px 2px',
-        overflow: 'hidden',
-        aspectRatio: '0.75',
-      }}>
-        <MediaThumb item={thumb} />
+      <div
+        onClick={onOpen}
+        style={{
+          position: 'relative',
+          overflow: 'visible',
+          cursor: 'pointer',
+          transform: `scale(${scale}) translate(${nudgeX}px, ${nudgeY}px) rotate(${rotation}deg) rotateX(${tiltX}deg)`,
+          transformOrigin: 'center bottom',
+          transformStyle: 'preserve-3d',
+          filter: blur > 0.1 ? `blur(${blur}px) brightness(${brightness})` : `brightness(${brightness})`,
+        }}
+      >
+        {/* tombstone face */}
+        <div style={{
+          borderRadius: '40% 40% 4px 4px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          background: '#222',
+          padding: '3px',
+          boxShadow: `0 ${4 + depth * 10}px ${10 + depth * 20}px rgba(0,0,0,${0.3 + depth * 0.3})`,
+        }}>
+          <div style={{
+            borderRadius: '38% 38% 2px 2px',
+            overflow: 'hidden',
+            aspectRatio: '0.75',
+          }}>
+            <MediaThumb item={thumb} />
+          </div>
+        </div>
+        {/* tombstone thickness — bottom edge */}
+        <div style={{
+          position: 'absolute',
+          bottom: '-6px',
+          left: '3px',
+          right: '3px',
+          height: '8px',
+          background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)',
+          borderRadius: '0 0 4px 4px',
+          transform: 'rotateX(-90deg)',
+          transformOrigin: 'top center',
+        }} />
+        {/* tombstone thickness — left edge */}
+        <div style={{
+          position: 'absolute',
+          top: '45%',
+          left: '-4px',
+          width: '6px',
+          height: '55%',
+          background: 'linear-gradient(90deg, #0e0e0e 0%, #1a1a1a 100%)',
+          borderRadius: '2px 0 0 2px',
+          transform: 'rotateY(90deg)',
+          transformOrigin: 'right center',
+        }} />
+        {/* tombstone thickness — right edge */}
+        <div style={{
+          position: 'absolute',
+          top: '45%',
+          right: '-4px',
+          width: '6px',
+          height: '55%',
+          background: 'linear-gradient(270deg, #0e0e0e 0%, #1a1a1a 100%)',
+          borderRadius: '0 2px 2px 0',
+          transform: 'rotateY(-90deg)',
+          transformOrigin: 'left center',
+        }} />
       </div>
+    </div>
       {/* carousel indicator */}
       {post.media.length > 1 && (
         <div style={{
