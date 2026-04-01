@@ -263,7 +263,7 @@ function CarouselModal({ post, onClose }: { post: Post; onClose: () => void }) {
               maxWidth: '90vw',
               maxHeight: '75vh',
               display: 'block',
-              filter: 'grayscale(0.5) brightness(0.7)',
+              filter: 'none',
             }}
           />
         ) : (
@@ -274,7 +274,7 @@ function CarouselModal({ post, onClose }: { post: Post; onClose: () => void }) {
               maxWidth: '90vw',
               maxHeight: '75vh',
               display: 'block',
-              filter: 'grayscale(0.5) brightness(0.7)',
+              filter: 'none',
             }}
           />
         )}
