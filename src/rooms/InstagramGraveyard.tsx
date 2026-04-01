@@ -413,24 +413,21 @@ export function InstagramGraveyard() {
   return (
     <RoomLayout>
       <style>{`
-        @keyframes batFly {
-          0% { transform: translateX(-5vw); }
-          100% { transform: translateX(105vw); }
-        }
-        @keyframes batFlyReverse {
-          0% { transform: translateX(105vw); }
-          100% { transform: translateX(-5vw); }
-        }
         @keyframes batFlap {
-          0%, 100% { transform: scaleY(1) translateY(0); }
-          25% { transform: scaleY(0.3) translateY(-2px); }
-          50% { transform: scaleY(1) translateY(2px); }
-          75% { transform: scaleY(0.3) translateY(-1px); }
+          0%, 100% { transform: scaleY(1); }
+          25% { transform: scaleY(0.3); }
+          50% { transform: scaleY(1); }
+          75% { transform: scaleY(0.3); }
         }
-        @keyframes batWobble {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(var(--wobble)); }
-        }
+        ${bats.map((bat, i) => `
+          @keyframes bat-${i} {
+            0% { left: ${bat.direction > 0 ? '-5' : '105'}vw; top: ${bat.startY}%; }
+            25% { top: ${bat.startY + bat.wobble * 0.5}%; }
+            50% { top: ${bat.startY - bat.wobble * 0.3}%; }
+            75% { top: ${bat.startY + bat.wobble * 0.4}%; }
+            100% { left: ${bat.direction > 0 ? '105' : '-5'}vw; top: ${bat.startY}%; }
+          }
+        `).join('')}
       `}</style>
       <div
         style={{
@@ -450,9 +447,7 @@ export function InstagramGraveyard() {
               key={`bat-${i}`}
               style={{
                 position: 'absolute',
-                top: `${bat.startY}%`,
-                animation: `${bat.direction > 0 ? 'batFly' : 'batFlyReverse'} ${bat.duration}s linear ${bat.delay}s infinite, batWobble ${2 + bat.flap * 3}s ease-in-out ${bat.delay}s infinite`,
-                ['--wobble' as string]: `${bat.wobble}px`,
+                animation: `bat-${i} ${bat.duration}s linear ${bat.delay}s infinite`,
               }}
             >
               <div style={{
