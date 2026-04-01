@@ -127,34 +127,72 @@ interface Post {
 }
 
 function MediaThumb({ item }: { item: MediaItem }) {
-  return item.type === 'video' ? (
-    <video
-      src={item.url}
-      autoPlay
-      muted
-      loop
-      playsInline
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        display: 'block',
-        filter: 'none',
-      }}
-    />
-  ) : (
-    <img
-      src={item.url}
-      alt=""
-      loading="lazy"
-      style={{
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        display: 'block',
-        filter: 'none',
-      }}
-    />
+  const [loaded, setLoaded] = useState(false)
+  const [inView, setInView] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect() } },
+      { rootMargin: '200px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      {/* solid tombstone placeholder */}
+      {!loaded && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <span style={{
+            fontSize: '1.5rem',
+            opacity: 0.15,
+          }}>🪦</span>
+        </div>
+      )}
+      {inView && (item.type === 'video' ? (
+        <video
+          src={item.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          onLoadedData={() => setLoaded(true)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+          }}
+        />
+      ) : (
+        <img
+          src={item.url}
+          alt=""
+          onLoad={() => setLoaded(true)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            opacity: loaded ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
