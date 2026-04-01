@@ -241,7 +241,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
             objectFit: 'cover',
             display: 'block',
             opacity: loaded ? 1 : 0,
-            transition: 'opacity 0.5s ease',
+            transition: 'opacity 2s ease',
           }}
         />
       ) : (
@@ -255,7 +255,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
             objectFit: 'cover',
             display: 'block',
             opacity: loaded ? 1 : 0,
-            transition: 'opacity 0.5s ease',
+            transition: 'opacity 2s ease',
           }}
         />
       ))}
