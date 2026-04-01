@@ -3203,11 +3203,6 @@
       "url": "https://qbmglbnxkchwekatkrlr.supabase.co/storage/v1/object/public/media/graveyard/ig/posts_202310_18056379943473118.jpg"
     },
     {
-      "name": "posts_202310_18063336604442843.jpg",
-      "type": "image",
-      "url": "https://qbmglbnxkchwekatkrlr.supabase.co/storage/v1/object/public/media/graveyard/ig/posts_202310_18063336604442843.jpg"
-    },
-    {
       "name": "posts_202310_18313109998129872.jpg",
       "type": "image",
       "url": "https://qbmglbnxkchwekatkrlr.supabase.co/storage/v1/object/public/media/graveyard/ig/posts_202310_18313109998129872.jpg"
@@ -3886,17 +3881,6 @@
           "name": "posts_202310_18313109998129872.jpg",
           "type": "image",
           "url": "https://qbmglbnxkchwekatkrlr.supabase.co/storage/v1/object/public/media/graveyard/ig/posts_202310_18313109998129872.jpg"
-        }
-      ]
-    },
-    {
-      "folder": "posts_202310",
-      "date": "2023-10",
-      "media": [
-        {
-          "name": "posts_202310_18063336604442843.jpg",
-          "type": "image",
-          "url": "https://qbmglbnxkchwekatkrlr.supabase.co/storage/v1/object/public/media/graveyard/ig/posts_202310_18063336604442843.jpg"
         }
       ]
     },
