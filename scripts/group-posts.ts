@@ -16,29 +16,22 @@ interface Post {
   media: MediaItem[]
 }
 
-// Group media by date folder
-const groups: Record<string, MediaItem[]> = {}
-for (const item of data.media) {
-  // name format: posts_201804_123456.jpg or reels_202201_123456.mp4
+// Each media file is its own post, sorted newest first
+const posts: Post[] = data.media.map((item: MediaItem) => {
   const parts = item.name.split('_')
-  const folder = `${parts[0]}_${parts[1]}` // e.g. "posts_201804"
-  if (!groups[folder]) groups[folder] = []
-  groups[folder].push(item)
-}
-
-// Convert to posts array, sorted by date (newest first)
-const posts: Post[] = Object.entries(groups)
-  .map(([folder, media]) => {
-    const datePart = folder.split('_')[1] // e.g. "201804"
-    const year = datePart.slice(0, 4)
-    const month = datePart.slice(4, 6)
-    return {
-      folder,
-      date: `${year}-${month}`,
-      media,
-    }
-  })
-  .sort((a, b) => b.date.localeCompare(a.date))
+  const datePart = parts[1] // e.g. "201804"
+  const year = datePart.slice(0, 4)
+  const month = datePart.slice(4, 6)
+  return {
+    folder: `${parts[0]}_${parts[1]}`,
+    date: `${year}-${month}`,
+    media: [item],
+  }
+}).sort((a: Post, b: Post) => {
+  // sort by date descending, then by filename descending within same date
+  if (a.date !== b.date) return b.date.localeCompare(a.date)
+  return b.media[0].name.localeCompare(a.media[0].name)
+})
 
 console.log(`Grouped ${data.media.length} media into ${posts.length} posts`)
 posts.forEach(p => console.log(`  ${p.date}: ${p.media.length} items`))
