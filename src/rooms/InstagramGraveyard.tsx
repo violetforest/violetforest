@@ -399,7 +399,7 @@ export function InstagramGraveyard() {
       startY: 5 + r() * 60,
       duration: 8 + r() * 12,
       delay: r() * -20,
-      size: 12 + r() * 18,
+      size: 25 + r() * 30,
       flap: 0.3 + r() * 0.3,
       wobble: r() * 20 - 10,
       direction: r() > 0.5 ? 1 : -1,
