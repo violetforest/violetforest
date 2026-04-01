@@ -283,35 +283,35 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
           transform: 'rotateY(-90deg)',
           transformOrigin: 'left center',
         }} />
+        {/* carousel indicator */}
+        {post.media.length > 1 && (
+          <div style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: '4px',
+            padding: '2px 6px',
+            fontSize: '0.6rem',
+            color: 'rgba(255,255,255,0.6)',
+            fontFamily: 'monospace',
+          }}>
+            {post.media.length}
+          </div>
+        )}
+        {/* date */}
+        <div style={{
+          textAlign: 'center',
+          padding: '4px 0 2px',
+          fontSize: '0.5rem',
+          fontFamily: 'monospace',
+          color: 'rgba(255,255,255,0.2)',
+          letterSpacing: '0.1em',
+        }}>
+          {post.date}
+        </div>
       </div>
     </div>
-      {/* carousel indicator */}
-      {post.media.length > 1 && (
-        <div style={{
-          position: 'absolute',
-          top: '8px',
-          right: '8px',
-          background: 'rgba(0,0,0,0.5)',
-          borderRadius: '4px',
-          padding: '2px 6px',
-          fontSize: '0.6rem',
-          color: 'rgba(255,255,255,0.6)',
-          fontFamily: 'monospace',
-        }}>
-          {post.media.length}
-        </div>
-      )}
-      {/* date */}
-      <div style={{
-        textAlign: 'center',
-        padding: '4px 0 2px',
-        fontSize: '0.5rem',
-        fontFamily: 'monospace',
-        color: 'rgba(255,255,255,0.2)',
-        letterSpacing: '0.1em',
-      }}>
-        {post.date}
-      </div>
     </div>
   )
 }
