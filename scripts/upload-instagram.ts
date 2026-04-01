@@ -52,19 +52,24 @@ for (const block of blocks) {
 }
 console.log(`Extracted ${logins.length} login entries`)
 
-// --- Collect all media (images + videos) ---
-const postsDir = join(EXPORT_DIR, 'media/posts')
+// --- Collect all media (images + videos) from posts + reels ---
+const mediaDirs = [
+  { dir: join(EXPORT_DIR, 'media/posts'), prefix: 'posts' },
+  { dir: join(EXPORT_DIR, 'media/reels'), prefix: 'reels' },
+]
 const mediaFiles: { path: string; name: string; type: 'image' | 'video' }[] = []
 
-for (const folder of readdirSync(postsDir)) {
-  const folderPath = join(postsDir, folder)
-  if (!statSync(folderPath).isDirectory()) continue
-  for (const file of readdirSync(folderPath)) {
-    const ext = file.split('.').pop()?.toLowerCase()
-    if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') {
-      mediaFiles.push({ path: join(folderPath, file), name: `${folder}_${file}`, type: 'image' })
-    } else if (ext === 'mp4') {
-      mediaFiles.push({ path: join(folderPath, file), name: `${folder}_${file}`, type: 'video' })
+for (const { dir, prefix } of mediaDirs) {
+  for (const folder of readdirSync(dir)) {
+    const folderPath = join(dir, folder)
+    if (!statSync(folderPath).isDirectory()) continue
+    for (const file of readdirSync(folderPath)) {
+      const ext = file.split('.').pop()?.toLowerCase()
+      if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') {
+        mediaFiles.push({ path: join(folderPath, file), name: `${prefix}_${folder}_${file}`, type: 'image' })
+      } else if (ext === 'mp4') {
+        mediaFiles.push({ path: join(folderPath, file), name: `${prefix}_${folder}_${file}`, type: 'video' })
+      }
     }
   }
 }
