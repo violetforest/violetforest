@@ -160,14 +160,15 @@ function MediaThumb({ item }: { item: MediaItem }) {
 function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; index: number }) {
   const thumb = post.media[0]
   const rand = useMemo(() => seededRandom(index * 4391 + 7), [index])
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600
   const depth = useMemo(() => rand(), [rand]) // 0 = far, 1 = close
-  const scale = useMemo(() => 0.6 + depth * 0.6, [depth]) // 0.6 to 1.2
-  const nudgeX = useMemo(() => (rand() - 0.5) * 15, [rand])
-  const nudgeY = useMemo(() => (rand() - 0.5) * 10, [rand])
-  const rotation = useMemo(() => (rand() - 0.5) * 4, [rand])
-  const blur = useMemo(() => Math.max(0, (1 - depth) * 1.5), [depth]) // far = blurry
-  const brightness = useMemo(() => 0.7 + depth * 0.3, [depth]) // 0.7 to 1.0
-  const zIndex = useMemo(() => 2 + Math.floor(depth * 20), [depth]) // 2 to 22
+  const scale = useMemo(() => isMobile ? 0.85 + depth * 0.2 : 0.6 + depth * 0.6, [depth, isMobile])
+  const nudgeX = useMemo(() => isMobile ? (rand() - 0.5) * 5 : (rand() - 0.5) * 15, [rand, isMobile])
+  const nudgeY = useMemo(() => isMobile ? (rand() - 0.5) * 3 : (rand() - 0.5) * 10, [rand, isMobile])
+  const rotation = useMemo(() => isMobile ? (rand() - 0.5) * 2 : (rand() - 0.5) * 4, [rand, isMobile])
+  const blur = useMemo(() => isMobile ? 0 : Math.max(0, (1 - depth) * 1.5), [depth, isMobile])
+  const brightness = useMemo(() => 0.7 + depth * 0.3, [depth])
+  const zIndex = useMemo(() => 2 + Math.floor(depth * 20), [depth])
 
   return (
     <div
@@ -347,19 +348,22 @@ export function InstagramGraveyard() {
       .map((g, i) => ({ ghost: g, idx: i }))
       .filter(({ idx }) => !usedIndicesRef.current.has(idx))
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 600
+    const count = isMobile ? 50 : 150
+
     // if we've used most, reset
-    if (available.length < 150) {
+    if (available.length < count) {
       usedIndicesRef.current.clear()
       return sampleGhosts(all, seed + 1)
     }
 
-    // shuffle available and take 150
+    // shuffle available and take count
     for (let i = available.length - 1; i > 0; i--) {
       const j = Math.floor(rand() * (i + 1));
       [available[i], available[j]] = [available[j], available[i]]
     }
 
-    const picked = available.slice(0, 150)
+    const picked = available.slice(0, count)
     picked.forEach(({ idx }) => usedIndicesRef.current.add(idx))
     return picked.map(({ ghost }) => ghost)
   }
