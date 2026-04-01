@@ -338,6 +338,7 @@ export function InstagramGraveyard() {
   const [openPost, setOpenPost] = useState<Post | null>(null)
   const [roseCount, setRoseCount] = useState(0)
   const [leftRose, setLeftRose] = useState(false)
+  const [scrolledPast, setScrolledPast] = useState(false)
 
 
   const allGhostsRef = useRef<Ghost[]>([])
@@ -395,13 +396,14 @@ export function InstagramGraveyard() {
     })
   }, [])
 
-  // resample ghosts on scroll checkpoints
+  // resample ghosts on scroll checkpoints + track scroll position
   useEffect(() => {
     const el = scrollRef.current
     if (!el || allGhostsRef.current.length === 0) return
 
     let lastBucket = 0
     const onScroll = () => {
+      setScrolledPast(el.scrollTop > 250)
       const bucket = Math.floor(el.scrollTop / 600)
       if (bucket !== lastBucket) {
         lastBucket = bucket
@@ -539,74 +541,45 @@ export function InstagramGraveyard() {
           }} />
         </div>
 
-        {/* sticky header with epitaph */}
+        {/* compact sticky header — shows rose after scrolling past epitaph */}
         <div
           style={{
             position: 'sticky',
             top: 0,
             zIndex: 35,
             background: '#0a0a0a',
-            padding: '1.5rem 1rem 1.2rem',
-            textAlign: 'center',
+            padding: '0.6rem 1rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-            <Link
-              to="/"
-              style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'Georgia, serif', color: '#fff' }}
-            >
-              home
-            </Link>
-            <div style={{ width: '2rem' }} />
-          </div>
-          <p style={{
-            fontSize: '1rem',
-            letterSpacing: '0.4em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.6)',
-            marginBottom: '0.8rem',
-            textShadow: '0 0 20px rgba(0,0,0,0.8)',
-          }}>
-            here doth lie
-          </p>
-          <p style={{
-            fontSize: '2.5rem',
-            fontStyle: 'italic',
-            fontFamily: 'Georgia, serif',
-            color: 'rgba(255,255,255,0.9)',
-            marginBottom: '0.3rem',
-            textShadow: '0 0 30px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.5)',
-          }}>
-            @violetforest.js
-          </p>
-          <p style={{
-            fontSize: '1.2rem',
-            letterSpacing: '0.25em',
-            color: 'rgba(255,255,255,0.5)',
-            textShadow: '0 0 15px rgba(0,0,0,0.8)',
-            fontFamily: 'monospace',
-          }}>
-            2015 — 2026
-          </p>
-          <button
-            onClick={leaveRose}
-            disabled={leftRose}
-            style={{
-              background: 'none',
-              border: 'none',
-              marginTop: '1rem',
-              cursor: leftRose ? 'default' : 'pointer',
-              fontSize: '1.1rem',
-              fontFamily: 'Georgia, serif',
-              fontStyle: 'italic',
-              color: 'rgba(255,255,255,0.6)',
-              opacity: leftRose ? 0.7 : 1,
-              textShadow: '0 0 15px rgba(0,0,0,0.8)',
-              transition: 'opacity 0.3s',
-            }}
+          <Link
+            to="/"
+            style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'Georgia, serif', color: '#fff' }}
           >
-            {leftRose ? `🥀 ${roseCount} roses left` : '🥀 leave a rose'}
-          </button>
+            home
+          </Link>
+          {scrolledPast && (
+            <button
+              onClick={leaveRose}
+              disabled={leftRose}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: leftRose ? 'default' : 'pointer',
+                fontSize: '0.9rem',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic',
+                color: 'rgba(255,255,255,0.6)',
+                opacity: leftRose ? 0.7 : 1,
+                transition: 'opacity 0.3s',
+              }}
+            >
+              {leftRose ? `🥀 ${roseCount}` : '🥀 leave a rose'}
+            </button>
+          )}
+          <div style={{ width: '2rem' }} />
         </div>
 
         {/* scrollable area with grid + ghosts */}
@@ -619,6 +592,58 @@ export function InstagramGraveyard() {
             WebkitOverflowScrolling: 'touch',
           }}
         >
+          {/* epitaph */}
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 1rem 3rem',
+            background: '#0a0a0a',
+          }}>
+            <p style={{
+              fontSize: '1rem',
+              letterSpacing: '0.4em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.6)',
+              marginBottom: '0.8rem',
+            }}>
+              here doth lie
+            </p>
+            <p style={{
+              fontSize: '2.5rem',
+              fontStyle: 'italic',
+              fontFamily: 'Georgia, serif',
+              color: 'rgba(255,255,255,0.9)',
+              marginBottom: '0.3rem',
+            }}>
+              @violetforest.js
+            </p>
+            <p style={{
+              fontSize: '1.2rem',
+              letterSpacing: '0.25em',
+              color: 'rgba(255,255,255,0.5)',
+              fontFamily: 'monospace',
+            }}>
+              2015 — 2026
+            </p>
+            <button
+              onClick={leaveRose}
+              disabled={leftRose}
+              style={{
+                background: 'none',
+                border: 'none',
+                marginTop: '1.2rem',
+                cursor: leftRose ? 'default' : 'pointer',
+                fontSize: '1.1rem',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic',
+                color: 'rgba(255,255,255,0.6)',
+                opacity: leftRose ? 0.7 : 1,
+                transition: 'opacity 0.3s',
+              }}
+            >
+              {leftRose ? `🥀 ${roseCount} roses left` : '🥀 leave a rose'}
+            </button>
+          </div>
+
           {/* ghosts behind tombstones */}
           <div
             style={{
