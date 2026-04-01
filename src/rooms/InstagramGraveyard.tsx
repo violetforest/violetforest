@@ -1,15 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { RoomLayout } from '../components/RoomLayout'
-
-interface LoginEntry {
-  timestamp: string
-  cookie: string
-  ip: string
-  port: string
-  language: string
-  userAgent: string
-}
 
 interface MediaItem {
   name: string
@@ -18,7 +9,7 @@ interface MediaItem {
 }
 
 interface GraveyardData {
-  logins: LoginEntry[]
+  logins: any[]
   media: MediaItem[]
   stats: {
     totalLogins: number
@@ -27,29 +18,84 @@ interface GraveyardData {
     totalVideos: number
     uniqueIPs: number
     uniqueUserAgents: number
-    firstLogin: string
-    lastLogin: string
   }
+}
+
+interface Ghost {
+  text: string
+  type: string
 }
 
 const base = import.meta.env.BASE_URL
 
-function ImageCell({ item, login }: { item: MediaItem; login: LoginEntry }) {
-  const [touched, setTouched] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+const TYPE_COLORS: Record<string, string> = {
+  ip: '#0ff',
+  'user-agent': '#0ff',
+  cookie: '#0ff',
+  search: '#ff6b9d',
+  advertiser: '#ff4444',
+  ad: '#ff4444',
+  contact: '#a78bfa',
+  following: '#a78bfa',
+  comment: '#fff',
+  link: '#88cc88',
+}
+
+function seededRandom(seed: number) {
+  let h = seed
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b)
+    h = Math.imul(h ^ (h >>> 13), 0x45d9f3b)
+    h = h ^ (h >>> 16)
+    return (h >>> 0) / 0xffffffff
+  }
+}
+
+function GhostText({ ghost, index }: { ghost: Ghost; index: number }) {
+  const rand = useMemo(() => seededRandom(index * 7919), [index])
+
+  const startX = useMemo(() => rand() * 100, [rand])
+  const startY = useMemo(() => rand() * 100, [rand])
+  const duration = useMemo(() => 15 + rand() * 30, [rand])
+  const delay = useMemo(() => rand() * -30, [rand])
+  const size = useMemo(() => {
+    if (ghost.type === 'ip' || ghost.type === 'cookie') return 0.55
+    if (ghost.type === 'user-agent' || ghost.type === 'link') return 0.4
+    if (ghost.type === 'comment') return 0.6
+    return 0.5
+  }, [ghost.type])
+
+  const color = TYPE_COLORS[ghost.type] || '#fff'
 
   return (
     <div
       style={{
-        position: 'relative',
+        position: 'absolute',
+        left: `${startX}%`,
+        top: `${startY}%`,
+        fontSize: `${size}rem`,
+        fontFamily: 'monospace',
+        color,
+        opacity: 0,
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
+        maxWidth: '60vw',
         overflow: 'hidden',
-        aspectRatio: '1',
+        textOverflow: 'ellipsis',
+        animation: `ghostDrift ${duration}s linear ${delay}s infinite`,
+        textShadow: `0 0 10px ${color}`,
       }}
-      onMouseEnter={() => setTouched(true)}
-      onMouseLeave={() => setTouched(false)}
-      onTouchStart={() => setTouched(true)}
-      onTouchEnd={() => setTimeout(() => setTouched(false), 2000)}
     >
+      {ghost.text}
+    </div>
+  )
+}
+
+function ImageCell({ item }: { item: MediaItem }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1' }}>
       {item.type === 'video' ? (
         <video
           ref={videoRef}
@@ -63,8 +109,7 @@ function ImageCell({ item, login }: { item: MediaItem; login: LoginEntry }) {
             height: '100%',
             objectFit: 'cover',
             display: 'block',
-            filter: touched ? 'none' : 'grayscale(0.3) contrast(0.9)',
-            transition: 'filter 0.3s ease',
+            filter: 'grayscale(0.5) brightness(0.7)',
           }}
         />
       ) : (
@@ -77,61 +122,37 @@ function ImageCell({ item, login }: { item: MediaItem; login: LoginEntry }) {
             height: '100%',
             objectFit: 'cover',
             display: 'block',
-            filter: touched ? 'none' : 'grayscale(0.3) contrast(0.9)',
-            transition: 'filter 0.3s ease',
+            filter: 'grayscale(0.5) brightness(0.7)',
           }}
         />
       )}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          padding: '0.4rem',
-          background: touched
-            ? 'linear-gradient(transparent 20%, rgba(0,0,0,0.8) 100%)'
-            : 'none',
-          transition: 'background 0.3s ease',
-        }}
-      >
-        {touched && (
-          <>
-            <p style={{ color: '#0ff', fontSize: '0.55rem', fontFamily: 'monospace', lineHeight: 1.4 }}>
-              {login.ip}:{login.port}
-            </p>
-            <p style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.45rem',
-              fontFamily: 'monospace',
-              lineHeight: 1.3,
-              wordBreak: 'break-all',
-              maxHeight: '2.5em',
-              overflow: 'hidden',
-            }}>
-              {login.userAgent}
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.45rem', fontFamily: 'monospace' }}>
-              {login.cookie}
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.45rem', fontFamily: 'monospace' }}>
-              {new Date(login.timestamp).toLocaleString()}
-            </p>
-          </>
-        )}
-      </div>
     </div>
   )
 }
 
 export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
+  const [ghosts, setGhosts] = useState<Ghost[]>([])
 
   useEffect(() => {
-    fetch(`${base}graveyard/ig/data.json`)
-      .then(r => r.json())
-      .then(setData)
+    fetch(`${base}graveyard/ig/data.json`).then(r => r.json()).then(setData)
+    fetch(`${base}graveyard/ig/ghosts.json`).then(r => r.json()).then((all: Ghost[]) => {
+      // Sample ~200 ghosts for performance, spread across types
+      const byType: Record<string, Ghost[]> = {}
+      for (const g of all) {
+        if (!byType[g.type]) byType[g.type] = []
+        byType[g.type].push(g)
+      }
+      const sampled: Ghost[] = []
+      for (const type of Object.keys(byType)) {
+        const items = byType[type]
+        const count = Math.min(items.length, Math.max(10, Math.floor(200 * items.length / all.length)))
+        for (let i = 0; i < count; i++) {
+          sampled.push(items[Math.floor(Math.random() * items.length)])
+        }
+      }
+      setGhosts(sampled)
+    })
   }, [])
 
   if (!data) {
@@ -144,6 +165,16 @@ export function InstagramGraveyard() {
 
   return (
     <RoomLayout>
+      <style>{`
+        @keyframes ghostDrift {
+          0% { opacity: 0; transform: translate(0, 0); }
+          5% { opacity: 0.3; }
+          50% { opacity: 0.15; }
+          95% { opacity: 0.3; }
+          100% { opacity: 0; transform: translate(-20vw, -15vh); }
+        }
+      `}</style>
+
       <div
         style={{
           position: 'fixed',
@@ -152,6 +183,7 @@ export function InstagramGraveyard() {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          background: '#0a0a0a',
         }}
       >
         {/* header */}
@@ -161,63 +193,58 @@ export function InstagramGraveyard() {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '0.8rem 1rem',
-            zIndex: 2,
-            background: 'rgba(240, 234, 245, 0.85)',
+            zIndex: 3,
+            background: 'rgba(10, 10, 10, 0.9)',
             backdropFilter: 'blur(8px)',
           }}
         >
           <Link
             to="/"
-            style={{ fontSize: '0.85rem', opacity: 0.5, fontFamily: 'Georgia, serif' }}
+            style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'Georgia, serif', color: '#fff' }}
           >
             home
           </Link>
-          <p style={{ fontSize: '0.8rem', fontStyle: 'italic', opacity: 0.55 }}>
+          <p style={{ fontSize: '0.8rem', fontStyle: 'italic', opacity: 0.3, color: '#fff' }}>
             instagram graveyard
           </p>
           <div style={{ width: '2rem' }} />
         </div>
 
-        {/* stats bar */}
-        <div
-          style={{
-            padding: '0.6rem 1rem',
-            fontFamily: 'monospace',
-            fontSize: '0.6rem',
-            color: '#1a1a1a',
-            opacity: 0.4,
-            display: 'flex',
-            gap: '1rem',
-            flexWrap: 'wrap',
-            background: 'rgba(240, 234, 245, 0.6)',
-          }}
-        >
-          <span>{data.stats.totalLogins} logins tracked</span>
-          <span>{data.stats.uniqueIPs} unique IPs</span>
-          <span>{data.stats.totalMedia} posts</span>
-        </div>
-
-        {/* grid */}
+        {/* scrollable area with grid + ghosts */}
         <div
           style={{
             flex: 1,
+            position: 'relative',
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
           }}
         >
+          {/* photo grid */}
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '2px',
+              gap: '1px',
             }}
           >
-            {data.media.map((item, i) => (
-              <ImageCell
-                key={item.name}
-                item={item}
-                login={data.logins[i % data.logins.length]}
-              />
+            {data.media.map(item => (
+              <ImageCell key={item.name} item={item} />
+            ))}
+          </div>
+
+          {/* ghost overlay */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: '3rem',
+              zIndex: 2,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            {ghosts.map((ghost, i) => (
+              <GhostText key={`${ghost.type}-${i}`} ghost={ghost} index={i} />
             ))}
           </div>
         </div>
