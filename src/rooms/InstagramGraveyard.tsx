@@ -138,7 +138,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
         height: '100%',
         objectFit: 'cover',
         display: 'block',
-        filter: 'brightness(0.7)',
+        filter: 'none',
       }}
     />
   ) : (
@@ -151,7 +151,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
         height: '100%',
         objectFit: 'cover',
         display: 'block',
-        filter: 'brightness(0.7)',
+        filter: 'none',
       }}
     />
   )
@@ -166,7 +166,7 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
   const nudgeY = useMemo(() => (rand() - 0.5) * 10, [rand])
   const rotation = useMemo(() => (rand() - 0.5) * 4, [rand])
   const blur = useMemo(() => Math.max(0, (1 - depth) * 1.5), [depth]) // far = blurry
-  const brightness = useMemo(() => 0.4 + depth * 0.4, [depth]) // 0.4 to 0.8
+  const brightness = useMemo(() => 0.7 + depth * 0.3, [depth]) // 0.7 to 1.0
   const zIndex = useMemo(() => Math.floor(depth * 10), [depth])
 
   return (
