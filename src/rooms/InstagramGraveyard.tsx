@@ -526,7 +526,7 @@ export function InstagramGraveyard() {
                       gap: isMobile ? '16px' : '8px',
                       transform: `translateY(${scrollY * speeds[colIdx]}px)`,
                       willChange: 'transform',
-                      paddingBottom: `${Math.abs(speeds[colIdx]) * 100}vh`,
+                      paddingBottom: `${Math.abs(speeds[colIdx]) * col.length * 150}px`,
                     }}
                   >
                     {col.map((post, i) => (
