@@ -116,61 +116,207 @@ function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total
   )
 }
 
-function ImageCell({ item }: { item: MediaItem }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
+interface Post {
+  folder: string
+  date: string
+  media: MediaItem[]
+}
+
+function MediaThumb({ item }: { item: MediaItem }) {
+  return item.type === 'video' ? (
+    <video
+      src={item.url}
+      autoPlay
+      muted
+      loop
+      playsInline
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+        filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+      }}
+    />
+  ) : (
+    <img
+      src={item.url}
+      alt=""
+      loading="lazy"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block',
+        filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+      }}
+    />
+  )
+}
+
+function PostCell({ post, onOpen }: { post: Post; onOpen: () => void }) {
+  const thumb = post.media[0]
 
   return (
-    <div style={{
-      position: 'relative',
-      overflow: 'hidden',
-      borderRadius: '40% 40% 4px 4px',
-      border: '1px solid rgba(255,255,255,0.08)',
-      background: '#111',
-      padding: '3px',
-    }}>
+    <div
+      onClick={onOpen}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '40% 40% 4px 4px',
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#111',
+        padding: '3px',
+        cursor: post.media.length > 1 ? 'pointer' : 'default',
+      }}
+    >
       <div style={{
         borderRadius: '38% 38% 2px 2px',
         overflow: 'hidden',
         aspectRatio: '0.75',
       }}>
+        <MediaThumb item={thumb} />
+      </div>
+      {/* carousel indicator */}
+      {post.media.length > 1 && (
+        <div style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          background: 'rgba(0,0,0,0.5)',
+          borderRadius: '4px',
+          padding: '2px 6px',
+          fontSize: '0.6rem',
+          color: 'rgba(255,255,255,0.6)',
+          fontFamily: 'monospace',
+        }}>
+          {post.media.length}
+        </div>
+      )}
+      {/* date */}
+      <div style={{
+        textAlign: 'center',
+        padding: '4px 0 2px',
+        fontSize: '0.5rem',
+        fontFamily: 'monospace',
+        color: 'rgba(255,255,255,0.2)',
+        letterSpacing: '0.1em',
+      }}>
+        {post.date}
+      </div>
+    </div>
+  )
+}
+
+function CarouselModal({ post, onClose }: { post: Post; onClose: () => void }) {
+  const [index, setIndex] = useState(0)
+  const item = post.media[index]
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 20,
+        background: 'rgba(0,0,0,0.9)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          maxWidth: '90vw',
+          maxHeight: '80vh',
+          position: 'relative',
+        }}
+      >
         {item.type === 'video' ? (
           <video
-            ref={videoRef}
             src={item.url}
             autoPlay
             muted
             loop
             playsInline
+            controls
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              maxWidth: '90vw',
+              maxHeight: '75vh',
               display: 'block',
-              filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+              filter: 'grayscale(0.5) brightness(0.7)',
             }}
           />
         ) : (
           <img
             src={item.url}
             alt=""
-            loading="lazy"
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              maxWidth: '90vw',
+              maxHeight: '75vh',
               display: 'block',
-              filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+              filter: 'grayscale(0.5) brightness(0.7)',
             }}
           />
         )}
       </div>
+
+      {/* nav */}
+      {post.media.length > 1 && (
+        <div style={{
+          display: 'flex',
+          gap: '1.5rem',
+          marginTop: '1rem',
+          alignItems: 'center',
+        }}>
+          <button
+            onClick={e => { e.stopPropagation(); setIndex((index - 1 + post.media.length) % post.media.length) }}
+            style={navBtnStyle}
+          >
+            prev
+          </button>
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: '0.75rem' }}>
+            {index + 1} / {post.media.length}
+          </span>
+          <button
+            onClick={e => { e.stopPropagation(); setIndex((index + 1) % post.media.length) }}
+            style={navBtnStyle}
+          >
+            next
+          </button>
+        </div>
+      )}
+
+      <p style={{
+        color: 'rgba(255,255,255,0.2)',
+        fontFamily: 'monospace',
+        fontSize: '0.7rem',
+        marginTop: '0.75rem',
+      }}>
+        {post.date}
+      </p>
     </div>
   )
+}
+
+const navBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: '1px solid rgba(255,255,255,0.15)',
+  color: 'rgba(255,255,255,0.5)',
+  fontFamily: 'Georgia, serif',
+  fontStyle: 'italic',
+  fontSize: '0.8rem',
+  padding: '0.4rem 1rem',
+  borderRadius: '4px',
+  cursor: 'pointer',
 }
 
 export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
   const [ghosts, setGhosts] = useState<Ghost[]>([])
+  const [openPost, setOpenPost] = useState<Post | null>(null)
 
   const allGhostsRef = useRef<Ghost[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -318,8 +464,12 @@ export function InstagramGraveyard() {
               zIndex: 2,
             }}
           >
-            {data.media.map(item => (
-              <ImageCell key={item.name} item={item} />
+            {(data as any).posts?.map((post: Post, i: number) => (
+              <PostCell key={post.folder} post={post} onOpen={() => setOpenPost(post)} />
+            )) ?? data.media.map(item => (
+              <div key={item.name} style={{ aspectRatio: '0.75' }}>
+                <MediaThumb item={item} />
+              </div>
             ))}
           </div>
 
@@ -339,6 +489,9 @@ export function InstagramGraveyard() {
             ))}
           </div>
         </div>
+        {openPost && (
+          <CarouselModal post={openPost} onClose={() => setOpenPost(null)} />
+        )}
       </div>
     </RoomLayout>
   )
