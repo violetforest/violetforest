@@ -402,28 +402,54 @@ export function InstagramGraveyard() {
           background: '#0a0a0a',
         }}
       >
-        {/* header */}
+        {/* sticky header with epitaph */}
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0.8rem 1rem',
-            zIndex: 3,
-            background: 'rgba(10, 10, 10, 0.9)',
-            backdropFilter: 'blur(8px)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 4,
+            background: 'rgba(10, 10, 10, 0.92)',
+            backdropFilter: 'blur(12px)',
+            padding: '1.2rem 1rem',
+            textAlign: 'center',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
           }}
         >
-          <Link
-            to="/"
-            style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'Georgia, serif', color: '#fff' }}
-          >
-            home
-          </Link>
-          <p style={{ fontSize: '0.8rem', fontStyle: 'italic', opacity: 0.3, color: '#fff' }}>
-            instagram graveyard
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+            <Link
+              to="/"
+              style={{ fontSize: '0.85rem', opacity: 0.4, fontFamily: 'Georgia, serif', color: '#fff' }}
+            >
+              home
+            </Link>
+            <div style={{ width: '2rem' }} />
+          </div>
+          <p style={{
+            fontSize: '0.65rem',
+            letterSpacing: '0.35em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.3)',
+            marginBottom: '0.4rem',
+          }}>
+            rest in peace
           </p>
-          <div style={{ width: '2rem' }} />
+          <p style={{
+            fontSize: '1.8rem',
+            fontStyle: 'italic',
+            fontFamily: 'Georgia, serif',
+            color: 'rgba(255,255,255,0.5)',
+            marginBottom: '0.2rem',
+          }}>
+            @violetforest.js
+          </p>
+          <p style={{
+            fontSize: '0.9rem',
+            letterSpacing: '0.2em',
+            color: 'rgba(255,255,255,0.2)',
+            fontFamily: 'monospace',
+          }}>
+            2015 — 2026
+          </p>
         </div>
 
         {/* scrollable area with grid + ghosts */}
@@ -436,24 +462,6 @@ export function InstagramGraveyard() {
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          {/* epitaph */}
-          <div style={{
-            textAlign: 'center',
-            padding: '3rem 1rem 2rem',
-            color: 'rgba(255,255,255,0.25)',
-            fontFamily: 'Georgia, serif',
-          }}>
-            <p style={{ fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              rest in peace
-            </p>
-            <p style={{ fontSize: '1.4rem', fontStyle: 'italic', marginBottom: '0.3rem' }}>
-              @violetforest.js
-            </p>
-            <p style={{ fontSize: '0.8rem', letterSpacing: '0.15em' }}>
-              2015 — 2026
-            </p>
-          </div>
-
           {/* ghosts behind tombstones */}
           <div
             style={{
