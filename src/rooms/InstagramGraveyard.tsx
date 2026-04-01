@@ -545,11 +545,9 @@ export function InstagramGraveyard() {
             position: 'sticky',
             top: 0,
             zIndex: 35,
-            background: 'rgba(10, 10, 10, 0.5)',
-            backdropFilter: 'blur(12px)',
-            padding: '1.2rem 1rem',
+            background: 'none',
+            padding: '1.5rem 1rem 1.2rem',
             textAlign: 'center',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
@@ -565,8 +563,9 @@ export function InstagramGraveyard() {
             fontSize: '1rem',
             letterSpacing: '0.4em',
             textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(255,255,255,0.6)',
             marginBottom: '0.8rem',
+            textShadow: '0 0 20px rgba(0,0,0,0.8)',
           }}>
             here doth lie
           </p>
@@ -574,15 +573,17 @@ export function InstagramGraveyard() {
             fontSize: '2.5rem',
             fontStyle: 'italic',
             fontFamily: 'Georgia, serif',
-            color: 'rgba(255,255,255,0.6)',
+            color: 'rgba(255,255,255,0.9)',
             marginBottom: '0.3rem',
+            textShadow: '0 0 30px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.5)',
           }}>
             @violetforest.js
           </p>
           <p style={{
             fontSize: '1.2rem',
             letterSpacing: '0.25em',
-            color: 'rgba(255,255,255,0.25)',
+            color: 'rgba(255,255,255,0.5)',
+            textShadow: '0 0 15px rgba(0,0,0,0.8)',
             fontFamily: 'monospace',
           }}>
             2015 — 2026
@@ -598,8 +599,9 @@ export function InstagramGraveyard() {
               fontSize: '1.1rem',
               fontFamily: 'Georgia, serif',
               fontStyle: 'italic',
-              color: 'rgba(255,255,255,0.35)',
-              opacity: leftRose ? 0.5 : 0.8,
+              color: 'rgba(255,255,255,0.6)',
+              opacity: leftRose ? 0.7 : 1,
+              textShadow: '0 0 15px rgba(0,0,0,0.8)',
               transition: 'opacity 0.3s',
             }}
           >
