@@ -120,37 +120,50 @@ function ImageCell({ item }: { item: MediaItem }) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '1' }}>
-      {item.type === 'video' ? (
-        <video
-          ref={videoRef}
-          src={item.url}
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-            filter: 'grayscale(0.5) brightness(0.7)',
-          }}
-        />
-      ) : (
-        <img
-          src={item.url}
-          alt=""
-          loading="lazy"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-            filter: 'grayscale(0.5) brightness(0.7)',
-          }}
-        />
-      )}
+    <div style={{
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: '40% 40% 4px 4px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      background: '#111',
+      padding: '3px',
+    }}>
+      <div style={{
+        borderRadius: '38% 38% 2px 2px',
+        overflow: 'hidden',
+        aspectRatio: '0.75',
+      }}>
+        {item.type === 'video' ? (
+          <video
+            ref={videoRef}
+            src={item.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+              filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+            }}
+          />
+        ) : (
+          <img
+            src={item.url}
+            alt=""
+            loading="lazy"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+              filter: 'grayscale(0.7) brightness(0.5) contrast(0.9)',
+            }}
+          />
+        )}
+      </div>
     </div>
   )
 }
@@ -260,12 +273,31 @@ export function InstagramGraveyard() {
             WebkitOverflowScrolling: 'touch',
           }}
         >
+          {/* epitaph */}
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem 1rem 2rem',
+            color: 'rgba(255,255,255,0.25)',
+            fontFamily: 'Georgia, serif',
+          }}>
+            <p style={{ fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+              rest in peace
+            </p>
+            <p style={{ fontSize: '1.4rem', fontStyle: 'italic', marginBottom: '0.3rem' }}>
+              @violetforest.js
+            </p>
+            <p style={{ fontSize: '0.8rem', letterSpacing: '0.15em' }}>
+              2015 — 2026
+            </p>
+          </div>
+
           {/* photo grid */}
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '1px',
+              gap: '8px',
+              padding: '0 8px 4rem',
             }}
           >
             {data.media.map(item => (
