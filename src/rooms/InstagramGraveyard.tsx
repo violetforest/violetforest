@@ -867,21 +867,49 @@ export function InstagramGraveyard() {
             ))}
           </div>
 
-          {/* photo grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px',
-              padding: '0 8px 4rem',
-              position: 'relative',
-              zIndex: 2,
-            }}
-          >
-            {((data as any).posts || []).map((post: Post, i: number) => (
-              <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} index={i} />
-            ))}
-          </div>
+          {/* photo grid (desktop) / horizontal swipe (mobile) */}
+          {typeof window !== 'undefined' && window.innerWidth < 600 ? (
+            <div
+              style={{
+                display: 'flex',
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch',
+                gap: '16px',
+                padding: '0 16px 2rem',
+                position: 'relative',
+                zIndex: 2,
+              }}
+            >
+              {((data as any).posts || []).map((post: Post, i: number) => (
+                <div
+                  key={post.folder + post.media[0]?.name}
+                  style={{
+                    flex: '0 0 75vw',
+                    scrollSnapAlign: 'center',
+                  }}
+                >
+                  <PostCell post={post} onOpen={() => setOpenPost(post)} index={i} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '8px',
+                padding: '0 8px 4rem',
+                position: 'relative',
+                zIndex: 2,
+              }}
+            >
+              {((data as any).posts || []).map((post: Post, i: number) => (
+                <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} index={i} />
+              ))}
+            </div>
+          )}
 
           {/* bottom rose count */}
           <div style={{
