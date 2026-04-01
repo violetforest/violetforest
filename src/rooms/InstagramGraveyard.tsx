@@ -126,24 +126,23 @@ interface Post {
   media: MediaItem[]
 }
 
-const T = 0 // transparent
+const T = 0
 const G1 = 1, G2 = 2, G3 = 3, G4 = 4, B1 = 5, B2 = 6, B3 = 7
 const TOMBSTONE_COLORS: Record<number, string> = {
   [G1]: '#a6a4a2', [G2]: '#999794', [G3]: '#8a8987', [G4]: '#6e6d6b',
-  [B1]: '#8a511c', [B2]: '#7a481a', [B3]: '#5c3612', [W]: '#d4d0cc',
+  [B1]: '#8a511c', [B2]: '#7a481a', [B3]: '#5c3612',
 }
-const W = 8 // white for skull
 const TOMBSTONE_GRID = [
   [T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G1],
   [T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G2,G2,G2],
   [T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G4,G4,G4,G4,G4,G4,G2,G2],
   [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G4,G2,G2,G2,G2,G2,G4,G3,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G2,G2,W,W,W,G2,G2,G4,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,W,W,W,W,W,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,W,G4,W,G4,W,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,W,G4,W,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,W,G4,W,G4,W,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,W,W,W,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G2,G2,G2,G4,G2,G2,G2,G4,G2,G2],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G4,G4,G4,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G4,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G4,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G4,G4,G4,G4,G4,G4,G4,G2,G4,G1],
   [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
   [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G2,G4,G4,G4,G4,G4,G4,G4,G2,G4,G3],
   [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G3,G2,G2,G2,G2,G3,G3,G3,G3,G4,G3],
@@ -195,6 +194,13 @@ function PixelTombstone() {
           imageRendering: 'pixelated',
         }}
       />
+      <span style={{
+        position: 'absolute',
+        fontSize: '2rem',
+        top: '22%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+      }}>💀</span>
     </div>
   )
 }
