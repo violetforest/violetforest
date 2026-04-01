@@ -389,16 +389,6 @@ export function InstagramGraveyard() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [data])
 
-
-
-  if (!data) {
-    return (
-      <RoomLayout>
-        <p style={{ opacity: 0.45, fontStyle: 'italic' }}>loading...</p>
-      </RoomLayout>
-    )
-  }
-
   const bats = useMemo(() => {
     const r = seededRandom(777)
     return Array.from({ length: 8 }, () => ({
@@ -411,6 +401,14 @@ export function InstagramGraveyard() {
       direction: r() > 0.5 ? 1 : -1,
     }))
   }, [])
+
+  if (!data) {
+    return (
+      <RoomLayout>
+        <p style={{ opacity: 0.45, fontStyle: 'italic' }}>loading...</p>
+      </RoomLayout>
+    )
+  }
 
   return (
     <RoomLayout>
