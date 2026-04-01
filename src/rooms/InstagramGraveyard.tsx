@@ -312,7 +312,6 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
         </div>
       </div>
     </div>
-    </div>
   )
 }
 
