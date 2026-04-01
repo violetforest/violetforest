@@ -533,7 +533,66 @@ export function InstagramGraveyard() {
   if (!data) {
     return (
       <RoomLayout>
-        <p style={{ opacity: 0.45, fontStyle: 'italic' }}>loading...</p>
+        <style>{`
+          @keyframes digUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+          }
+          @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+          }
+        `}</style>
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#0a0a0a',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1.5rem',
+          zIndex: 1,
+        }}>
+          <div style={{
+            fontSize: '3rem',
+            animation: 'digUp 1s ease-out forwards, pulse 2s ease-in-out 1s infinite',
+          }}>
+            🪦
+          </div>
+          <p style={{
+            fontFamily: 'Georgia, serif',
+            fontStyle: 'italic',
+            color: 'rgba(255,255,255,0.4)',
+            fontSize: '1rem',
+            animation: 'digUp 1s ease-out 0.3s forwards',
+            opacity: 0,
+          }}>
+            exhuming data
+          </p>
+          <div style={{
+            display: 'flex',
+            gap: '6px',
+            animation: 'digUp 1s ease-out 0.6s forwards',
+            opacity: 0,
+          }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.3)',
+                animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite`,
+              }} />
+            ))}
+          </div>
+        </div>
       </RoomLayout>
     )
   }
