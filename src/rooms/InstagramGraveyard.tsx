@@ -52,7 +52,6 @@ function seededRandom(seed: number) {
 }
 
 function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total: number }) {
-  // spread ghosts evenly across the space, then add jitter
   const rand = useMemo(() => seededRandom(index * 7919 + 13), [index])
 
   const cols = Math.ceil(Math.sqrt(total))
@@ -64,20 +63,23 @@ function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total
   const startX = useMemo(() => (baseX + (rand() - 0.5) * 30 + 100) % 100, [baseX, rand])
   const startY = useMemo(() => (baseY + (rand() - 0.5) * 30 + 100) % 100, [baseY, rand])
 
-  const duration = useMemo(() => 20 + rand() * 40, [rand])
+  // depth: 0 = far away, 1 = very close
+  const depth = useMemo(() => rand(), [rand])
+
+  // depth affects everything
+  const duration = useMemo(() => 50 - depth * 35, [depth]) // close = faster (15-50s)
   const delay = useMemo(() => rand() * -60, [rand])
-
-  // random drift direction per ghost
-  const driftX = useMemo(() => (rand() - 0.5) * 40, [rand])
-  const driftY = useMemo(() => (rand() - 0.5) * 30, [rand])
+  const driftX = useMemo(() => (rand() - 0.5) * (20 + depth * 30), [rand, depth])
+  const driftY = useMemo(() => (rand() - 0.5) * (15 + depth * 20), [rand, depth])
   const animName = useMemo(() => `ghost-${index}`, [index])
+  const rotation = useMemo(() => (rand() - 0.5) * 4, [rand])
 
-  const size = useMemo(() => {
-    if (ghost.type === 'ip' || ghost.type === 'cookie') return 1
-    if (ghost.type === 'user-agent' || ghost.type === 'link') return 0.75
-    if (ghost.type === 'comment') return 1.1
-    return 0.9
-  }, [ghost.type])
+  // close = bigger, brighter, sharper. far = smaller, dimmer, blurred
+  const baseSize = ghost.type === 'comment' ? 1.1 : ghost.type === 'user-agent' || ghost.type === 'link' ? 0.75 : 0.9
+  const size = baseSize * (0.4 + depth * 1.2) // 0.4x to 1.6x
+  const peakOpacity = 0.15 + depth * 0.65 // 0.15 to 0.8
+  const blur = Math.max(0, (1 - depth) * 2) // 0 to 2px
+  const glowSize = 5 + depth * 20 // 5 to 25px
 
   const color = TYPE_COLORS[ghost.type] || '#fff'
 
@@ -85,11 +87,11 @@ function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total
     <>
       <style>{`
         @keyframes ${animName} {
-          0% { opacity: 0; transform: translate(0, 0); }
-          8% { opacity: 0.7; }
-          50% { opacity: 0.35; transform: translate(${driftX * 0.5}vw, ${driftY * 0.5}vh); }
-          92% { opacity: 0.7; }
-          100% { opacity: 0; transform: translate(${driftX}vw, ${driftY}vh); }
+          0% { opacity: 0; transform: translate(0, 0) rotate(${rotation}deg) scale(${0.95 + depth * 0.1}); }
+          8% { opacity: ${peakOpacity}; }
+          50% { opacity: ${peakOpacity * 0.5}; transform: translate(${driftX * 0.5}vw, ${driftY * 0.5}vh) rotate(${rotation * 0.5}deg) scale(1); }
+          92% { opacity: ${peakOpacity}; }
+          100% { opacity: 0; transform: translate(${driftX}vw, ${driftY}vh) rotate(0deg) scale(${1.05 - depth * 0.1}); }
         }
       `}</style>
       <div
@@ -107,7 +109,8 @@ function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           animation: `${animName} ${duration}s linear ${delay}s infinite`,
-          textShadow: `0 0 10px ${color}`,
+          textShadow: `0 0 ${glowSize}px ${color}`,
+          filter: blur > 0.1 ? `blur(${blur}px)` : 'none',
         }}
       >
         {ghost.text}
