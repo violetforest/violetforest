@@ -442,27 +442,27 @@ export function InstagramGraveyard() {
             <div style={{ width: '2rem' }} />
           </div>
           <p style={{
-            fontSize: '0.65rem',
-            letterSpacing: '0.35em',
+            fontSize: '1rem',
+            letterSpacing: '0.4em',
             textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.3)',
-            marginBottom: '0.6rem',
+            color: 'rgba(255,255,255,0.35)',
+            marginBottom: '0.8rem',
           }}>
             here doth lie
           </p>
           <p style={{
-            fontSize: '1.8rem',
+            fontSize: '2.5rem',
             fontStyle: 'italic',
             fontFamily: 'Georgia, serif',
-            color: 'rgba(255,255,255,0.5)',
-            marginBottom: '0.2rem',
+            color: 'rgba(255,255,255,0.6)',
+            marginBottom: '0.3rem',
           }}>
             @violetforest.js
           </p>
           <p style={{
-            fontSize: '0.9rem',
-            letterSpacing: '0.2em',
-            color: 'rgba(255,255,255,0.2)',
+            fontSize: '1.2rem',
+            letterSpacing: '0.25em',
+            color: 'rgba(255,255,255,0.25)',
             fontFamily: 'monospace',
           }}>
             2015 — 2026
