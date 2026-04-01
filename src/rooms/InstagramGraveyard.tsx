@@ -453,7 +453,7 @@ export function InstagramGraveyard() {
       .filter(({ idx }) => !usedIndicesRef.current.has(idx))
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 600
-    const count = isMobile ? 50 : 150
+    const count = isMobile ? 5 : 10
 
     // if we've used most, reset
     if (available.length < count) {
@@ -500,11 +500,20 @@ export function InstagramGraveyard() {
     setCondolence('')
   }
 
+  const cycleRef = useRef(0)
+
   useEffect(() => {
     fetch(`${base}graveyard/ig/data.json`).then(r => r.json()).then(setData)
     fetch(`${base}graveyard/ig/ghosts.json`).then(r => r.json()).then((all: Ghost[]) => {
       allGhostsRef.current = all
       setGhosts(sampleGhosts(all, 0))
+
+      // cycle through new ghosts every 6 seconds
+      const interval = setInterval(() => {
+        cycleRef.current++
+        setGhosts(sampleGhosts(allGhostsRef.current, cycleRef.current))
+      }, 6000)
+      return () => clearInterval(interval)
     })
   }, [])
 
