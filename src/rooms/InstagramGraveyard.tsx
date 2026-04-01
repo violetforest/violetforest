@@ -59,10 +59,10 @@ function GhostText({ ghost, index }: { ghost: Ghost; index: number }) {
   const duration = useMemo(() => 15 + rand() * 30, [rand])
   const delay = useMemo(() => rand() * -30, [rand])
   const size = useMemo(() => {
-    if (ghost.type === 'ip' || ghost.type === 'cookie') return 0.55
-    if (ghost.type === 'user-agent' || ghost.type === 'link') return 0.4
-    if (ghost.type === 'comment') return 0.6
-    return 0.5
+    if (ghost.type === 'ip' || ghost.type === 'cookie') return 1
+    if (ghost.type === 'user-agent' || ghost.type === 'link') return 0.75
+    if (ghost.type === 'comment') return 1.1
+    return 0.9
   }, [ghost.type])
 
   const color = TYPE_COLORS[ghost.type] || '#fff'
@@ -168,9 +168,9 @@ export function InstagramGraveyard() {
       <style>{`
         @keyframes ghostDrift {
           0% { opacity: 0; transform: translate(0, 0); }
-          5% { opacity: 0.3; }
-          50% { opacity: 0.15; }
-          95% { opacity: 0.3; }
+          5% { opacity: 0.7; }
+          50% { opacity: 0.4; }
+          95% { opacity: 0.7; }
           100% { opacity: 0; transform: translate(-20vw, -15vh); }
         }
       `}</style>
