@@ -419,6 +419,21 @@ export function InstagramGraveyard() {
           50% { transform: scaleY(1); }
           75% { transform: scaleY(0.3); }
         }
+        @keyframes fogDrift1 {
+          0% { transform: translateX(-10%); opacity: 0.3; }
+          50% { opacity: 0.5; }
+          100% { transform: translateX(10%); opacity: 0.3; }
+        }
+        @keyframes fogDrift2 {
+          0% { transform: translateX(10%); opacity: 0.2; }
+          50% { opacity: 0.4; }
+          100% { transform: translateX(-10%); opacity: 0.2; }
+        }
+        @keyframes fogDrift3 {
+          0% { transform: translateX(-5%) scaleX(1.1); opacity: 0.15; }
+          50% { opacity: 0.35; }
+          100% { transform: translateX(5%) scaleX(0.9); opacity: 0.15; }
+        }
         ${bats.map((bat, i) => `
           @keyframes bat-${i} {
             0% { left: ${bat.direction > 0 ? '-5' : '105'}vw; top: ${bat.startY}%; }
@@ -461,6 +476,46 @@ export function InstagramGraveyard() {
             </div>
           ))}
         </div>
+        {/* fog layers */}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 28, pointerEvents: 'none', overflow: 'hidden' }}>
+          <div style={{
+            position: 'absolute',
+            top: '5%',
+            left: '-20%',
+            width: '140%',
+            height: '25%',
+            background: 'radial-gradient(ellipse at center, rgba(180,180,200,0.25) 0%, transparent 70%)',
+            animation: 'fogDrift1 25s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '30%',
+            left: '-10%',
+            width: '120%',
+            height: '20%',
+            background: 'radial-gradient(ellipse at center, rgba(150,150,180,0.2) 0%, transparent 70%)',
+            animation: 'fogDrift2 35s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '55%',
+            left: '-15%',
+            width: '130%',
+            height: '30%',
+            background: 'radial-gradient(ellipse at center, rgba(160,160,190,0.18) 0%, transparent 65%)',
+            animation: 'fogDrift3 40s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '75%',
+            left: '-10%',
+            width: '120%',
+            height: '25%',
+            background: 'radial-gradient(ellipse at center, rgba(140,140,170,0.22) 0%, transparent 70%)',
+            animation: 'fogDrift1 30s ease-in-out infinite reverse',
+          }} />
+        </div>
+
         {/* sticky header with epitaph */}
         <div
           style={{
