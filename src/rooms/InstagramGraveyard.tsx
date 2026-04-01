@@ -339,6 +339,8 @@ export function InstagramGraveyard() {
   const [roseCount, setRoseCount] = useState(0)
   const [leftRose, setLeftRose] = useState(false)
   const [scrolledPast, setScrolledPast] = useState(false)
+  const [showCondolences, setShowCondolences] = useState(false)
+  const [condolence, setCondolence] = useState('')
 
 
   const allGhostsRef = useRef<Ghost[]>([])
@@ -379,13 +381,25 @@ export function InstagramGraveyard() {
     setLeftRose(localStorage.getItem('left-rose') === 'true')
   }, [])
 
-  const leaveRose = async () => {
+  const leaveRose = () => {
     if (leftRose) return
+    setShowCondolences(true)
+  }
+
+  const submitCondolence = async () => {
+    setShowCondolences(false)
     setLeftRose(true)
     localStorage.setItem('left-rose', 'true')
     const newCount = roseCount + 1
     setRoseCount(newCount)
     await supabase.from('graveyard_roses').upsert({ id: 1, count: newCount })
+    if (condolence.trim()) {
+      await supabase.from('guestbook_entries').insert({
+        name: null,
+        message: `🥀 ${condolence.trim()}`,
+      })
+    }
+    setCondolence('')
   }
 
   useEffect(() => {
@@ -679,6 +693,30 @@ export function InstagramGraveyard() {
             ))}
           </div>
 
+          {/* bottom rose count */}
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem 1rem 4rem',
+            position: 'relative',
+            zIndex: 2,
+          }}>
+            <p style={{
+              fontSize: '2rem',
+              color: 'rgba(255,255,255,0.15)',
+              marginBottom: '0.5rem',
+            }}>
+              🥀
+            </p>
+            <p style={{
+              fontSize: '1rem',
+              fontFamily: 'Georgia, serif',
+              fontStyle: 'italic',
+              color: 'rgba(255,255,255,0.25)',
+            }}>
+              {roseCount} {roseCount === 1 ? 'rose' : 'roses'} left
+            </p>
+          </div>
+
           {/* ghosts weaving between tombstones */}
           <div
             style={{
@@ -711,6 +749,86 @@ export function InstagramGraveyard() {
             ))}
           </div>
         </div>
+        {/* condolences popup */}
+        {showCondolences && (
+          <div
+            onClick={() => setShowCondolences(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              background: 'rgba(0,0,0,0.85)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+            }}
+          >
+            <div onClick={e => e.stopPropagation()} style={{ textAlign: 'center', maxWidth: '400px', width: '100%' }}>
+              <p style={{
+                fontSize: '1.4rem',
+                fontStyle: 'italic',
+                fontFamily: 'Georgia, serif',
+                color: 'rgba(255,255,255,0.8)',
+                marginBottom: '1.5rem',
+              }}>
+                express your condolences
+              </p>
+              <textarea
+                placeholder="say something nice... (optional)"
+                value={condolence}
+                onChange={e => setCondolence(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '4px',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontSize: '1rem',
+                  fontFamily: 'Georgia, serif',
+                  outline: 'none',
+                  minHeight: '80px',
+                  resize: 'vertical',
+                  marginBottom: '1rem',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button
+                  onClick={submitCondolence}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: 'rgba(255,255,255,0.7)',
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    fontSize: '1rem',
+                    padding: '0.6rem 1.5rem',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  🥀 leave a rose
+                </button>
+                <button
+                  onClick={() => setShowCondolences(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'rgba(255,255,255,0.3)',
+                    fontFamily: 'Georgia, serif',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  nevermind
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {openPost && (
           <CarouselModal post={openPost} onClose={() => setOpenPost(null)} />
         )}
