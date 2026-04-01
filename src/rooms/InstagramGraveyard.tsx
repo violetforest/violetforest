@@ -167,7 +167,7 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
   const rotation = useMemo(() => (rand() - 0.5) * 4, [rand])
   const blur = useMemo(() => Math.max(0, (1 - depth) * 1.5), [depth]) // far = blurry
   const brightness = useMemo(() => 0.7 + depth * 0.3, [depth]) // 0.7 to 1.0
-  const zIndex = useMemo(() => Math.floor(depth * 10), [depth])
+  const zIndex = useMemo(() => 2 + Math.floor(depth * 20), [depth]) // 2 to 22
 
   return (
     <div
@@ -490,7 +490,7 @@ export function InstagramGraveyard() {
               pointerEvents: 'none',
             }}
           >
-            {ghosts.slice(0, Math.floor(ghosts.length / 2)).map((ghost, i) => (
+            {ghosts.slice(0, Math.floor(ghosts.length / 3)).map((ghost, i) => (
               <GhostText key={`behind-${ghost.type}-${i}`} ghost={ghost} index={i} total={ghosts.length} />
             ))}
           </div>
@@ -532,19 +532,35 @@ export function InstagramGraveyard() {
             )
           })()}
 
-          {/* ghosts in front of tombstones */}
+          {/* ghosts weaving between tombstones */}
           <div
             style={{
               position: 'fixed',
               inset: 0,
               top: '3rem',
-              zIndex: 3,
+              zIndex: 12,
               overflow: 'hidden',
               pointerEvents: 'none',
             }}
           >
-            {ghosts.slice(Math.floor(ghosts.length / 2)).map((ghost, i) => (
-              <GhostText key={`front-${ghost.type}-${i}`} ghost={ghost} index={i + Math.floor(ghosts.length / 2)} total={ghosts.length} />
+            {ghosts.slice(Math.floor(ghosts.length / 3), Math.floor(ghosts.length * 2 / 3)).map((ghost, i) => (
+              <GhostText key={`mid-${ghost.type}-${i}`} ghost={ghost} index={i + Math.floor(ghosts.length / 3)} total={ghosts.length} />
+            ))}
+          </div>
+
+          {/* ghosts in front of everything */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: '3rem',
+              zIndex: 25,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            {ghosts.slice(Math.floor(ghosts.length * 2 / 3)).map((ghost, i) => (
+              <GhostText key={`front-${ghost.type}-${i}`} ghost={ghost} index={i + Math.floor(ghosts.length * 2 / 3)} total={ghosts.length} />
             ))}
           </div>
         </div>
