@@ -317,6 +317,7 @@ export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
   const [ghosts, setGhosts] = useState<Ghost[]>([])
   const [openPost, setOpenPost] = useState<Post | null>(null)
+  const [scrollY, setScrollY] = useState(0)
 
   const allGhostsRef = useRef<Ghost[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -360,6 +361,15 @@ export function InstagramGraveyard() {
         setGhosts(sampleGhosts(allGhostsRef.current, bucket))
       }
     }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [data])
+
+  // track scroll for parallax columns
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const onScroll = () => setScrollY(el.scrollTop)
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
   }, [data])
@@ -453,25 +463,42 @@ export function InstagramGraveyard() {
             ))}
           </div>
 
-          {/* photo grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px',
-              padding: '0 8px 4rem',
-              position: 'relative',
-              zIndex: 2,
-            }}
-          >
-            {(data as any).posts?.map((post: Post, i: number) => (
-              <PostCell key={post.folder} post={post} onOpen={() => setOpenPost(post)} />
-            )) ?? data.media.map(item => (
-              <div key={item.name} style={{ aspectRatio: '0.75' }}>
-                <MediaThumb item={item} />
+          {/* parallax columns */}
+          {(() => {
+            const posts: Post[] = (data as any).posts || []
+            const cols: Post[][] = [[], [], []]
+            posts.forEach((p, i) => cols[i % 3].push(p))
+            const speeds = [0, -0.15, -0.3] // column speed offsets
+
+            return (
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                padding: '0 8px 4rem',
+                position: 'relative',
+                zIndex: 2,
+                alignItems: 'flex-start',
+              }}>
+                {cols.map((col, colIdx) => (
+                  <div
+                    key={colIdx}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      transform: `translateY(${scrollY * speeds[colIdx]}px)`,
+                      willChange: 'transform',
+                    }}
+                  >
+                    {col.map(post => (
+                      <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} />
+                    ))}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          })()}
 
           {/* ghosts in front of tombstones */}
           <div
