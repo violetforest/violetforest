@@ -322,22 +322,29 @@ export function InstagramGraveyard() {
   const allGhostsRef = useRef<Ghost[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const usedIndicesRef = useRef<Set<number>>(new Set())
+
   const sampleGhosts = (all: Ghost[], seed: number) => {
-    const byType: Record<string, Ghost[]> = {}
-    for (const g of all) {
-      if (!byType[g.type]) byType[g.type] = []
-      byType[g.type].push(g)
-    }
-    const sampled: Ghost[] = []
     const rand = seededRandom(seed)
-    for (const type of Object.keys(byType)) {
-      const items = byType[type]
-      const count = Math.min(items.length, Math.max(10, Math.floor(150 * items.length / all.length)))
-      for (let i = 0; i < count; i++) {
-        sampled.push(items[Math.floor(rand() * items.length)])
-      }
+    const available = all
+      .map((g, i) => ({ ghost: g, idx: i }))
+      .filter(({ idx }) => !usedIndicesRef.current.has(idx))
+
+    // if we've used most, reset
+    if (available.length < 150) {
+      usedIndicesRef.current.clear()
+      return sampleGhosts(all, seed + 1)
     }
-    return sampled
+
+    // shuffle available and take 150
+    for (let i = available.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [available[i], available[j]] = [available[j], available[i]]
+    }
+
+    const picked = available.slice(0, 150)
+    picked.forEach(({ idx }) => usedIndicesRef.current.add(idx))
+    return picked.map(({ ghost }) => ghost)
   }
 
   useEffect(() => {
