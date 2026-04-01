@@ -154,8 +154,11 @@ function MediaThumb({ item }: { item: MediaItem }) {
   )
 }
 
-function PostCell({ post, onOpen }: { post: Post; onOpen: () => void }) {
+function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; index: number }) {
   const thumb = post.media[0]
+  const rand = useMemo(() => seededRandom(index * 4391 + 7), [index])
+  const scale = useMemo(() => 0.75 + rand() * 0.5, [rand]) // 0.75 to 1.25
+  const nudgeX = useMemo(() => (rand() - 0.5) * 10, [rand])
 
   return (
     <div
@@ -168,6 +171,8 @@ function PostCell({ post, onOpen }: { post: Post; onOpen: () => void }) {
         background: '#111',
         padding: '3px',
         cursor: post.media.length > 1 ? 'pointer' : 'default',
+        transform: `scale(${scale}) translateX(${nudgeX}px)`,
+        transformOrigin: 'center top',
       }}
     >
       <div style={{
@@ -506,8 +511,8 @@ export function InstagramGraveyard() {
                       willChange: 'transform',
                     }}
                   >
-                    {col.map(post => (
-                      <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} />
+                    {col.map((post, i) => (
+                      <PostCell key={post.folder + post.media[0]?.name} post={post} onOpen={() => setOpenPost(post)} index={colIdx * 100 + i} />
                     ))}
                   </div>
                 ))}
