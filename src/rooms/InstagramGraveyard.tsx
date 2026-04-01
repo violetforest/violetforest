@@ -159,26 +159,51 @@ export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
   const [ghosts, setGhosts] = useState<Ghost[]>([])
 
+  const allGhostsRef = useRef<Ghost[]>([])
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const sampleGhosts = (all: Ghost[], seed: number) => {
+    const byType: Record<string, Ghost[]> = {}
+    for (const g of all) {
+      if (!byType[g.type]) byType[g.type] = []
+      byType[g.type].push(g)
+    }
+    const sampled: Ghost[] = []
+    const rand = seededRandom(seed)
+    for (const type of Object.keys(byType)) {
+      const items = byType[type]
+      const count = Math.min(items.length, Math.max(10, Math.floor(150 * items.length / all.length)))
+      for (let i = 0; i < count; i++) {
+        sampled.push(items[Math.floor(rand() * items.length)])
+      }
+    }
+    return sampled
+  }
+
   useEffect(() => {
     fetch(`${base}graveyard/ig/data.json`).then(r => r.json()).then(setData)
     fetch(`${base}graveyard/ig/ghosts.json`).then(r => r.json()).then((all: Ghost[]) => {
-      // Sample ~200 ghosts for performance, spread across types
-      const byType: Record<string, Ghost[]> = {}
-      for (const g of all) {
-        if (!byType[g.type]) byType[g.type] = []
-        byType[g.type].push(g)
-      }
-      const sampled: Ghost[] = []
-      for (const type of Object.keys(byType)) {
-        const items = byType[type]
-        const count = Math.min(items.length, Math.max(10, Math.floor(200 * items.length / all.length)))
-        for (let i = 0; i < count; i++) {
-          sampled.push(items[Math.floor(Math.random() * items.length)])
-        }
-      }
-      setGhosts(sampled)
+      allGhostsRef.current = all
+      setGhosts(sampleGhosts(all, 0))
     })
   }, [])
+
+  // resample ghosts on scroll checkpoints
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || allGhostsRef.current.length === 0) return
+
+    let lastBucket = 0
+    const onScroll = () => {
+      const bucket = Math.floor(el.scrollTop / 600)
+      if (bucket !== lastBucket) {
+        lastBucket = bucket
+        setGhosts(sampleGhosts(allGhostsRef.current, bucket))
+      }
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [data])
 
   if (!data) {
     return (
@@ -227,6 +252,7 @@ export function InstagramGraveyard() {
 
         {/* scrollable area with grid + ghosts */}
         <div
+          ref={scrollRef}
           style={{
             flex: 1,
             position: 'relative',
