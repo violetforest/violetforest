@@ -500,7 +500,7 @@ export function InstagramGraveyard() {
             const posts: Post[] = (data as any).posts || []
             const cols: Post[][] = [[], [], []]
             posts.forEach((p, i) => cols[i % 3].push(p))
-            const speeds = [0, -0.15, -0.3] // column speed offsets
+            const speeds = [0, -0.08, -0.15] // column speed offsets
 
             return (
               <div style={{
