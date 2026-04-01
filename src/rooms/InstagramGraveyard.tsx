@@ -291,6 +291,22 @@ export function InstagramGraveyard() {
             </p>
           </div>
 
+          {/* ghosts behind tombstones */}
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: '3rem',
+              zIndex: 1,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            {ghosts.slice(0, Math.floor(ghosts.length / 2)).map((ghost, i) => (
+              <GhostText key={`behind-${ghost.type}-${i}`} ghost={ghost} index={i} total={ghosts.length} />
+            ))}
+          </div>
+
           {/* photo grid */}
           <div
             style={{
@@ -298,6 +314,8 @@ export function InstagramGraveyard() {
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '8px',
               padding: '0 8px 4rem',
+              position: 'relative',
+              zIndex: 2,
             }}
           >
             {data.media.map(item => (
@@ -305,19 +323,19 @@ export function InstagramGraveyard() {
             ))}
           </div>
 
-          {/* ghost overlay */}
+          {/* ghosts in front of tombstones */}
           <div
             style={{
               position: 'fixed',
               inset: 0,
               top: '3rem',
-              zIndex: 2,
+              zIndex: 3,
               overflow: 'hidden',
               pointerEvents: 'none',
             }}
           >
-            {ghosts.map((ghost, i) => (
-              <GhostText key={`${ghost.type}-${i}`} ghost={ghost} index={i} total={ghosts.length} />
+            {ghosts.slice(Math.floor(ghosts.length / 2)).map((ghost, i) => (
+              <GhostText key={`front-${ghost.type}-${i}`} ghost={ghost} index={i + Math.floor(ghosts.length / 2)} total={ghosts.length} />
             ))}
           </div>
         </div>
