@@ -446,9 +446,9 @@ export function InstagramGraveyard() {
             letterSpacing: '0.35em',
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.3)',
-            marginBottom: '0.4rem',
+            marginBottom: '0.6rem',
           }}>
-            rest in peace
+            here doth lie
           </p>
           <p style={{
             fontSize: '1.8rem',
