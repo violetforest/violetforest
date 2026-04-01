@@ -460,7 +460,7 @@ export function InstagramGraveyard() {
         }}
       >
         {/* bats */}
-        <div style={{ position: 'fixed', inset: 0, zIndex: 30, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 40, pointerEvents: 'none', overflow: 'hidden' }}>
           {bats.map((bat, i) => (
             <div
               key={`bat-${i}`}
@@ -481,7 +481,7 @@ export function InstagramGraveyard() {
           ))}
         </div>
         {/* fog layers */}
-        <div style={{ position: 'fixed', inset: 0, zIndex: 28, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 38, pointerEvents: 'none', overflow: 'hidden' }}>
           <div style={{
             position: 'absolute',
             top: '5%',
