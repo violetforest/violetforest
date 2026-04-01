@@ -164,9 +164,18 @@ function MediaThumb({ item }: { item: MediaItem }) {
             justifyContent: 'center',
           }}>
             <div style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <div style={{
               position: 'relative',
               width: 'calc(25 * 3px)',
               height: 'calc(26 * 3px)',
+              transform: 'scale(1.8)',
+              transformOrigin: 'center center',
             }}>
               <div style={{
                 position: 'absolute',
@@ -192,6 +201,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
                   36px 42px #8a8987, 39px 42px #8a511c, 42px 42px #8a8987, 45px 42px #8a8987, 48px 42px #8a8987, 51px 42px #8a8987, 54px 42px #8a8987, 57px 42px #8a8987, 60px 42px #8a8987, 63px 42px #8a8987, 66px 42px #8a8987, 69px 42px #6e6d6b, 72px 42px #8a8987
                 `,
               }} />
+            </div>
             </div>
           </div>
         </div>
