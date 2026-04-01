@@ -493,7 +493,7 @@ export function InstagramGraveyard() {
               <div style={{
                 fontSize: `${bat.size}px`,
                 animation: `batFlap ${bat.flap}s ease-in-out infinite`,
-                opacity: 0.6,
+                opacity: 1,
                 filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))',
               }}>
                 🦇
