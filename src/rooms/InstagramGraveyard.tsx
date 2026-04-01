@@ -126,6 +126,78 @@ interface Post {
   media: MediaItem[]
 }
 
+const T = 0 // transparent
+const G1 = 1, G2 = 2, G3 = 3, G4 = 4, B1 = 5, B2 = 6, B3 = 7
+const TOMBSTONE_COLORS: Record<number, string> = {
+  [G1]: '#a6a4a2', [G2]: '#999794', [G3]: '#8a8987', [G4]: '#6e6d6b',
+  [B1]: '#8a511c', [B2]: '#7a481a', [B3]: '#5c3612',
+}
+const TOMBSTONE_GRID = [
+  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G2,G2,G2],
+  [T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G4,G4,G4,G4,G4,G4,G2,G2],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G4,G2,G2,G2,G2,G2,G4,G3,G2,G2],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G2,G2,G2,G4,G2,G2,G2,G4,G2,G2],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G4,G4,G4,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G4,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G4,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G4,G4,G4,G4,G4,G4,G4,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G2,G4,G4,G4,G4,G4,G4,G4,G2,G4,G3],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G3,G2,G2,G2,G2,G3,G3,G3,G3,G4,G3],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G3,G4,G4,G4,G4,G4,G4,G4,G3,G4,G3],
+  [T,T,T,T,T,T,T,T,T,T,T,T,G3,B1,G3,G3,G3,G3,G3,G3,G3,G3,G3,G4,G3],
+  [T,T,T,T,T,T,T,T,T,T,T,T,B1,B1,B1,G3,G3,G3,B2,G3,B2,B2,B2,B2,G3],
+  [T,T,T,T,T,T,T,T,T,T,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B2,B2,B2,B1,B2,B2,B1,B1],
+  [T,T,T,T,T,T,T,B1,B1,B1,B2,B2,B2,B2,B2,B1,B2,B2,B3,B1,B2,B3,B3,B1,B1,B2,B2,B2,B1,B1],
+  [T,T,T,T,T,T,B1,B3,B1,B2,B2,B2,B3,B3,B2,B2,B1,B2,B2,B1,B2,B3,B3,B3,B3,B1,B3,B1,B3,B3,B1],
+  [T,T,T,T,T,B3,B1,B2,B3,B3,B1,B3,B3,B1,B2,B3,B2,B2,B3,B2,B1,B1,B1,B3,B3,B3,B3,B3,B2,B1,B3,B1],
+  [T,T,T,T,B3,B3,B3,B3,B2,B1,B3,B3,B2,B1,B2,B3,B3,B3,B3,B1,B3,B3,B2,B2,B2,B3,B3,B2,B1,B3,B3,B3,B1],
+  [T,T,B1,B1,B2,B2,B2,B1,B3,B2,B1,B1,B2,B2,B2,B3,B3,B2,B2,B1,B1,B2,B1,B3,B3,B3,B3,B1,B1,B3,B3,B3,B1],
+  [B2,B2,B1,B1,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B2,B2,B1,B1,B1,B3,B1,B1,B3,B1,B2],
+]
+
+function PixelTombstone() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const rows = TOMBSTONE_GRID.length
+    const maxCols = Math.max(...TOMBSTONE_GRID.map(r => r.length))
+    canvas.width = maxCols
+    canvas.height = rows
+
+    for (let y = 0; y < rows; y++) {
+      const row = TOMBSTONE_GRID[y]
+      for (let x = 0; x < row.length; x++) {
+        const val = row[x]
+        if (val === T) continue
+        ctx.fillStyle = TOMBSTONE_COLORS[val] || '#000'
+        ctx.fillRect(x, y, 1, 1)
+      }
+    }
+  }, [])
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          imageRendering: 'pixelated',
+        }}
+      />
+    </div>
+  )
+}
+
 function MediaThumb({ item }: { item: MediaItem }) {
   const [loaded, setLoaded] = useState(false)
   const [inView, setInView] = useState(false)
@@ -146,65 +218,7 @@ function MediaThumb({ item }: { item: MediaItem }) {
     <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
       {/* pixel art tombstone placeholder */}
       {!loaded && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: '#000',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <div style={{
-              position: 'relative',
-              width: 'calc(25 * 3px)',
-              height: 'calc(26 * 3px)',
-              transform: 'scale(1.8)',
-              transformOrigin: 'center center',
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '10%',
-                left: '10%',
-                width: '3px',
-                height: '3px',
-                boxShadow: `
-                  45px 0px #a6a4a2, 48px 0px #a6a4a2, 51px 0px #a6a4a2, 54px 0px #a6a4a2, 57px 0px #a6a4a2, 60px 0px #a6a4a2, 63px 0px #a6a4a2,
-                  42px 3px #a6a4a2, 45px 3px #a6a4a2, 48px 3px #a6a4a2, 51px 3px #a6a4a2, 54px 3px #a6a4a2, 57px 3px #999794, 60px 3px #999794, 63px 3px #999794, 66px 3px #999794,
-                  39px 6px #a6a4a2, 42px 6px #a6a4a2, 45px 6px #6e6d6b, 48px 6px #6e6d6b, 51px 6px #6e6d6b, 54px 6px #6e6d6b, 57px 6px #6e6d6b, 60px 6px #6e6d6b, 63px 6px #6e6d6b, 66px 6px #999794, 69px 6px #999794,
-                  36px 9px #a6a4a2, 39px 9px #a6a4a2, 42px 9px #a6a4a2, 45px 9px #6e6d6b, 48px 9px #999794, 51px 9px #999794, 54px 9px #999794, 57px 9px #999794, 60px 9px #999794, 63px 9px #6e6d6b, 66px 9px #8a8987, 69px 9px #999794, 72px 9px #999794,
-                  36px 12px #a6a4a2, 39px 12px #a6a4a2, 42px 12px #6e6d6b, 45px 12px #999794, 48px 12px #999794, 51px 12px #999794, 54px 12px #6e6d6b, 57px 12px #999794, 60px 12px #999794, 63px 12px #999794, 66px 12px #6e6d6b, 69px 12px #999794, 72px 12px #999794,
-                  36px 15px #a6a4a2, 39px 15px #6e6d6b, 42px 15px #999794, 45px 15px #999794, 48px 15px #999794, 51px 15px #6e6d6b, 54px 15px #6e6d6b, 57px 15px #6e6d6b, 60px 15px #999794, 63px 15px #999794, 66px 15px #999794, 69px 15px #6e6d6b, 72px 15px #a6a4a2,
-                  36px 18px #a6a4a2, 39px 18px #6e6d6b, 42px 18px #999794, 45px 18px #999794, 48px 18px #999794, 51px 18px #999794, 54px 18px #6e6d6b, 57px 18px #999794, 60px 18px #999794, 63px 18px #999794, 66px 18px #999794, 69px 18px #6e6d6b, 72px 18px #a6a4a2,
-                  36px 21px #a6a4a2, 39px 21px #6e6d6b, 42px 21px #999794, 45px 21px #999794, 48px 21px #999794, 51px 21px #999794, 54px 21px #6e6d6b, 57px 21px #999794, 60px 21px #999794, 63px 21px #999794, 66px 21px #999794, 69px 21px #6e6d6b, 72px 21px #a6a4a2,
-                  36px 24px #a6a4a2, 39px 24px #6e6d6b, 42px 24px #999794, 45px 24px #999794, 48px 24px #999794, 51px 24px #999794, 54px 24px #999794, 57px 24px #999794, 60px 24px #999794, 63px 24px #999794, 66px 24px #999794, 69px 24px #6e6d6b, 72px 24px #a6a4a2,
-                  36px 27px #a6a4a2, 39px 27px #6e6d6b, 42px 27px #999794, 45px 27px #6e6d6b, 48px 27px #6e6d6b, 51px 27px #6e6d6b, 54px 27px #6e6d6b, 57px 27px #6e6d6b, 60px 27px #6e6d6b, 63px 27px #6e6d6b, 66px 27px #999794, 69px 27px #6e6d6b, 72px 27px #a6a4a2,
-                  36px 30px #a6a4a2, 39px 30px #6e6d6b, 42px 30px #999794, 45px 30px #999794, 48px 30px #999794, 51px 30px #999794, 54px 30px #999794, 57px 30px #999794, 60px 30px #999794, 63px 30px #999794, 66px 30px #999794, 69px 30px #6e6d6b, 72px 30px #a6a4a2,
-                  36px 33px #8a8987, 39px 33px #6e6d6b, 42px 33px #999794, 45px 33px #6e6d6b, 48px 33px #6e6d6b, 51px 33px #6e6d6b, 54px 33px #6e6d6b, 57px 33px #6e6d6b, 60px 33px #6e6d6b, 63px 33px #6e6d6b, 66px 33px #999794, 69px 33px #6e6d6b, 72px 33px #8a8987,
-                  36px 36px #8a8987, 39px 36px #6e6d6b, 42px 36px #8a8987, 45px 36px #999794, 48px 36px #999794, 51px 36px #999794, 54px 36px #999794, 57px 36px #8a8987, 60px 36px #8a8987, 63px 36px #8a8987, 66px 36px #8a8987, 69px 36px #6e6d6b, 72px 36px #8a8987,
-                  36px 39px #8a8987, 39px 39px #6e6d6b, 42px 39px #8a8987, 45px 39px #6e6d6b, 48px 39px #6e6d6b, 51px 39px #6e6d6b, 54px 39px #6e6d6b, 57px 39px #6e6d6b, 60px 39px #6e6d6b, 63px 39px #6e6d6b, 66px 39px #8a8987, 69px 39px #6e6d6b, 72px 39px #8a8987,
-                  36px 42px #8a8987, 39px 42px #8a511c, 42px 42px #8a8987, 45px 42px #8a8987, 48px 42px #8a8987, 51px 42px #8a8987, 54px 42px #8a8987, 57px 42px #8a8987, 60px 42px #8a8987, 63px 42px #8a8987, 66px 42px #8a8987, 69px 42px #6e6d6b, 72px 42px #8a8987
-                `,
-              }} />
-            </div>
-            </div>
-          </div>
-        </div>
+        <PixelTombstone />
       )}
       {inView && (item.type === 'video' ? (
         <video
