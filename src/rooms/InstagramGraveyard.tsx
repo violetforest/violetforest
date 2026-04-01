@@ -51,13 +51,27 @@ function seededRandom(seed: number) {
   }
 }
 
-function GhostText({ ghost, index }: { ghost: Ghost; index: number }) {
-  const rand = useMemo(() => seededRandom(index * 7919), [index])
+function GhostText({ ghost, index, total }: { ghost: Ghost; index: number; total: number }) {
+  // spread ghosts evenly across the space, then add jitter
+  const rand = useMemo(() => seededRandom(index * 7919 + 13), [index])
 
-  const startX = useMemo(() => rand() * 100, [rand])
-  const startY = useMemo(() => rand() * 100, [rand])
-  const duration = useMemo(() => 15 + rand() * 30, [rand])
-  const delay = useMemo(() => rand() * -30, [rand])
+  const cols = Math.ceil(Math.sqrt(total))
+  const row = Math.floor(index / cols)
+  const col = index % cols
+
+  const baseX = (col / cols) * 100
+  const baseY = (row / cols) * 100
+  const startX = useMemo(() => (baseX + (rand() - 0.5) * 30 + 100) % 100, [baseX, rand])
+  const startY = useMemo(() => (baseY + (rand() - 0.5) * 30 + 100) % 100, [baseY, rand])
+
+  const duration = useMemo(() => 20 + rand() * 40, [rand])
+  const delay = useMemo(() => rand() * -60, [rand])
+
+  // random drift direction per ghost
+  const driftX = useMemo(() => (rand() - 0.5) * 40, [rand])
+  const driftY = useMemo(() => (rand() - 0.5) * 30, [rand])
+  const animName = useMemo(() => `ghost-${index}`, [index])
+
   const size = useMemo(() => {
     if (ghost.type === 'ip' || ghost.type === 'cookie') return 1
     if (ghost.type === 'user-agent' || ghost.type === 'link') return 0.75
@@ -68,26 +82,37 @@ function GhostText({ ghost, index }: { ghost: Ghost; index: number }) {
   const color = TYPE_COLORS[ghost.type] || '#fff'
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: `${startX}%`,
-        top: `${startY}%`,
-        fontSize: `${size}rem`,
-        fontFamily: 'monospace',
-        color,
-        opacity: 0,
-        whiteSpace: 'nowrap',
-        pointerEvents: 'none',
-        maxWidth: '60vw',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        animation: `ghostDrift ${duration}s linear ${delay}s infinite`,
-        textShadow: `0 0 10px ${color}`,
-      }}
-    >
-      {ghost.text}
-    </div>
+    <>
+      <style>{`
+        @keyframes ${animName} {
+          0% { opacity: 0; transform: translate(0, 0); }
+          8% { opacity: 0.7; }
+          50% { opacity: 0.35; transform: translate(${driftX * 0.5}vw, ${driftY * 0.5}vh); }
+          92% { opacity: 0.7; }
+          100% { opacity: 0; transform: translate(${driftX}vw, ${driftY}vh); }
+        }
+      `}</style>
+      <div
+        style={{
+          position: 'absolute',
+          left: `${startX}%`,
+          top: `${startY}%`,
+          fontSize: `${size}rem`,
+          fontFamily: 'monospace',
+          color,
+          opacity: 0,
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+          maxWidth: '70vw',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          animation: `${animName} ${duration}s linear ${delay}s infinite`,
+          textShadow: `0 0 10px ${color}`,
+        }}
+      >
+        {ghost.text}
+      </div>
+    </>
   )
 }
 
@@ -165,16 +190,6 @@ export function InstagramGraveyard() {
 
   return (
     <RoomLayout>
-      <style>{`
-        @keyframes ghostDrift {
-          0% { opacity: 0; transform: translate(0, 0); }
-          5% { opacity: 0.7; }
-          50% { opacity: 0.4; }
-          95% { opacity: 0.7; }
-          100% { opacity: 0; transform: translate(-20vw, -15vh); }
-        }
-      `}</style>
-
       <div
         style={{
           position: 'fixed',
@@ -244,7 +259,7 @@ export function InstagramGraveyard() {
             }}
           >
             {ghosts.map((ghost, i) => (
-              <GhostText key={`${ghost.type}-${i}`} ghost={ghost} index={i} />
+              <GhostText key={`${ghost.type}-${i}`} ghost={ghost} index={i} total={ghosts.length} />
             ))}
           </div>
         </div>
