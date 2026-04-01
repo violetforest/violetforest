@@ -598,6 +598,8 @@ export function InstagramGraveyard() {
             textAlign: 'center',
             padding: '4rem 1rem 3rem',
             background: '#0a0a0a',
+            position: 'relative',
+            zIndex: 30,
           }}>
             <p style={{
               fontSize: '1rem',
