@@ -160,22 +160,31 @@ function MediaThumb({ item }: { item: MediaItem }) {
 function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; index: number }) {
   const thumb = post.media[0]
   const rand = useMemo(() => seededRandom(index * 4391 + 7), [index])
-  const scale = useMemo(() => 0.75 + rand() * 0.5, [rand]) // 0.75 to 1.25
-  const nudgeX = useMemo(() => (rand() - 0.5) * 10, [rand])
+  const depth = useMemo(() => rand(), [rand]) // 0 = far, 1 = close
+  const scale = useMemo(() => 0.6 + depth * 0.6, [depth]) // 0.6 to 1.2
+  const nudgeX = useMemo(() => (rand() - 0.5) * 15, [rand])
+  const nudgeY = useMemo(() => (rand() - 0.5) * 10, [rand])
+  const rotation = useMemo(() => (rand() - 0.5) * 4, [rand])
+  const blur = useMemo(() => Math.max(0, (1 - depth) * 1.5), [depth]) // far = blurry
+  const brightness = useMemo(() => 0.4 + depth * 0.4, [depth]) // 0.4 to 0.8
+  const zIndex = useMemo(() => Math.floor(depth * 10), [depth])
 
   return (
     <div
       onClick={onOpen}
       style={{
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'visible',
         borderRadius: '40% 40% 4px 4px',
         border: '1px solid rgba(255,255,255,0.08)',
         background: '#111',
         padding: '3px',
-        cursor: post.media.length > 1 ? 'pointer' : 'default',
-        transform: `scale(${scale}) translateX(${nudgeX}px)`,
+        cursor: 'pointer',
+        transform: `scale(${scale}) translate(${nudgeX}px, ${nudgeY}px) rotate(${rotation}deg)`,
         transformOrigin: 'center top',
+        filter: blur > 0.1 ? `blur(${blur}px) brightness(${brightness})` : `brightness(${brightness})`,
+        zIndex,
+        boxShadow: `0 ${4 + depth * 10}px ${10 + depth * 20}px rgba(0,0,0,${0.3 + depth * 0.3})`,
       }}
     >
       <div style={{
