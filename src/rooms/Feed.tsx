@@ -35,15 +35,18 @@ function PostCard({ post }: { post: Post }) {
   }
 
   return (
-    <div
+    <article
+      className="h-entry"
       style={{
         width: '100%',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
         padding: '1.5rem 0',
       }}
     >
+      <data className="p-author h-card" value="violet forest" style={{ display: 'none' }} />
       {post.type === 'photo' && post.image_url && (
         <img
+          className="u-photo"
           src={post.image_url}
           alt=""
           style={{
@@ -65,7 +68,7 @@ function PostCard({ post }: { post: Post }) {
             opacity: 0.85,
           }}
         >
-          {post.body}
+          <span className="e-content">{post.body}</span>
         </blockquote>
       )}
 
@@ -91,6 +94,7 @@ function PostCard({ post }: { post: Post }) {
 
       {post.type === 'text' && post.body && (
         <p
+          className="e-content"
           style={{
             fontSize: 'clamp(1.43rem, 3.75vw, 1.65rem)',
             lineHeight: 1.6,
@@ -124,9 +128,9 @@ function PostCard({ post }: { post: Post }) {
           marginTop: '0.75rem',
         }}
       >
-        <span style={{ fontSize: '1.13rem', opacity: 0.45 }}>
+        <time className="dt-published" dateTime={post.created_at} style={{ fontSize: '1.13rem', opacity: 0.45 }}>
           {timeAgo(post.created_at)}
-        </span>
+        </time>
         {'share' in navigator && (
           <button
             onClick={share}
@@ -143,7 +147,7 @@ function PostCard({ post }: { post: Post }) {
           </button>
         )}
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -164,7 +168,8 @@ export function Feed() {
 
   return (
     <ScrollableRoomLayout>
-      <div style={{ width: '100%' }}>
+      <div className="h-feed" style={{ width: '100%' }}>
+        <data className="p-name" value="violet's space" style={{ display: 'none' }} />
         <div
           style={{
             display: 'flex',
