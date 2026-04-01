@@ -158,42 +158,47 @@ const TOMBSTONE_GRID = [
   [B2,B2,B1,B1,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B2,B2,B1,B1,B1,B3,B1,B1,B3,B1,B2],
 ]
 
-function PixelTombstone() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+// Generate the tombstone frame canvas once — stone border with transparent center
+const tombstoneFrameCanvas = (() => {
+  if (typeof document === 'undefined') return null
+  const rows = TOMBSTONE_GRID.length
+  const maxCols = Math.max(...TOMBSTONE_GRID.map(r => r.length))
+  const canvas = document.createElement('canvas')
+  canvas.width = maxCols
+  canvas.height = rows
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const rows = TOMBSTONE_GRID.length
-    const maxCols = Math.max(...TOMBSTONE_GRID.map(r => r.length))
-    canvas.width = maxCols
-    canvas.height = rows
-
-    for (let y = 0; y < rows; y++) {
-      const row = TOMBSTONE_GRID[y]
-      for (let x = 0; x < row.length; x++) {
-        const val = row[x]
-        if (val === T) continue
-        ctx.fillStyle = TOMBSTONE_COLORS[val] || '#000'
-        ctx.fillRect(x, y, 1, 1)
-      }
+  // Find the "inner" area (G2 pixels that form the stone face) to keep transparent
+  // The border is G1, G3, G4 pixels and the dirt is B1, B2, B3
+  // The face area (G2) will be transparent so the photo shows through
+  for (let y = 0; y < rows; y++) {
+    const row = TOMBSTONE_GRID[y]
+    for (let x = 0; x < row.length; x++) {
+      const val = row[x]
+      if (val === T || val === G2) continue // transparent center + background
+      ctx.fillStyle = TOMBSTONE_COLORS[val] || '#000'
+      ctx.fillRect(x, y, 1, 1)
     }
-  }, [])
+  }
+  return canvas.toDataURL()
+})()
 
+function PixelTombstone() {
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-          imageRendering: 'pixelated',
-        }}
-      />
+      {tombstoneFrameCanvas && (
+        <img
+          src={tombstoneFrameCanvas}
+          alt=""
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            imageRendering: 'pixelated',
+          }}
+        />
+      )}
       <span style={{
         position: 'absolute',
         fontSize: '2rem',
@@ -202,6 +207,26 @@ function PixelTombstone() {
         transform: 'translateX(-50%)',
       }}>💀</span>
     </div>
+  )
+}
+
+function TombstoneFrame() {
+  if (!tombstoneFrameCanvas) return null
+  return (
+    <img
+      src={tombstoneFrameCanvas}
+      alt=""
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        imageRendering: 'pixelated',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }}
+    />
   )
 }
 
@@ -281,26 +306,18 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
       onClick={onOpen}
       style={{
         position: 'relative',
-        overflow: 'visible',
-        borderRadius: '40% 40% 4px 4px',
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: '#111',
-        padding: '3px',
+        overflow: 'hidden',
+        background: '#000',
         cursor: 'pointer',
         transform: `scale(${scale}) translate(${nudgeX}px, ${nudgeY}px) rotate(${rotation}deg)`,
         transformOrigin: 'center top',
         filter: blur > 0.1 ? `blur(${blur}px) brightness(${brightness})` : `brightness(${brightness})`,
         zIndex,
-        boxShadow: `0 ${4 + depth * 10}px ${10 + depth * 20}px rgba(0,0,0,${0.3 + depth * 0.3})`,
+        aspectRatio: '0.75',
       }}
     >
-      <div style={{
-        borderRadius: '38% 38% 2px 2px',
-        overflow: 'hidden',
-        aspectRatio: '0.75',
-      }}>
-        <MediaThumb item={thumb} />
-      </div>
+      <MediaThumb item={thumb} />
+      <TombstoneFrame />
       {/* carousel indicator */}
       {post.media.length > 1 && (
         <div style={{
