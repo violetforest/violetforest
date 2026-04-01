@@ -334,7 +334,7 @@ export function InstagramGraveyard() {
   const [data, setData] = useState<GraveyardData | null>(null)
   const [ghosts, setGhosts] = useState<Ghost[]>([])
   const [openPost, setOpenPost] = useState<Post | null>(null)
-  const [scrollY, setScrollY] = useState(0)
+
 
   const allGhostsRef = useRef<Ghost[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -389,14 +389,7 @@ export function InstagramGraveyard() {
     return () => el.removeEventListener('scroll', onScroll)
   }, [data])
 
-  // track scroll for parallax columns
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const onScroll = () => setScrollY(el.scrollTop)
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [data])
+
 
   if (!data) {
     return (
@@ -408,7 +401,7 @@ export function InstagramGraveyard() {
 
   const bats = useMemo(() => {
     const r = seededRandom(777)
-    return Array.from({ length: 8 }, (_, i) => ({
+    return Array.from({ length: 8 }, () => ({
       startY: 5 + r() * 60,
       duration: 8 + r() * 12,
       delay: r() * -20,
@@ -461,7 +454,7 @@ export function InstagramGraveyard() {
                 position: 'absolute',
                 top: `${bat.startY}%`,
                 animation: `${bat.direction > 0 ? 'batFly' : 'batFlyReverse'} ${bat.duration}s linear ${bat.delay}s infinite, batWobble ${2 + bat.flap * 3}s ease-in-out ${bat.delay}s infinite`,
-                ['--wobble' as any]: `${bat.wobble}px`,
+                ['--wobble' as string]: `${bat.wobble}px`,
               }}
             >
               <div style={{
