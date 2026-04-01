@@ -17,6 +17,7 @@ const AskBox = lazy(() => import('./rooms/AskBox').then(m => ({ default: m.AskBo
 const Links = lazy(() => import('./rooms/Links').then(m => ({ default: m.Links })))
 const Stories = lazy(() => import('./rooms/Stories').then(m => ({ default: m.Stories })))
 const SendDM = lazy(() => import('./rooms/SendDM').then(m => ({ default: m.SendDM })))
+const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
 
 const ROOM_MAP: Record<string, number> = {
   '/': 0,
@@ -31,6 +32,7 @@ const ROOM_MAP: Record<string, number> = {
   '/stories': 0,
   '/dm': 0,
   '/admin': 0,
+  '/graveyard/instagram': 0,
 }
 
 export default function App() {
@@ -64,6 +66,7 @@ export default function App() {
             <Route path="/links" element={<Links />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/dm" element={<SendDM />} />
+            <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
           </Routes>
         </Suspense>
       </AnimatePresence>

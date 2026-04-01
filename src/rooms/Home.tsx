@@ -61,6 +61,7 @@ export function Home() {
             { to: '/ask', label: 'ask me anything' },
             { to: '/dm', label: 'message me' },
             { to: '/links', label: 'links' },
+            { to: '/graveyard/instagram', label: 'instagram graveyard' },
           ].map(({ to, label }) => (
             <Link
               key={to}
