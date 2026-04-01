@@ -406,8 +406,41 @@ export function InstagramGraveyard() {
     )
   }
 
+  const bats = useMemo(() => {
+    const r = seededRandom(777)
+    return Array.from({ length: 8 }, (_, i) => ({
+      startY: 5 + r() * 60,
+      duration: 8 + r() * 12,
+      delay: r() * -20,
+      size: 12 + r() * 18,
+      flap: 0.3 + r() * 0.3,
+      wobble: r() * 20 - 10,
+      direction: r() > 0.5 ? 1 : -1,
+    }))
+  }, [])
+
   return (
     <RoomLayout>
+      <style>{`
+        @keyframes batFly {
+          0% { transform: translateX(-5vw); }
+          100% { transform: translateX(105vw); }
+        }
+        @keyframes batFlyReverse {
+          0% { transform: translateX(105vw); }
+          100% { transform: translateX(-5vw); }
+        }
+        @keyframes batFlap {
+          0%, 100% { transform: scaleY(1) translateY(0); }
+          25% { transform: scaleY(0.3) translateY(-2px); }
+          50% { transform: scaleY(1) translateY(2px); }
+          75% { transform: scaleY(0.3) translateY(-1px); }
+        }
+        @keyframes batWobble {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(var(--wobble)); }
+        }
+      `}</style>
       <div
         style={{
           position: 'fixed',
@@ -419,6 +452,29 @@ export function InstagramGraveyard() {
           background: '#0a0a0a',
         }}
       >
+        {/* bats */}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 30, pointerEvents: 'none', overflow: 'hidden' }}>
+          {bats.map((bat, i) => (
+            <div
+              key={`bat-${i}`}
+              style={{
+                position: 'absolute',
+                top: `${bat.startY}%`,
+                animation: `${bat.direction > 0 ? 'batFly' : 'batFlyReverse'} ${bat.duration}s linear ${bat.delay}s infinite, batWobble ${2 + bat.flap * 3}s ease-in-out ${bat.delay}s infinite`,
+                ['--wobble' as any]: `${bat.wobble}px`,
+              }}
+            >
+              <div style={{
+                fontSize: `${bat.size}px`,
+                animation: `batFlap ${bat.flap}s ease-in-out infinite`,
+                opacity: 0.6,
+                filter: 'drop-shadow(0 0 4px rgba(0,0,0,0.8))',
+              }}>
+                🦇
+              </div>
+            </div>
+          ))}
+        </div>
         {/* sticky header with epitaph */}
         <div
           style={{
