@@ -547,11 +547,12 @@ export function InstagramGraveyard() {
             position: 'sticky',
             top: 0,
             zIndex: 35,
-            background: '#0a0a0a',
+            background: '#000',
             padding: '0.6rem 1rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            borderBottom: scrolledPast ? '1px solid rgba(255,255,255,0.05)' : 'none',
           }}
         >
           <Link
