@@ -68,8 +68,7 @@ export default function App() {
             <Route path="/links" element={<Links />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/dm" element={<SendDM />} />
-            <Route path="/graveyard/instagram" element={<InstagramGraveyard3D />} />
-            <Route path="/graveyard/instagram/2d" element={<InstagramGraveyard />} />
+            <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
