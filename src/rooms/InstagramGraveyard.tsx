@@ -126,109 +126,6 @@ interface Post {
   media: MediaItem[]
 }
 
-const T = 0
-const G1 = 1, G2 = 2, G3 = 3, G4 = 4, B1 = 5, B2 = 6, B3 = 7
-const TOMBSTONE_COLORS: Record<number, string> = {
-  [G1]: '#a6a4a2', [G2]: '#999794', [G3]: '#8a8987', [G4]: '#6e6d6b',
-  [B1]: '#8a511c', [B2]: '#7a481a', [B3]: '#5c3612',
-}
-const TOMBSTONE_GRID = [
-  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G1,G1,G1,G2,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G4,G4,G4,G4,G4,G4,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G1,G4,G2,G2,G2,G2,G2,G4,G3,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G1,G4,G2,G2,G2,G2,G2,G2,G2,G4,G2,G2],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G1,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G1],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G2,G2,G2,G2,G2,G2,G2,G2,G2,G4,G3],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G3,G3,G3,G3,G3,G3,G3,G3,G3,G4,G3],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G3,G4,G3,G3,G3,G3,G3,G3,G3,G3,G3,G4,G3],
-  [T,T,T,T,T,T,T,T,T,T,T,T,G3,B1,G3,G3,G3,G3,G3,G3,G3,G3,G3,G4,G3],
-  [T,T,T,T,T,T,T,T,T,T,T,T,B1,B1,B1,G3,G3,G3,B2,G3,B2,B2,B2,B2,G3],
-  [T,T,T,T,T,T,T,T,T,T,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B2,B2,B2,B1,B2,B2,B1,B1],
-  [T,T,T,T,T,T,T,B1,B1,B1,B2,B2,B2,B2,B2,B1,B2,B2,B3,B1,B2,B3,B3,B1,B1,B2,B2,B2,B1,B1],
-  [T,T,T,T,T,T,B1,B3,B1,B2,B2,B2,B3,B3,B2,B2,B1,B2,B2,B1,B2,B3,B3,B3,B3,B1,B3,B1,B3,B3,B1],
-  [T,T,T,T,T,B3,B1,B2,B3,B3,B1,B3,B3,B1,B2,B3,B2,B2,B3,B2,B1,B1,B1,B3,B3,B3,B3,B3,B2,B1,B3,B1],
-  [T,T,T,T,B3,B3,B3,B3,B2,B1,B3,B3,B2,B1,B2,B3,B3,B3,B3,B1,B3,B3,B2,B2,B2,B3,B3,B2,B1,B3,B3,B3,B1],
-  [T,T,B1,B1,B2,B2,B2,B1,B3,B2,B1,B1,B2,B2,B2,B3,B3,B2,B2,B1,B1,B2,B1,B3,B3,B3,B3,B1,B1,B3,B3,B3,B1],
-  [B2,B2,B1,B1,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B1,B1,B1,B1,B1,B1,B2,B1,B1,B2,B2,B1,B1,B1,B3,B1,B1,B3,B1,B2],
-]
-
-// Generate the tombstone frame canvas once — stone border with transparent center
-const tombstoneFrameCanvas = (() => {
-  if (typeof document === 'undefined') return null
-  const rows = TOMBSTONE_GRID.length
-  const maxCols = Math.max(...TOMBSTONE_GRID.map(r => r.length))
-  const canvas = document.createElement('canvas')
-  canvas.width = maxCols
-  canvas.height = rows
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return null
-
-  // Find the "inner" area (G2 pixels that form the stone face) to keep transparent
-  // The border is G1, G3, G4 pixels and the dirt is B1, B2, B3
-  // The face area (G2) will be transparent so the photo shows through
-  for (let y = 0; y < rows; y++) {
-    const row = TOMBSTONE_GRID[y]
-    for (let x = 0; x < row.length; x++) {
-      const val = row[x]
-      if (val === T || val === G2) continue // transparent center + background
-      ctx.fillStyle = TOMBSTONE_COLORS[val] || '#000'
-      ctx.fillRect(x, y, 1, 1)
-    }
-  }
-  return canvas.toDataURL()
-})()
-
-function PixelTombstone() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {tombstoneFrameCanvas && (
-        <img
-          src={tombstoneFrameCanvas}
-          alt=""
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            imageRendering: 'pixelated',
-          }}
-        />
-      )}
-      <span style={{
-        position: 'absolute',
-        fontSize: '2rem',
-        top: '22%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-      }}>💀</span>
-    </div>
-  )
-}
-
-function TombstoneFrame() {
-  if (!tombstoneFrameCanvas) return null
-  return (
-    <img
-      src={tombstoneFrameCanvas}
-      alt=""
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        imageRendering: 'pixelated',
-        zIndex: 1,
-        pointerEvents: 'none',
-      }}
-    />
-  )
-}
 
 function MediaThumb({ item }: { item: MediaItem }) {
   const [loaded, setLoaded] = useState(false)
@@ -248,9 +145,8 @@ function MediaThumb({ item }: { item: MediaItem }) {
 
   return (
     <div ref={ref} style={{ width: '100%', height: '100%', position: 'relative' }}>
-      {/* pixel art tombstone placeholder */}
       {!loaded && (
-        <PixelTombstone />
+        <div style={{ position: 'absolute', inset: 0, background: '#111' }} />
       )}
       {inView && (item.type === 'video' ? (
         <video
@@ -317,7 +213,6 @@ function PostCell({ post, onOpen, index }: { post: Post; onOpen: () => void; ind
       }}
     >
       <MediaThumb item={thumb} />
-      <TombstoneFrame />
       {/* carousel indicator */}
       {post.media.length > 1 && (
         <div style={{
