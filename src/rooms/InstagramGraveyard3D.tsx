@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 interface MediaItem {
@@ -42,11 +42,13 @@ export function InstagramGraveyard3D() {
   const [leftRose, setLeftRose] = useState(false)
   const [showCondolences, setShowCondolences] = useState(false)
   const [condolence, setCondolence] = useState('')
+  const [scrollProgress, setScrollProgress] = useState(0)
+
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(`${base}graveyard/ig/data.json`).then(r => r.json()).then(setData)
     fetch(`${base}graveyard/ig/ghosts.json`).then(r => r.json()).then((all: Ghost[]) => {
-      // sample ~40 ghosts for the 3D scene
       const shuffled = all.sort(() => Math.random() - 0.5)
       setGhosts(shuffled.slice(0, 40))
     })
@@ -55,6 +57,21 @@ export function InstagramGraveyard3D() {
     })
     setLeftRose(localStorage.getItem('left-rose') === 'true')
   }, [])
+
+  const onScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const max = el.scrollHeight - el.clientHeight
+    if (max <= 0) return
+    setScrollProgress(el.scrollTop / max)
+  }, [])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || !entered) return
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [entered, onScroll])
 
   const leaveRose = () => {
     if (leftRose) return
@@ -83,6 +100,10 @@ export function InstagramGraveyard3D() {
         position: 'fixed', inset: 0, background: '#000',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.5rem',
       }}>
+        <style>{`
+          @keyframes digUp { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+          @keyframes pulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.4; } }
+        `}</style>
         <div style={{ fontSize: '3rem', animation: 'digUp 1s ease-out forwards' }}>🪦</div>
         <p style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', color: 'rgba(255,255,255,0.4)', fontSize: '1rem' }}>
           exhuming data
@@ -92,10 +113,11 @@ export function InstagramGraveyard3D() {
   }
 
   const posts = data.posts || []
-  const COLS = 2 // tombstones per row (1 left, 1 right)
+  const COLS = 2
   const ROWS = Math.ceil(posts.length / COLS)
-  const CELL_DEPTH = 120 // px depth per row
+  const CELL_DEPTH = 150
   const TOTAL_DEPTH = ROWS * CELL_DEPTH
+  const currentZ = scrollProgress * TOTAL_DEPTH
 
   if (!entered) {
     return (
@@ -107,6 +129,9 @@ export function InstagramGraveyard3D() {
           gap: '1rem', fontFamily: 'Georgia, serif', color: '#fff',
         }}
       >
+        <style>{`
+          @keyframes pulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.4; } }
+        `}</style>
         <p style={{ fontSize: '0.8rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.4 }}>
           here doth lie
         </p>
@@ -117,15 +142,11 @@ export function InstagramGraveyard3D() {
           2015 — 2026
         </p>
         <p style={{ fontSize: '0.8rem', opacity: 0.25, marginTop: '2rem', animation: 'pulse 2s ease-in-out infinite' }}>
-          scroll to enter
+          click to enter, scroll to walk
         </p>
         <Link to="/" style={{ fontSize: '0.8rem', opacity: 0.2, marginTop: '1rem', color: '#fff' }}>
           home
         </Link>
-        <style>{`
-          @keyframes pulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.4; } }
-          @keyframes digUp { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-        `}</style>
       </div>
     )
   }
@@ -133,16 +154,9 @@ export function InstagramGraveyard3D() {
   return (
     <>
       <style>{`
-        @keyframes walkForward {
-          0% { transform: translateZ(0px); }
-          100% { transform: translateZ(${TOTAL_DEPTH}px); }
-        }
         @keyframes ghostFloat {
-          0%, 100% { opacity: 0.5; transform: translateY(0); }
-          50% { opacity: 0.2; transform: translateY(-10px); }
-        }
-        @keyframes batFlyAcross {
-          0% { left: -10%; } 100% { left: 110%; }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
         }
         @keyframes batFlap3d {
           0%, 100% { transform: scaleY(1); }
@@ -150,56 +164,54 @@ export function InstagramGraveyard3D() {
         }
         .graveyard-scroll::-webkit-scrollbar { width: 4px; }
         .graveyard-scroll::-webkit-scrollbar-track { background: #000; }
-        .graveyard-scroll::-webkit-scrollbar-thumb { background: #333; }
+        .graveyard-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
       `}</style>
 
-      {/* Scrollable body */}
+      {/* Scrollable container */}
       <div
+        ref={scrollRef}
         className="graveyard-scroll"
         style={{
           position: 'fixed', inset: 0, background: '#000',
           overflowY: 'auto', overflowX: 'hidden',
+          zIndex: 0,
         }}
       >
-        {/* Tall spacer for scroll */}
-        <div style={{ height: `${Math.max(2000, ROWS * 80)}vh`, pointerEvents: 'none' }} />
+        {/* Tall spacer */}
+        <div style={{ height: `${Math.max(3000, ROWS * 100)}vh`, pointerEvents: 'none' }} />
       </div>
 
       {/* 3D viewport */}
       <div style={{
         position: 'fixed', inset: 0,
-        perspective: '500px',
+        perspective: '400px',
         perspectiveOrigin: '50% 55%',
         pointerEvents: 'none',
         overflow: 'hidden',
       }}>
-        {/* Fog overlay */}
+        {/* Fog */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 10, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse at 50% 60%, transparent 20%, rgba(0,0,0,0.6) 60%, #000 90%)',
+          background: 'radial-gradient(ellipse at 50% 60%, transparent 15%, rgba(0,0,0,0.5) 50%, #000 85%)',
         }} />
 
-        {/* The level — moves forward on scroll */}
+        {/* The level */}
         <div style={{
           position: 'absolute',
           width: '100%', height: '100%',
           transformStyle: 'preserve-3d',
-          animation: 'walkForward linear',
-          animationTimeline: 'scroll()' as any,
-          animationRange: 'entry 0% cover 100%' as any,
+          transform: `translateZ(${currentZ}px)`,
         }}>
-          {/* Ground plane */}
+          {/* Ground */}
           <div style={{
             position: 'absolute',
-            width: '2000px', height: `${TOTAL_DEPTH + 500}px`,
+            width: '3000px', height: `${TOTAL_DEPTH + 600}px`,
             left: '50%', top: '50%',
-            transform: `translate(-50%, -50%) rotateX(90deg) translateZ(-80px)`,
+            transform: 'translate(-50%, -50%) rotateX(90deg) translateZ(-100px)',
             background: `
-              repeating-linear-gradient(0deg, transparent, transparent 118px, rgba(30,50,30,0.3) 118px, rgba(30,50,30,0.3) 120px),
-              repeating-linear-gradient(90deg, transparent, transparent 98px, rgba(30,50,30,0.2) 98px, rgba(30,50,30,0.2) 100px),
-              linear-gradient(180deg, #0a120a 0%, #0d1a0d 50%, #0a0f0a 100%)
+              repeating-linear-gradient(0deg, transparent, transparent ${CELL_DEPTH - 2}px, rgba(30,60,30,0.15) ${CELL_DEPTH - 2}px, rgba(30,60,30,0.15) ${CELL_DEPTH}px),
+              linear-gradient(180deg, #080e08 0%, #0a150a 50%, #060b06 100%)
             `,
-            transformStyle: 'preserve-3d',
           }} />
 
           {/* Tombstones */}
@@ -207,8 +219,8 @@ export function InstagramGraveyard3D() {
             const row = Math.floor(i / COLS)
             const col = i % COLS
             const side = col === 0 ? -1 : 1
-            const z = -(row * CELL_DEPTH + 200)
-            const x = side * 120
+            const z = -(row * CELL_DEPTH + 300)
+            const x = side * (80 + (i % 7) * 8)
             const media = post.media[0]
 
             return (
@@ -218,32 +230,50 @@ export function InstagramGraveyard3D() {
                   position: 'absolute',
                   left: '50%',
                   top: '50%',
-                  width: '80px',
-                  height: '100px',
+                  width: '90px',
+                  height: '120px',
                   transformStyle: 'preserve-3d',
-                  transform: `translate(-50%, -50%) translate3d(${x}px, -10px, ${z}px)`,
+                  transform: `translate(-50%, -50%) translate3d(${x}px, -20px, ${z}px)`,
                 }}
               >
                 {/* Stone back */}
                 <div style={{
-                  position: 'absolute',
-                  width: '100%', height: '100%',
-                  borderRadius: '40% 40% 4px 4px',
-                  background: '#3a3a3a',
+                  position: 'absolute', width: '100%', height: '100%',
+                  borderRadius: '40% 40% 2px 2px',
+                  background: 'linear-gradient(180deg, #3a3a3a, #2a2a2a)',
+                  transform: 'rotateY(180deg) translateZ(4px)',
                   backfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg) translateZ(3px)',
                 }} />
 
-                {/* Stone front with photo */}
+                {/* Left side */}
                 <div style={{
                   position: 'absolute',
-                  width: '100%', height: '100%',
-                  borderRadius: '40% 40% 4px 4px',
+                  width: '8px', height: '100%',
+                  background: '#2a2a2a',
+                  left: '-4px', top: 0,
+                  transform: 'rotateY(-90deg) translateZ(4px)',
+                  transformOrigin: 'right',
+                }} />
+
+                {/* Right side */}
+                <div style={{
+                  position: 'absolute',
+                  width: '8px', height: '100%',
+                  background: '#2a2a2a',
+                  right: '-4px', top: 0,
+                  transform: 'rotateY(90deg) translateZ(4px)',
+                  transformOrigin: 'left',
+                }} />
+
+                {/* Front face with photo */}
+                <div style={{
+                  position: 'absolute', width: '100%', height: '100%',
+                  borderRadius: '40% 40% 2px 2px',
                   overflow: 'hidden',
-                  border: '2px solid #555',
-                  background: '#222',
+                  border: '3px solid #444',
+                  background: '#111',
+                  transform: 'translateZ(4px)',
                   backfaceVisibility: 'hidden',
-                  transform: 'translateZ(3px)',
                 }}>
                   {media.type === 'video' ? (
                     <video
@@ -261,16 +291,13 @@ export function InstagramGraveyard3D() {
                   )}
                 </div>
 
-                {/* Date label */}
+                {/* Date */}
                 <div style={{
                   position: 'absolute',
-                  bottom: '-16px',
-                  left: '50%',
-                  transform: 'translateX(-50%) translateZ(4px)',
-                  fontSize: '6px',
-                  fontFamily: 'monospace',
-                  color: 'rgba(255,255,255,0.2)',
-                  whiteSpace: 'nowrap',
+                  bottom: '-18px', left: '50%',
+                  transform: 'translateX(-50%) translateZ(5px)',
+                  fontSize: '7px', fontFamily: 'monospace',
+                  color: 'rgba(255,255,255,0.25)', whiteSpace: 'nowrap',
                 }}>
                   {post.date}
                 </div>
@@ -278,30 +305,26 @@ export function InstagramGraveyard3D() {
             )
           })}
 
-          {/* Ghost text in 3D space */}
+          {/* Ghost text */}
           {ghosts.map((ghost, i) => {
-            const z = -(Math.random() * TOTAL_DEPTH)
-            const x = (Math.random() - 0.5) * 400
-            const y = -20 - Math.random() * 60
+            const z = -(i / ghosts.length) * TOTAL_DEPTH - 200
+            const x = (Math.sin(i * 2.7) * 0.5) * 350
+            const y = -15 - (Math.cos(i * 1.3) * 0.5 + 0.5) * 50
             const color = TYPE_COLORS[ghost.type] || '#fff'
+            const duration = 3 + (i % 5) * 0.8
             return (
               <div
                 key={`ghost-${i}`}
                 style={{
                   position: 'absolute',
-                  left: '50%',
-                  top: '50%',
+                  left: '50%', top: '50%',
                   transform: `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px)`,
-                  fontSize: '8px',
-                  fontFamily: 'monospace',
-                  color,
-                  opacity: 0.4,
-                  whiteSpace: 'nowrap',
-                  maxWidth: '200px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  textShadow: `0 0 8px ${color}`,
-                  animation: `ghostFloat ${3 + Math.random() * 4}s ease-in-out ${Math.random() * -5}s infinite`,
+                  fontSize: '9px', fontFamily: 'monospace',
+                  color, opacity: 0.5,
+                  whiteSpace: 'nowrap', maxWidth: '200px',
+                  overflow: 'hidden', textOverflow: 'ellipsis',
+                  textShadow: `0 0 10px ${color}`,
+                  animation: `ghostFloat ${duration}s ease-in-out ${-(i * 0.7)}s infinite`,
                   pointerEvents: 'none',
                 }}
               >
@@ -311,16 +334,15 @@ export function InstagramGraveyard3D() {
           })}
 
           {/* Bats */}
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div
-              key={`bat3d-${i}`}
+              key={`bat-${i}`}
               style={{
                 position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: `translate(-50%, -50%) translate3d(${(Math.random() - 0.5) * 300}px, ${-40 - Math.random() * 40}px, ${-Math.random() * TOTAL_DEPTH}px)`,
-                fontSize: '20px',
-                animation: `batFlap3d ${0.3 + Math.random() * 0.3}s ease-in-out infinite`,
+                left: '50%', top: '50%',
+                transform: `translate(-50%, -50%) translate3d(${Math.sin(i * 1.9) * 200}px, ${-50 - i * 10}px, ${-i * (TOTAL_DEPTH / 6) - 300}px)`,
+                fontSize: '24px',
+                animation: `batFlap3d ${0.3 + (i % 3) * 0.1}s ease-in-out infinite`,
                 pointerEvents: 'none',
               }}
             >
@@ -330,7 +352,7 @@ export function InstagramGraveyard3D() {
         </div>
       </div>
 
-      {/* HUD overlay */}
+      {/* HUD */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         zIndex: 20, pointerEvents: 'none',
@@ -360,8 +382,7 @@ export function InstagramGraveyard3D() {
       {/* Top bar */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0,
-        zIndex: 20, textAlign: 'center',
-        padding: '0.8rem', pointerEvents: 'none',
+        zIndex: 20, textAlign: 'center', padding: '0.8rem', pointerEvents: 'none',
       }}>
         <p style={{
           fontSize: '0.7rem', letterSpacing: '0.3em', textTransform: 'uppercase',
