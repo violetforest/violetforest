@@ -390,9 +390,7 @@ function AlbumCover({
     meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, c.coverScale, 0.07))
 
     if (materialRef.current) {
-      // Front cover gets slight transparency, wrapFade for cycling
-      const frontFade = relIndex === 0 ? 0.7 : 1
-      const targetOpacity = c.opacity * frontFade * wrapFade.current * ease
+      const targetOpacity = c.opacity * wrapFade.current * ease
       materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
       materialRef.current.roughness = c.roughness
       materialRef.current.metalness = c.metalness
@@ -678,6 +676,99 @@ function StackGroup({ config, children }: { config: React.MutableRefObject<Confi
   return <group ref={groupRef}>{children}</group>
 }
 
+// ── Scroll glitter particles ─────────────────────────────────
+interface Particle {
+  x: number; y: number; z: number
+  vx: number; vy: number; vz: number
+  life: number; maxLife: number
+  size: number
+  color: THREE.Color
+}
+
+function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<number> }) {
+  const MAX = 200
+  const particles = useRef<Particle[]>([])
+  const prevOffset = useRef(scrollOffset.current)
+  const meshRef = useRef<THREE.InstancedMesh>(null)
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const colors = useMemo(() => [
+    new THREE.Color('#ffb8d0'),
+    new THREE.Color('#ffc8e0'),
+    new THREE.Color('#ffd8ec'),
+    new THREE.Color('#ffe0f0'),
+    new THREE.Color('#fff0f8'),
+    new THREE.Color('#ffffff'),
+  ], [])
+
+  useFrame(() => {
+    if (!meshRef.current) return
+
+    // Detect scroll movement
+    const delta = Math.abs(scrollOffset.current - prevOffset.current)
+    prevOffset.current = scrollOffset.current
+
+    // Spawn particles when scrolling
+    if (delta > 0.005) {
+      const count = Math.min(8, Math.floor(delta * 40))
+      for (let i = 0; i < count; i++) {
+        if (particles.current.length >= MAX) break
+        particles.current.push({
+          x: (Math.random() - 0.5) * 4,
+          y: (Math.random() - 0.5) * 3,
+          z: (Math.random() - 0.5) * 2 + 1,
+          vx: (Math.random() - 0.5) * 0.06,
+          vy: (Math.random() - 0.3) * 0.04,
+          vz: (Math.random() - 0.5) * 0.03,
+          life: 1,
+          maxLife: 0.6 + Math.random() * 0.8,
+          size: 0.02 + Math.random() * 0.04,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        })
+      }
+    }
+
+    // Update particles
+    const alive: Particle[] = []
+    for (const p of particles.current) {
+      p.life -= 1 / 60 / p.maxLife
+      if (p.life <= 0) continue
+      p.x += p.vx
+      p.y += p.vy
+      p.vy -= 0.001 // gentle gravity
+      p.z += p.vz
+      alive.push(p)
+    }
+    particles.current = alive
+
+    // Update instanced mesh
+    for (let i = 0; i < MAX; i++) {
+      if (i < alive.length) {
+        const p = alive[i]
+        const scale = p.size * Math.min(1, p.life * 3)
+        dummy.position.set(p.x, p.y, p.z)
+        dummy.scale.setScalar(scale)
+        dummy.updateMatrix()
+        meshRef.current.setMatrixAt(i, dummy.matrix)
+        meshRef.current.setColorAt(i, p.color)
+      } else {
+        dummy.position.set(0, 0, -999)
+        dummy.scale.setScalar(0)
+        dummy.updateMatrix()
+        meshRef.current.setMatrixAt(i, dummy.matrix)
+      }
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true
+    if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true
+  })
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX]}>
+      <sphereGeometry args={[1, 6, 6]} />
+      <meshBasicMaterial transparent opacity={0.8} />
+    </instancedMesh>
+  )
+}
+
 // ── Scene ────────────────────────────────────────────────────
 function Scene({
   tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, config,
@@ -701,6 +792,7 @@ function Scene({
       <DprController config={config} />
       <CameraRig config={config} />
       {c.showClouds && <PastelClouds config={config} />}
+      <ScrollGlitter scrollOffset={scrollOffset} />
 
       <StackGroup config={config}>
         {tracks.map((track, i) => (
