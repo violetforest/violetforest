@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { MeshReflectorMaterial } from '@react-three/drei'
+import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { motion } from 'framer-motion'
 
@@ -43,6 +43,21 @@ interface Config {
   glowIntensity: number
   reflectionStrength: number
   reflectionBlur: number
+  stackRotX: number
+  stackRotY: number
+  stackRotZ: number
+  vanishX: number
+  vanishY: number
+  entranceSpeed: number
+  entranceStagger: number
+  hoverLift: number
+  hoverSnap: number
+  scrollLerp: number
+  coverScale: number
+  cloudOpacity: number
+  cloudSpeed: number
+  cloudScale: number
+  showClouds: boolean
   showReflection: boolean
   showEnvMap: boolean
   showGlow: boolean
@@ -50,19 +65,34 @@ interface Config {
 }
 
 const DEFAULT_CONFIG: Config = {
-  depthSpacing: 6.0,
-  xSpread: 0,
-  ySpread: 0,
-  parallax: 1.0,
-  opacity: 1.0,
-  roughness: 0,
-  metalness: 1.0,
-  clearcoat: 1.0,
-  transmission: 0.01,
-  envMapIntensity: 1.37,
-  glowIntensity: 5.9,
-  reflectionStrength: 1.0,
+  depthSpacing: 20,
+  xSpread: 0.3,
+  ySpread: 0.4,
+  parallax: 0.21,
+  opacity: 1,
+  roughness: 1,
+  metalness: 0.04,
+  clearcoat: 0,
+  transmission: 0,
+  envMapIntensity: 1.09,
+  glowIntensity: 2.1,
+  reflectionStrength: 1,
   reflectionBlur: 600,
+  stackRotX: 0.018,
+  stackRotY: -0.43,
+  stackRotZ: -0.02,
+  vanishX: -0.6,
+  vanishY: -0.6,
+  entranceSpeed: 1.8,
+  entranceStagger: 0.06,
+  hoverLift: 2.5,
+  hoverSnap: 0.18,
+  scrollLerp: 0.12,
+  coverScale: 1,
+  cloudOpacity: 0.4,
+  cloudSpeed: 0.2,
+  cloudScale: 0.2,
+  showClouds: true,
   showReflection: true,
   showEnvMap: true,
   showGlow: true,
@@ -85,7 +115,7 @@ function SliderPanel({
   const [copied, setCopied] = useState(false)
 
   const sliders: { key: keyof Config; label: string; min: number; max: number; step: number }[] = [
-    { key: 'depthSpacing', label: 'Depth Spacing', min: 0.5, max: 6, step: 0.1 },
+    { key: 'depthSpacing', label: 'Depth Spacing', min: 0.5, max: 20, step: 0.1 },
     { key: 'xSpread', label: 'X Spread', min: 0, max: 6, step: 0.1 },
     { key: 'ySpread', label: 'Y Spread', min: 0, max: 4, step: 0.1 },
     { key: 'parallax', label: 'Parallax', min: 0, max: 1, step: 0.01 },
@@ -98,10 +128,25 @@ function SliderPanel({
     { key: 'glowIntensity', label: 'Glow Intensity', min: 0, max: 8, step: 0.1 },
     { key: 'reflectionStrength', label: 'Reflection Strength', min: 0, max: 1, step: 0.01 },
     { key: 'reflectionBlur', label: 'Reflection Blur', min: 0, max: 1000, step: 10 },
+    { key: 'stackRotX', label: 'Stack Rotate X', min: -Math.PI, max: Math.PI, step: 0.01 },
+    { key: 'stackRotY', label: 'Stack Rotate Y', min: -Math.PI, max: Math.PI, step: 0.01 },
+    { key: 'stackRotZ', label: 'Stack Rotate Z', min: -Math.PI, max: Math.PI, step: 0.01 },
+    { key: 'vanishX', label: 'Vanish Point X', min: -5, max: 5, step: 0.1 },
+    { key: 'vanishY', label: 'Vanish Point Y', min: -5, max: 5, step: 0.1 },
+    { key: 'entranceSpeed', label: 'Entrance Speed', min: 0.2, max: 5, step: 0.1 },
+    { key: 'entranceStagger', label: 'Entrance Stagger', min: 0, max: 0.3, step: 0.01 },
+    { key: 'hoverLift', label: 'Hover Lift', min: 0, max: 6, step: 0.1 },
+    { key: 'hoverSnap', label: 'Hover Snap Speed', min: 0.02, max: 0.5, step: 0.01 },
+    { key: 'scrollLerp', label: 'Scroll Smoothness', min: 0.02, max: 0.5, step: 0.01 },
+    { key: 'coverScale', label: 'Cover Scale', min: 0.3, max: 3, step: 0.1 },
+    { key: 'cloudOpacity', label: 'Cloud Opacity', min: 0, max: 1, step: 0.01 },
+    { key: 'cloudSpeed', label: 'Cloud Speed', min: 0, max: 1, step: 0.01 },
+    { key: 'cloudScale', label: 'Cloud Scale', min: 0.1, max: 3, step: 0.1 },
     { key: 'dpr', label: 'Pixel Ratio', min: 0.5, max: 2, step: 0.1 },
   ]
 
   const toggles: { key: keyof Config; label: string }[] = [
+    { key: 'showClouds', label: 'Clouds' },
     { key: 'showReflection', label: 'Reflection Floor' },
     { key: 'showEnvMap', label: 'Environment Map' },
     { key: 'showGlow', label: 'Active Glow' },
@@ -141,6 +186,7 @@ function SliderPanel({
 
       {visible && (
         <div
+          data-settings-panel
           style={{
             position: 'absolute', top: '3rem', right: '1rem', zIndex: 10,
             background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
@@ -189,24 +235,31 @@ function AlbumCover({
   track,
   index,
   scrollOffset,
-  activeIndex,
-  onClick,
-  mousePos,
+  targetOffset,
+  totalTracks,
   loaded,
   config,
+  onSelect,
 }: {
   track: Track
   index: number
   scrollOffset: React.MutableRefObject<number>
-  activeIndex: number
-  onClick: () => void
-  mousePos: React.MutableRefObject<{ x: number; y: number }>
+  targetOffset: React.MutableRefObject<number>
+  totalTracks: number
   loaded: boolean
   config: React.MutableRefObject<Config>
+  onSelect: (i: number) => void
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.MeshPhysicalMaterial>(null)
   const entranceProgress = useRef(0)
+  const hoverTarget = useRef(0)
+  const hoverValue = useRef(0)
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const isMobile = useRef(typeof window !== 'undefined' && 'ontouchstart' in window)
+  const tappedOpen = useRef(false)
+  const prevRelIndex = useRef(0)
+  const wrapFade = useRef(1) // 1 = visible, 0 = hidden
 
   const rand = useMemo(() => ({
     xNorm: seededRandom(index * 3) - 0.5,
@@ -214,7 +267,7 @@ function AlbumCover({
     startX: (seededRandom(index * 31) - 0.5) * 16,
     startY: (seededRandom(index * 37) - 0.5) * 10,
     startZ: -15 - seededRandom(index * 41) * 20,
-    entranceDelay: index * 0.06,
+    entranceDelay: index,
   }), [index])
 
   const texture = useMemo(() => {
@@ -232,42 +285,65 @@ function AlbumCover({
     const c = config.current
 
     if (loaded && entranceProgress.current < 1) {
-      const delayedStart = Math.max(0, entranceProgress.current + delta * 1.8 - rand.entranceDelay * 1.8 * delta)
-      entranceProgress.current = Math.min(1, delayedStart + delta * 1.8)
+      const spd = c.entranceSpeed
+      const delayedStart = Math.max(0, entranceProgress.current + delta * spd - rand.entranceDelay * c.entranceStagger * spd * delta)
+      entranceProgress.current = Math.min(1, delayedStart + delta * spd)
     }
     const t = entranceProgress.current
     const ease = 1 - Math.pow(1 - t, 3)
 
+    // Infinite cycling stack — wraps around
+    const stackSpacing = c.depthSpacing * 0.1
     const offset = scrollOffset.current
-    const relIndex = index - offset
+    // Wrap index so covers cycle infinitely
+    let relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
+    // Center the range so covers sit behind camera too
+    if (relIndex > totalTracks / 2) relIndex -= totalTracks
 
-    const targetZ = -relIndex * c.depthSpacing
-    const targetX = rand.xNorm * c.xSpread + relIndex * 0.35
-    const targetY = rand.yNorm * c.ySpread + relIndex * 0.2
+    // Detect wrap — if relIndex jumped more than half the stack, fade out and teleport
+    const jumped = Math.abs(relIndex - prevRelIndex.current) > totalTracks * 0.4
+    if (jumped && ease >= 1) {
+      wrapFade.current = 0 // instantly hide
+    }
+    prevRelIndex.current = relIndex
 
-    const pStr = Math.max(0.05, c.parallax - Math.abs(relIndex) * 0.03)
-    const mx = mousePos.current.x * pStr
-    const my = mousePos.current.y * pStr
+    // Fade back in
+    wrapFade.current = THREE.MathUtils.lerp(wrapFade.current, 1, 0.15)
 
-    const x = THREE.MathUtils.lerp(rand.startX, targetX + mx, ease)
-    const y = THREE.MathUtils.lerp(rand.startY, targetY + my, ease)
+    const targetX = 0
+    const targetY = 0
+    const targetZ = -relIndex * stackSpacing
+
+    // Hover lifts the cover up — smooth interpolation
+    hoverValue.current = THREE.MathUtils.lerp(hoverValue.current, hoverTarget.current, 0.1)
+    const lift = hoverValue.current * c.hoverLift
+
+    const x = THREE.MathUtils.lerp(rand.startX, targetX, ease)
+    const y = THREE.MathUtils.lerp(rand.startY, targetY + lift, ease)
     const z = THREE.MathUtils.lerp(rand.startZ, targetZ, ease)
 
-    meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, x, 0.07)
-    meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, y, 0.07)
-    meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, z, 0.07)
+    // When wrapping, teleport instantly instead of sliding
+    if (wrapFade.current < 0.1) {
+      meshRef.current.position.x = x
+      meshRef.current.position.y = y
+      meshRef.current.position.z = z
+    } else {
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, x, 0.07)
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, y, 0.07)
+      meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, z, 0.07)
+    }
 
+    // Face camera — no rotation
     meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, 0, 0.06)
     meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, 0, 0.06)
     meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, 0, 0.06)
 
-    const isActive = index === activeIndex
-    const targetScale = isActive ? 1.1 : 1
-    meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.07))
+    meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, c.coverScale, 0.07))
 
     if (materialRef.current) {
-      const distFromCenter = Math.abs(relIndex)
-      const targetOpacity = Math.max(0.4, c.opacity - distFromCenter * 0.03) * ease
+      // Front cover gets slight transparency, wrapFade for cycling
+      const frontFade = relIndex === 0 ? 0.7 : 1
+      const targetOpacity = c.opacity * frontFade * wrapFade.current * ease
       materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
       materialRef.current.roughness = c.roughness
       materialRef.current.metalness = c.metalness
@@ -278,24 +354,64 @@ function AlbumCover({
   })
 
   return (
-    <mesh ref={meshRef} onClick={onClick}>
+    <mesh
+      ref={meshRef}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (isMobile.current) {
+          // Mobile: first tap lifts, second tap selects
+          if (tappedOpen.current) {
+            tappedOpen.current = false
+            hoverTarget.current = 0
+            targetOffset.current = index - 1
+            scrollOffset.current = index - 1
+            const wrapped = ((index % totalTracks) + totalTracks) % totalTracks
+            onSelect(wrapped)
+          } else {
+            tappedOpen.current = true
+            hoverTarget.current = 1
+            // Auto-close after 3s
+            if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+            hoverTimeout.current = setTimeout(() => { tappedOpen.current = false; hoverTarget.current = 0 }, 3000)
+          }
+        } else {
+          // Desktop: click to skip
+          targetOffset.current = index - 1
+          scrollOffset.current = index - 1
+          const wrapped = ((index % totalTracks) + totalTracks) % totalTracks
+          onSelect(wrapped)
+        }
+      }}
+      onPointerOver={(e) => {
+        if (isMobile.current) return
+        e.stopPropagation()
+        if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
+        hoverTarget.current = 1
+        document.body.style.cursor = 'pointer'
+      }}
+      onPointerOut={() => {
+        if (isMobile.current) return
+        hoverTimeout.current = setTimeout(() => { hoverTarget.current = 0 }, 50)
+        document.body.style.cursor = 'default'
+      }}
+    >
       <planeGeometry args={[2.2, 2.2]} />
       <meshPhysicalMaterial
         ref={materialRef}
         map={texture}
         color={texture ? '#ffffff' : '#1a1520'}
         transparent
-        opacity={0}
+        opacity={1}
         side={THREE.DoubleSide}
-        roughness={0}
-        metalness={1}
-        clearcoat={1}
+        roughness={1}
+        metalness={0}
+        clearcoat={0}
         clearcoatRoughness={0.05}
-        reflectivity={0.9}
-        transmission={0.01}
-        thickness={0.5}
+        reflectivity={0}
+        transmission={0}
+        thickness={0}
         ior={1.5}
-        envMapIntensity={1.37}
+        envMapIntensity={0}
       />
     </mesh>
   )
@@ -321,16 +437,15 @@ function ActiveGlow({
     const offset = scrollOffset.current
     const relIndex = activeIndex - offset
 
-    const rx = (seededRandom(activeIndex * 3) - 0.5) * c.xSpread
-    const ry = (seededRandom(activeIndex * 7) - 0.5) * c.ySpread
-
-    lightRef.current.position.x = THREE.MathUtils.lerp(lightRef.current.position.x, rx + relIndex * 0.35, 0.06)
-    lightRef.current.position.y = THREE.MathUtils.lerp(lightRef.current.position.y, ry + relIndex * 0.2, 0.06)
-    lightRef.current.position.z = THREE.MathUtils.lerp(lightRef.current.position.z, -relIndex * c.depthSpacing + 2, 0.06)
+    // Glow hovers above the active CD in the stack
+    const targetY = relIndex * 0.15 + 2.5
+    lightRef.current.position.x = THREE.MathUtils.lerp(lightRef.current.position.x, 0, 0.06)
+    lightRef.current.position.y = THREE.MathUtils.lerp(lightRef.current.position.y, targetY, 0.06)
+    lightRef.current.position.z = THREE.MathUtils.lerp(lightRef.current.position.z, 0, 0.06)
     lightRef.current.intensity = c.glowIntensity
   })
 
-  return <pointLight ref={lightRef} color="#e0d0f8" intensity={2.5} distance={8} decay={2} />
+  return <pointLight ref={lightRef} color="#e0d0f8" intensity={2.5} distance={10} decay={2} />
 }
 
 // ── Environment map ──────────────────────────────────────────
@@ -355,7 +470,7 @@ function EnvironmentMap({ enabled }: { enabled: boolean }) {
 function ReflectionFloor({ config }: { config: React.MutableRefObject<Config> }) {
   const c = config.current
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, -5]}>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 0]}>
       <planeGeometry args={[40, 40]} />
       <MeshReflectorMaterial
         blur={[c.reflectionBlur, c.reflectionBlur * 0.33]}
@@ -384,12 +499,143 @@ function DprController({ config }: { config: React.MutableRefObject<Config> }) {
   return null
 }
 
+// ── Camera controller ────────────────────────────────────────
+function CameraRig({ config }: { config: React.MutableRefObject<Config> }) {
+  const { camera } = useThree()
+  const target = useMemo(() => new THREE.Vector3(0, 0, 0), [])
+
+  useFrame(() => {
+    const c = config.current
+    target.x = THREE.MathUtils.lerp(target.x, c.vanishX, 0.08)
+    target.y = THREE.MathUtils.lerp(target.y, c.vanishY, 0.08)
+    camera.lookAt(target)
+  })
+
+  return null
+}
+
+// ── 4-pointed twinkling star ─────────────────────────────────
+function createStarShape(outerRadius: number, innerRadius: number) {
+  const shape = new THREE.Shape()
+  const points = 4
+  for (let i = 0; i < points * 2; i++) {
+    const angle = (i * Math.PI) / points - Math.PI / 2
+    const r = i % 2 === 0 ? outerRadius : innerRadius
+    const x = Math.cos(angle) * r
+    const y = Math.sin(angle) * r
+    if (i === 0) shape.moveTo(x, y)
+    else shape.lineTo(x, y)
+  }
+  shape.closePath()
+  return shape
+}
+
+const starShape = createStarShape(0.15, 0.04)
+const starGeometry = new THREE.ShapeGeometry(starShape)
+
+function TwinklingStar({ position, speed = 1, color = '#fff0f8' }: { position: [number, number, number]; speed?: number; color?: string }) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const offset = useMemo(() => Math.random() * Math.PI * 2, [])
+
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return
+    const t = clock.getElapsedTime() * speed + offset
+    const scale = 0.5 + Math.pow(Math.sin(t), 2) * 0.5
+    meshRef.current.scale.setScalar(scale)
+    meshRef.current.rotation.z = t * 0.3
+    if (meshRef.current.material instanceof THREE.MeshBasicMaterial) {
+      meshRef.current.material.opacity = 0.3 + Math.pow(Math.sin(t), 2) * 0.7
+    }
+  })
+
+  return (
+    <mesh ref={meshRef} position={position} geometry={starGeometry}>
+      <meshBasicMaterial color={color} transparent opacity={1} side={THREE.DoubleSide} />
+    </mesh>
+  )
+}
+
+function StarField() {
+  const stars = useMemo(() => {
+    const cloudCenters: [number, number, number][] = [
+      [-6, 3, -8], [5, 4, -10], [-3, 5, -12],
+      [7, 2, -6], [0, 6, -15], [-8, 4, -14],
+    ]
+    const result: { pos: [number, number, number]; speed: number; color: string }[] = []
+    const colors = ['#fff8fc', '#ffe0f0', '#ffd0e8', '#ffffff', '#fff0f8']
+    for (const center of cloudCenters) {
+      const count = 3 + Math.floor(Math.random() * 3)
+      for (let i = 0; i < count; i++) {
+        result.push({
+          pos: [
+            center[0] + (Math.random() - 0.5) * 4,
+            center[1] + (Math.random() - 0.5) * 3,
+            center[2] + (Math.random() - 0.5) * 3,
+          ] as [number, number, number],
+          speed: 0.5 + Math.random() * 1.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        })
+      }
+    }
+    return result
+  }, [])
+
+  return (
+    <>
+      {stars.map((s, i) => (
+        <TwinklingStar key={i} position={s.pos} speed={s.speed} color={s.color} />
+      ))}
+    </>
+  )
+}
+
+// ── Pastel clouds ───────────────────────────────────────────
+function PastelClouds({ config }: { config: React.MutableRefObject<Config> }) {
+  const c = config.current
+  const s = c.cloudScale
+  return (
+    <>
+      <Clouds material={THREE.MeshLambertMaterial}>
+        <Cloud position={[-6, 3, -8]} speed={c.cloudSpeed} opacity={c.cloudOpacity} color="#f8c8d8" segments={20} volume={4 * s} />
+        <Cloud position={[5, 4, -10]} speed={c.cloudSpeed * 0.75} opacity={c.cloudOpacity * 0.9} color="#f0b0c8" segments={15} volume={3.5 * s} />
+        <Cloud position={[-3, 5, -12]} speed={c.cloudSpeed * 1.2} opacity={c.cloudOpacity * 0.85} color="#fad0e0" segments={18} volume={3 * s} />
+        <Cloud position={[7, 2, -6]} speed={c.cloudSpeed * 0.5} opacity={c.cloudOpacity} color="#f5c0d5" segments={12} volume={2.5 * s} />
+        <Cloud position={[0, 6, -15]} speed={c.cloudSpeed * 0.9} opacity={c.cloudOpacity * 0.75} color="#fce0ec" segments={22} volume={5 * s} />
+        <Cloud position={[-8, 4, -14]} speed={c.cloudSpeed * 0.6} opacity={c.cloudOpacity * 0.9} color="#f8d0e0" segments={16} volume={3.5 * s} />
+      </Clouds>
+      <Sparkles position={[-6, 3, -8]} count={30} scale={5 * s} size={3} speed={0.4} color="#ffe0f0" opacity={0.7} />
+      <Sparkles position={[5, 4, -10]} count={25} scale={4.5 * s} size={2.5} speed={0.3} color="#ffd0e8" opacity={0.6} />
+      <Sparkles position={[-3, 5, -12]} count={20} scale={4 * s} size={2} speed={0.5} color="#ffe8f4" opacity={0.65} />
+      <Sparkles position={[7, 2, -6]} count={15} scale={3.5 * s} size={3} speed={0.35} color="#ffc8e0" opacity={0.7} />
+      <Sparkles position={[0, 6, -15]} count={35} scale={6 * s} size={2.5} speed={0.25} color="#fff0f8" opacity={0.5} />
+      <Sparkles position={[-8, 4, -14]} count={20} scale={4.5 * s} size={2} speed={0.45} color="#ffd8ec" opacity={0.6} />
+      <StarField />
+    </>
+  )
+}
+
+// ── Stack group (applies rotation to whole stack) ───────────
+function StackGroup({ config, children }: { config: React.MutableRefObject<Config>; children: React.ReactNode }) {
+  const groupRef = useRef<THREE.Group>(null)
+
+  useFrame(() => {
+    if (!groupRef.current) return
+    const c = config.current
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, c.stackRotX, 0.08)
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, c.stackRotY, 0.08)
+    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, c.stackRotZ, 0.08)
+  })
+
+  return <group ref={groupRef}>{children}</group>
+}
+
 // ── Scene ────────────────────────────────────────────────────
 function Scene({
-  tracks, scrollOffset, activeIndex, onSelect, mousePos, loaded, config,
+  tracks, scrollOffset, targetOffset, activeIndex, onSelect, mousePos, loaded, config,
 }: {
   tracks: Track[]
   scrollOffset: React.MutableRefObject<number>
+  targetOffset: React.MutableRefObject<number>
   activeIndex: number
   onSelect: (i: number) => void
   mousePos: React.MutableRefObject<{ x: number; y: number }>
@@ -405,22 +651,26 @@ function Scene({
 
       <EnvironmentMap enabled={c.showEnvMap} />
       <DprController config={config} />
+      <CameraRig config={config} />
+      {c.showClouds && <PastelClouds config={config} />}
 
-      {tracks.map((track, i) => (
-        <AlbumCover
-          key={track.permalink_url}
-          track={track}
-          index={i}
-          scrollOffset={scrollOffset}
-          activeIndex={activeIndex}
-          onClick={() => onSelect(i)}
-          mousePos={mousePos}
-          loaded={loaded}
-          config={config}
-        />
-      ))}
+      <StackGroup config={config}>
+        {tracks.map((track, i) => (
+          <AlbumCover
+            key={track.permalink_url}
+            track={track}
+            index={i}
+            scrollOffset={scrollOffset}
+            targetOffset={targetOffset}
+            totalTracks={tracks.length}
+            loaded={loaded}
+            config={config}
+            onSelect={onSelect}
+          />
+        ))}
 
-      {c.showGlow && <ActiveGlow tracks={tracks} activeIndex={activeIndex} scrollOffset={scrollOffset} config={config} />}
+        {c.showGlow && <ActiveGlow tracks={tracks} activeIndex={activeIndex} scrollOffset={scrollOffset} config={config} />}
+      </StackGroup>
       {c.showReflection && <ReflectionFloor config={config} />}
     </>
   )
@@ -431,7 +681,7 @@ export function Listening() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [loaded, setLoaded] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(1)
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
@@ -474,62 +724,48 @@ export function Listening() {
 
   useEffect(() => {
     let raf: number
-    const tick = () => { scrollOffset.current += (targetOffset.current - scrollOffset.current) * 0.06; raf = requestAnimationFrame(tick) }
+    const tick = () => { scrollOffset.current += (targetOffset.current - scrollOffset.current) * configRef.current.scrollLerp; raf = requestAnimationFrame(tick) }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      mousePos.current.x = (e.clientX / window.innerWidth - 0.5) * 2
-      mousePos.current.y = -(e.clientY / window.innerHeight - 0.5) * 2
-    }
-    window.addEventListener('mousemove', onMouseMove)
-    return () => window.removeEventListener('mousemove', onMouseMove)
-  }, [])
-
-  const scheduleSnap = useCallback(() => {
-    if (snapTimeout.current) clearTimeout(snapTimeout.current)
-    snapTimeout.current = setTimeout(() => {
-      const snapped = Math.round(targetOffset.current)
-      targetOffset.current = Math.max(0, Math.min(tracks.length - 1, snapped))
-      if (snapped >= 0 && snapped < tracks.length) setActiveIndex(snapped)
-    }, 150)
-  }, [tracks.length])
-
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault()
-      targetOffset.current = Math.max(0, Math.min(tracks.length - 1, targetOffset.current + e.deltaY * 0.004))
-      const newIndex = Math.round(targetOffset.current)
-      if (newIndex !== activeIndex && newIndex >= 0 && newIndex < tracks.length) setActiveIndex(newIndex)
-      scheduleSnap()
-    }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [tracks.length, activeIndex, scheduleSnap])
-
+  // Scroll to cycle through the stack
   useEffect(() => {
     const el = containerRef.current
     if (!el || tracks.length === 0) return
-    let touchStartY = 0, touchStartOffset = 0
-    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; touchStartOffset = targetOffset.current }
+    const onWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement)?.closest?.('[data-settings-panel]')) return
+      e.preventDefault()
+      const dir = e.deltaY > 0 ? 1 : -1
+      targetOffset.current += dir
+      // Active = one behind the front (the prominent fully-opaque cover)
+      const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
+      setActiveIndex(wrapped)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [tracks.length])
+
+  // Touch to cycle
+  useEffect(() => {
+    if (tracks.length === 0) return
+    let touchStartY = 0
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
-      const delta = (touchStartY - e.touches[0].clientY) * 0.015
-      targetOffset.current = Math.max(0, Math.min(tracks.length - 1, touchStartOffset + delta))
-      const newIndex = Math.round(targetOffset.current)
-      if (newIndex !== activeIndex && newIndex >= 0 && newIndex < tracks.length) setActiveIndex(newIndex)
+      const delta = touchStartY - e.touches[0].clientY
+      if (Math.abs(delta) > 30) {
+        const dir = delta > 0 ? 1 : -1
+        targetOffset.current += dir
+        const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
+        setActiveIndex(wrapped)
+        touchStartY = e.touches[0].clientY
+      }
     }
-    const onTouchEnd = () => scheduleSnap()
-    // Use window-level listeners so the Canvas overlay doesn't block them
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: false })
-    window.addEventListener('touchend', onTouchEnd)
-    return () => { window.removeEventListener('touchstart', onTouchStart); window.removeEventListener('touchmove', onTouchMove); window.removeEventListener('touchend', onTouchEnd) }
-  }, [tracks.length, activeIndex, scheduleSnap])
+    return () => { window.removeEventListener('touchstart', onTouchStart); window.removeEventListener('touchmove', onTouchMove) }
+  }, [tracks.length])
 
   const selectTrack = useCallback((i: number) => {
     setActiveIndex(i)
@@ -549,6 +785,11 @@ export function Listening() {
       style={{ position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .listening-controls-wrapper { display: none !important; }
+        }
+      `}</style>
       {tracks.length > 0 && (
         <div style={{ position: 'absolute', inset: 0 }}>
           <Canvas
@@ -557,12 +798,14 @@ export function Listening() {
             style={{ background: 'transparent' }}
             gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
           >
-            <Scene tracks={tracks} scrollOffset={scrollOffset} activeIndex={activeIndex} onSelect={selectTrack} mousePos={mousePos} loaded={loaded} config={configRef} />
+            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} mousePos={mousePos} loaded={loaded} config={configRef} />
           </Canvas>
         </div>
       )}
 
-      <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} />
+      <div className="listening-controls-wrapper">
+        <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} />
+      </div>
 
       {/* Top overlay */}
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0', pointerEvents: 'none' }}>
@@ -582,19 +825,19 @@ export function Listening() {
 
       {/* Bottom overlay */}
       {activeTrack && (
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem 1.5rem', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 
-          <div style={{ textAlign: 'center', marginBottom: '0.75rem', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
-            <p style={{ fontSize: 'clamp(1rem, 3vw, 1.3rem)', fontWeight: 400, opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px', margin: '0 auto 0.2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(0.35rem, 1vw, 0.75rem)', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
+            <p style={{ fontSize: 'clamp(0.85rem, 3vw, 1.3rem)', fontWeight: 400, opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px', margin: '0 auto 0.2rem', padding: '0 0.5rem' }}>
               {activeTrack.title}
             </p>
-            <p style={{ fontSize: 'clamp(0.75rem, 2vw, 0.9rem)', opacity: 0.5 }}>
+            <p style={{ fontSize: 'clamp(0.7rem, 2vw, 0.9rem)', opacity: 0.5 }}>
               {activeTrack.artist} &middot; {formatDuration(activeTrack.duration)}
             </p>
           </div>
 
           {nowPlaying && (
-            <div style={{ maxWidth: '500px', margin: '0 auto 0.5rem', pointerEvents: 'auto' }}>
+            <div style={{ maxWidth: '500px', margin: '0 auto clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
               <iframe
                 width="100%" height="80" scrolling="no" frameBorder="no" allow="autoplay"
                 src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
@@ -603,17 +846,7 @@ export function Listening() {
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '0.5rem', pointerEvents: 'auto' }}>
-            {tracks.slice(0, 20).map((_, i) => (
-              <button key={i} onClick={() => selectTrack(i)} style={{
-                width: i === activeIndex ? '18px' : '6px', height: '6px', borderRadius: '3px',
-                background: i === activeIndex ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.15)',
-                border: 'none', padding: 0, cursor: 'pointer', transition: 'all 0.3s ease',
-              }} />
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '0.6rem', pointerEvents: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: 'clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
             <a href="https://soundcloud.com/hypermiami" target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', opacity: 0.35, borderBottom: '1px solid rgba(0,0,0,0.15)', paddingBottom: '2px' }}>
               soundcloud
@@ -625,11 +858,6 @@ export function Listening() {
         </div>
       )}
 
-      {tracks.length > 1 && !loading && (
-        <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', zIndex: 2, opacity: 0.2, fontSize: '0.7rem', letterSpacing: '0.1em', writingMode: 'vertical-rl' as const, pointerEvents: 'none' }}>
-          scroll to browse
-        </div>
-      )}
     </motion.div>
   )
 }
