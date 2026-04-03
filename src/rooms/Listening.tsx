@@ -884,15 +884,17 @@ export function Listening() {
   useEffect(() => {
     if (tracks.length === 0) return
     let touchStartY = 0
-    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY }
+    let swiped = false
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; swiped = false }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
+      if (swiped) return
       const delta = touchStartY - e.touches[0].clientY
-      if (Math.abs(delta) > 3) {
+      if (Math.abs(delta) > 15) {
+        swiped = true
         const dir = delta > 0 ? -1 : 1
         targetOffset.current += dir
         updateActive()
-        touchStartY = e.touches[0].clientY
       }
     }
     window.addEventListener('touchstart', onTouchStart, { passive: true })
