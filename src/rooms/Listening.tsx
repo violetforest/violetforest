@@ -14,7 +14,7 @@ interface Track {
 }
 
 const EDGE_FN_URL = `${import.meta.env.VITE_SUPABASE_URL || 'https://qbmglbnxkchwekatkrlr.supabase.co'}/functions/v1/soundcloud-likes`
-const BASE = import.meta.env.BASE_URL || '/violetforest/'
+const BASE = import.meta.env.BASE_URL || '/'
 
 function formatDuration(ms: number) {
   const totalSeconds = Math.floor(ms / 1000)
