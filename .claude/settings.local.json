@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/violetforest/Downloads/**)",
+      "Bash(unzip -l /Users/violetforest/Downloads/doom-scrollfront-end-conf-2024-demo.zip)",
+      "Read(//private/tmp/**)",
+      "Bash(unzip -o /Users/violetforest/Downloads/doom-scrollfront-end-conf-2024-demo.zip)",
+      "Bash(npx supabase:*)",
+      "WebFetch(domain:soundcloud.com)",
+      "Bash(curl -s https://qbmglbnxkchwekatkrlr.supabase.co/functions/v1/soundcloud-likes)",
+      "Bash(curl -s 'https://soundcloud.com')",
+      "Bash(curl -s 'https://a-v2.sndcdn.com/assets/2-37be9845.js')",
+      "Bash(curl -s 'https://a-v2.sndcdn.com/assets/58-66de8ddd.js')",
+      "Bash(tar -tf /Users/violetforest/Downloads/B_3d3a14de-ascii-particles.tar)",
+      "Bash(tar xf:*)",
+      "Bash(mkdir -p /tmp/3d-build)",
+      "Bash(tar -xzf \"/Users/violetforest/Downloads/B_79298240-violet-forest-3d-build.tar.gz\" -C /tmp/3d-build)",
+      "Read(//tmp/**)",
+      "Bash(npx vite:*)",
+      "Bash(python3 -c \"from PIL import Image; print\\(''PIL available''\\)\")",
+      "Bash(python3 scripts/gen-cybertwee-textures.py)",
+      "Bash(git status:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
+    ]
+  }
+}
