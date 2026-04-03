@@ -410,10 +410,9 @@ function AlbumCover({
           if (tappedOpen.current) {
             tappedOpen.current = false
             hoverTarget.current = 0
-            targetOffset.current = index - 1
-            scrollOffset.current = index - 1
-            const wrapped = ((index % totalTracks) + totalTracks) % totalTracks
-            onSelect(wrapped)
+            targetOffset.current = index
+            scrollOffset.current = index
+            onSelect(index % totalTracks)
           } else {
             tappedOpen.current = true
             hoverTarget.current = 1
@@ -423,10 +422,9 @@ function AlbumCover({
           }
         } else {
           // Desktop: click to skip
-          targetOffset.current = index - 1
-          scrollOffset.current = index - 1
-          const wrapped = ((index % totalTracks) + totalTracks) % totalTracks
-          onSelect(wrapped)
+          targetOffset.current = index
+          scrollOffset.current = index
+          onSelect(index % totalTracks)
         }
       }}
       onPointerOver={(e) => {
