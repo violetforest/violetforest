@@ -610,12 +610,12 @@ function PastelClouds({ config }: { config: React.MutableRefObject<Config> }) {
   return (
     <>
       <Clouds material={THREE.MeshLambertMaterial}>
-        <Cloud position={[-6, 3, -8]} speed={c.cloudSpeed} opacity={c.cloudOpacity} color="#f8c8d8" segments={20} volume={4 * s} />
-        <Cloud position={[5, 4, -10]} speed={c.cloudSpeed * 0.75} opacity={c.cloudOpacity * 0.9} color="#f0b0c8" segments={15} volume={3.5 * s} />
-        <Cloud position={[-3, 5, -12]} speed={c.cloudSpeed * 1.2} opacity={c.cloudOpacity * 0.85} color="#fad0e0" segments={18} volume={3 * s} />
-        <Cloud position={[7, 2, -6]} speed={c.cloudSpeed * 0.5} opacity={c.cloudOpacity} color="#f5c0d5" segments={12} volume={2.5 * s} />
-        <Cloud position={[0, 6, -15]} speed={c.cloudSpeed * 0.9} opacity={c.cloudOpacity * 0.75} color="#fce0ec" segments={22} volume={5 * s} />
-        <Cloud position={[-8, 4, -14]} speed={c.cloudSpeed * 0.6} opacity={c.cloudOpacity * 0.9} color="#f8d0e0" segments={16} volume={3.5 * s} />
+        <Cloud position={[-6, 3, -8]} speed={0} opacity={c.cloudOpacity} color="#f8c8d8" segments={20} volume={4 * s} />
+        <Cloud position={[5, 4, -10]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f0b0c8" segments={15} volume={3.5 * s} />
+        <Cloud position={[-3, 5, -12]} speed={0} opacity={c.cloudOpacity * 0.85} color="#fad0e0" segments={18} volume={3 * s} />
+        <Cloud position={[7, 2, -6]} speed={0} opacity={c.cloudOpacity} color="#f5c0d5" segments={12} volume={2.5 * s} />
+        <Cloud position={[0, 6, -15]} speed={0} opacity={c.cloudOpacity * 0.75} color="#fce0ec" segments={22} volume={5 * s} />
+        <Cloud position={[-8, 4, -14]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f8d0e0" segments={16} volume={3.5 * s} />
       </Clouds>
       <Sparkles position={[-6, 3, -8]} count={30} scale={5 * s} size={3} speed={0.4} color="#ffe0f0" opacity={0.7} />
       <Sparkles position={[5, 4, -10]} count={25} scale={4.5 * s} size={2.5} speed={0.3} color="#ffd0e8" opacity={0.6} />
