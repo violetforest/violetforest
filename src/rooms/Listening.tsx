@@ -341,7 +341,7 @@ function AlbumCover({
     const offset = scrollOffset.current
     // Wrap index so covers cycle infinitely
     let relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
-    // Hide covers that would wrap in front of camera
+    // Center the range so covers wrap behind camera
     if (relIndex > totalTracks / 2) relIndex -= totalTracks
 
     // Detect wrap — if relIndex jumped more than half the stack
@@ -350,12 +350,6 @@ function AlbumCover({
       wrapFade.current = -1 // hide and wait to teleport
     }
     prevRelIndex.current = relIndex
-
-    // Hide covers with negative relIndex (they'd appear between camera and stack)
-    if (relIndex < 0) {
-      if (meshRef.current) meshRef.current.visible = false
-      return
-    }
 
     const targetX = 0
     const targetY = 0
@@ -416,8 +410,8 @@ function AlbumCover({
           if (tappedOpen.current) {
             tappedOpen.current = false
             hoverTarget.current = 0
-            targetOffset.current = index
-            scrollOffset.current = index
+            targetOffset.current = index + 2
+            scrollOffset.current = index + 2
             onSelect(index % totalTracks)
           } else {
             tappedOpen.current = true
@@ -428,8 +422,8 @@ function AlbumCover({
           }
         } else {
           // Desktop: click to skip
-          targetOffset.current = index
-          scrollOffset.current = index
+          targetOffset.current = index + 2
+          scrollOffset.current = index + 2
           onSelect(index % totalTracks)
         }
       }}
@@ -869,7 +863,9 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          if (data.length > 0) setNowPlaying(data[0].permalink_url)
+          const frontIdx = ((0 - 2) % data.length + data.length) % data.length
+          setActiveIndex(frontIdx)
+          if (data[frontIdx]) setNowPlaying(data[frontIdx].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -889,7 +885,7 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
+      const wrapped = (((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length
       setActiveIndex(wrapped)
     }, 150)
   }, [tracks.length])
