@@ -11,7 +11,7 @@ interface Story {
 }
 
 function hoursLeft(created_at: string) {
-  const ms = 24 * 60 * 60 * 1000 - (Date.now() - new Date(created_at).getTime())
+  const ms = 72 * 60 * 60 * 1000 - (Date.now() - new Date(created_at).getTime())
   const hours = Math.floor(ms / (60 * 60 * 1000))
   const minutes = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000))
   if (hours > 0) return `${hours}h`
@@ -42,8 +42,8 @@ function StoryCard({ story, index }: { story: Story; index: number }) {
   const animDuration = useMemo(() => 4 + rand() * 3, [rand])
 
   // fade based on time remaining
-  const ms = 24 * 60 * 60 * 1000 - (Date.now() - new Date(story.created_at).getTime())
-  const lifePercent = Math.max(0, Math.min(1, ms / (24 * 60 * 60 * 1000)))
+  const ms = 72 * 60 * 60 * 1000 - (Date.now() - new Date(story.created_at).getTime())
+  const lifePercent = Math.max(0, Math.min(1, ms / (72 * 60 * 60 * 1000)))
   const fadeOpacity = 0.4 + lifePercent * 0.5
 
   return (
@@ -95,7 +95,7 @@ export function Stories() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
     supabase
       .from('stories')
       .select('*')
