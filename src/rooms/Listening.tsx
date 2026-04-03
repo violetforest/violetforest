@@ -821,10 +821,11 @@ export function Listening() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [loaded, setLoaded] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeIndex, setActiveIndex] = useState(1)
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
+  const [aboutVisible, setAboutVisible] = useState(false)
   const scrollOffset = useRef(0)
   const targetOffset = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -859,7 +860,7 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          if (data.length > 0) setNowPlaying(data[0].permalink_url)
+          if (data.length > 1) setNowPlaying(data[1].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -879,7 +880,7 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
+      const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
       setActiveIndex(wrapped)
     }, 150)
   }, [tracks.length])
@@ -959,6 +960,47 @@ export function Listening() {
       <div className="listening-controls-wrapper">
         <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} fpsRef={fpsRef} />
       </div>
+
+      {/* About button */}
+      <button
+        onClick={() => setAboutVisible((v) => !v)}
+        style={{
+          position: 'absolute', top: '1rem', left: '1rem', zIndex: 10,
+          background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.1)',
+          borderRadius: '4px', padding: '0.4rem 0.7rem', fontSize: '0.7rem',
+          cursor: 'pointer', fontFamily: 'monospace', opacity: 0.6,
+        }}
+      >
+        {aboutVisible ? 'close' : 'about'}
+      </button>
+
+      {aboutVisible && (
+        <div
+          style={{
+            position: 'absolute', top: '3rem', left: '1rem', zIndex: 10,
+            background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
+            padding: '1.2rem', maxWidth: '280px',
+            fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
+          }}
+        >
+          <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.75rem' }}>about this page</p>
+          <p style={{ opacity: 0.7 }}>
+            if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 10 most recent tracks I've liked on soundcloud
+          </p>
+          <p style={{ opacity: 0.5, marginTop: '0.75rem', fontSize: '0.65rem' }}>
+            └ ᵥᵢₒₗₑₜ ᶠᵒʳᵉˢᵗ ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡ ̶̶̷̸̲̱❉҈҉҈҉҈҇
+          </p>
+          <a
+            href="https://soundcloud.com/hypermiami"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
+          >
+            soundcloud.com/hypermiami
+          </a>
+        </div>
+      )}
 
       {/* Top overlay */}
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0', pointerEvents: 'none' }}>
