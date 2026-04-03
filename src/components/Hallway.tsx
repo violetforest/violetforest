@@ -1,4 +1,4 @@
-import { useRef, useMemo, Suspense } from 'react'
+import { useMemo } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 

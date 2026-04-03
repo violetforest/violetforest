@@ -63,8 +63,7 @@ const doorLinkStyle: React.CSSProperties = {
 }
 
 export function Home() {
-  const { visitCount } = useSpaceStore()
-  const isReturning = visitCount > 1
+  useSpaceStore()
 
   const [latestPost, setLatestPost] = useState<Post | null>(null)
   const [guestbookEntries, setGuestbookEntries] = useState<GuestbookEntry[]>([])
