@@ -284,6 +284,7 @@ function AlbumCover({
   loaded,
   config,
   onSelect,
+  frontCoverRef,
 }: {
   track: Track
   index: number
@@ -293,6 +294,7 @@ function AlbumCover({
   loaded: boolean
   config: React.MutableRefObject<Config>
   onSelect: (i: number) => void
+  frontCoverRef: React.MutableRefObject<{ index: number; dist: number; frame: number }>
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.MeshPhysicalMaterial>(null)
@@ -324,7 +326,9 @@ function AlbumCover({
     return tex
   }, [track.artwork_url])
 
-  useFrame((_, delta) => {
+  const _worldPos = useMemo(() => new THREE.Vector3(), [])
+
+  useFrame(({ camera, clock }, delta) => {
     if (!meshRef.current) return
     const c = config.current
 
@@ -388,6 +392,18 @@ function AlbumCover({
 
     meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, c.coverScale, 0.07))
 
+    // Track which cover is closest to camera (= visual front)
+    if (meshRef.current.visible && wrapFade.current >= 0.5) {
+      meshRef.current.getWorldPosition(_worldPos)
+      const dist = _worldPos.distanceTo(camera.position)
+      const frame = Math.floor(clock.elapsedTime * 60)
+      if (frame !== frontCoverRef.current.frame) {
+        frontCoverRef.current = { index, dist, frame }
+      } else if (dist < frontCoverRef.current.dist) {
+        frontCoverRef.current = { index, dist, frame }
+      }
+    }
+
     if (materialRef.current) {
       const targetOpacity = c.opacity * wrapFade.current * ease
       materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
@@ -409,8 +425,8 @@ function AlbumCover({
           if (tappedOpen.current) {
             tappedOpen.current = false
             hoverTarget.current = 0
-            targetOffset.current = index + 2
-            scrollOffset.current = index + 2
+            targetOffset.current = index
+            scrollOffset.current = index
             onSelect(index % totalTracks)
           } else {
             tappedOpen.current = true
@@ -421,8 +437,8 @@ function AlbumCover({
           }
         } else {
           // Desktop: click to skip
-          targetOffset.current = index + 2
-          scrollOffset.current = index + 2
+          targetOffset.current = index
+          scrollOffset.current = index
           onSelect(index % totalTracks)
         }
       }}
@@ -773,7 +789,7 @@ function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<
 
 // ── Scene ────────────────────────────────────────────────────
 function Scene({
-  tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, config,
+  tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, config, frontCoverRef,
 }: {
   tracks: Track[]
   scrollOffset: React.MutableRefObject<number>
@@ -782,6 +798,7 @@ function Scene({
   onSelect: (i: number) => void
   loaded: boolean
   config: React.MutableRefObject<Config>
+  frontCoverRef: React.MutableRefObject<{ index: number; dist: number; frame: number }>
 }) {
   const c = config.current
   return (
@@ -808,6 +825,7 @@ function Scene({
             loaded={loaded}
             config={config}
             onSelect={onSelect}
+            frontCoverRef={frontCoverRef}
           />
         ))}
 
@@ -831,6 +849,7 @@ export function Listening() {
   const scrollOffset = useRef(0)
   const targetOffset = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
+  const frontCoverRef = useRef<{ index: number; dist: number; frame: number }>({ index: 0, dist: Infinity, frame: 0 })
 
   const configRef = useRef<Config>({ ...DEFAULT_CONFIG })
   const fpsRef = useRef(0)
@@ -862,15 +881,24 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          const frontIdx = ((-2 % data.length) + data.length) % data.length
-          setActiveIndex(frontIdx)
-          if (data[frontIdx]) setNowPlaying(data[frontIdx].permalink_url)
+          // Initial active will be set by frontCoverRef after first render
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
       })
       .catch(() => setLoading(false))
   }, [])
+
+  // Set initial active track once covers have rendered and frontCoverRef is populated
+  useEffect(() => {
+    if (!loaded || tracks.length === 0) return
+    const timer = setTimeout(() => {
+      const idx = frontCoverRef.current.index
+      setActiveIndex(idx)
+      if (tracks[idx]) setNowPlaying(tracks[idx].permalink_url)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [loaded, tracks])
 
   useEffect(() => {
     let raf: number
@@ -884,10 +912,9 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = (((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length
-      setActiveIndex(wrapped)
+      setActiveIndex(frontCoverRef.current.index)
     }, 150)
-  }, [tracks.length])
+  }, [])
 
   // Scroll to cycle through the stack
   useEffect(() => {
@@ -955,7 +982,7 @@ export function Listening() {
             gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
           >
             <FpsTracker fpsRef={fpsRef} />
-            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} config={configRef} />
+            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} config={configRef} frontCoverRef={frontCoverRef} />
           </Canvas>
         </div>
       )}
@@ -1015,7 +1042,7 @@ export function Listening() {
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 
           <div style={{ textAlign: 'center', fontSize: '1.1rem', opacity: 0.9, fontFamily: 'monospace', marginBottom: '0.5rem', background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', maxWidth: '90vw', margin: '0 auto 0.5rem', wordBreak: 'break-all' }}>
-            idx={activeIndex} off={Math.round(targetOffset.current)} visual_front=[{(((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length}]
+            song=tracks[{activeIndex}] "{activeTrack?.title?.slice(0,15)}" | off={Math.round(targetOffset.current)}
           </div>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(0.35rem, 1vw, 0.75rem)', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
             <p style={{ fontSize: 'clamp(0.85rem, 3vw, 1.3rem)', fontWeight: 400, opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px', margin: '0 auto 0.2rem', padding: '0 0.5rem' }}>
