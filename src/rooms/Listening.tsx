@@ -909,7 +909,7 @@ export function Listening() {
       e.preventDefault()
       const delta = touchStartY - e.touches[0].clientY
       if (Math.abs(delta) > 15) {
-        const dir = delta > 0 ? 1 : -1
+        const dir = delta > 0 ? -1 : 1
         targetOffset.current += dir
         updateActive()
         touchStartY = e.touches[0].clientY
