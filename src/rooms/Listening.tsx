@@ -568,7 +568,7 @@ export function Listening() {
           listening
         </p>
         <h2 style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7 }}>
-          what i've been liking
+          what i'm listening to
         </h2>
       </div>
 
