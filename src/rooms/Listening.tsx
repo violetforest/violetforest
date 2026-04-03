@@ -394,10 +394,12 @@ function AlbumCover({
       materialRef.current.transmission = c.transmission
       materialRef.current.envMapIntensity = c.envMapIntensity
 
-      // Darken covers with negative relIndex (in front of stack, to the left)
-      const darkAmount = relIndex < 0 ? Math.min(1, Math.abs(relIndex) * 0.7) : 0
-      const brightness = 1 - darkAmount
-      materialRef.current.color.lerp(new THREE.Color(brightness, brightness, brightness), 0.1)
+      // Fade covers to the left (negative relIndex) toward white/transparent
+      if (relIndex < 0) {
+        const fadeAmount = Math.min(0.7, Math.abs(relIndex) * 0.35)
+        materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity * (1 - fadeAmount), 0.1)
+        materialRef.current.color.lerp(new THREE.Color(1, 1, 1), 0.1)
+      }
     }
   })
 
