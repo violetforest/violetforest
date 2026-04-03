@@ -393,6 +393,11 @@ function AlbumCover({
       materialRef.current.clearcoat = c.clearcoat
       materialRef.current.transmission = c.transmission
       materialRef.current.envMapIntensity = c.envMapIntensity
+
+      // Darken covers with negative relIndex (in front of stack, to the left)
+      const darkAmount = relIndex < 0 ? Math.min(1, Math.abs(relIndex) * 0.7) : 0
+      const brightness = 1 - darkAmount
+      materialRef.current.color.lerp(new THREE.Color(brightness, brightness, brightness), 0.1)
     }
   })
 
