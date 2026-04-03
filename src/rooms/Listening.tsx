@@ -339,8 +339,9 @@ function AlbumCover({
     // Infinite cycling stack — wraps around
     const stackSpacing = c.depthSpacing * 0.1
     const offset = scrollOffset.current
-    // Wrap index so covers cycle infinitely (all positive — no covers between camera and stack)
-    const relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
+    // Wrap index so covers cycle infinitely
+    let relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
+    if (relIndex > totalTracks / 2) relIndex -= totalTracks
 
     // Detect wrap — if relIndex jumped more than half the stack
     const jumped = Math.abs(relIndex - prevRelIndex.current) > totalTracks * 0.4
@@ -408,8 +409,8 @@ function AlbumCover({
           if (tappedOpen.current) {
             tappedOpen.current = false
             hoverTarget.current = 0
-            targetOffset.current = index
-            scrollOffset.current = index
+            targetOffset.current = index + 2
+            scrollOffset.current = index + 2
             onSelect(index % totalTracks)
           } else {
             tappedOpen.current = true
@@ -420,8 +421,8 @@ function AlbumCover({
           }
         } else {
           // Desktop: click to skip
-          targetOffset.current = index
-          scrollOffset.current = index
+          targetOffset.current = index + 2
+          scrollOffset.current = index + 2
           onSelect(index % totalTracks)
         }
       }}
@@ -861,8 +862,9 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          setActiveIndex(0)
-          if (data.length > 0) setNowPlaying(data[0].permalink_url)
+          const frontIdx = ((-2 % data.length) + data.length) % data.length
+          setActiveIndex(frontIdx)
+          if (data[frontIdx]) setNowPlaying(data[frontIdx].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -882,7 +884,7 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
+      const wrapped = (((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length
       setActiveIndex(wrapped)
     }, 150)
   }, [tracks.length])
@@ -1013,7 +1015,7 @@ export function Listening() {
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 
           <div style={{ textAlign: 'center', fontSize: '1.1rem', opacity: 0.9, fontFamily: 'monospace', marginBottom: '0.5rem', background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', maxWidth: '90vw', margin: '0 auto 0.5rem', wordBreak: 'break-all' }}>
-            idx={activeIndex} off={Math.round(targetOffset.current)} front=[{((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length}] +1=[{(((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length}]
+            idx={activeIndex} off={Math.round(targetOffset.current)} visual_front=[{(((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length}]
           </div>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(0.35rem, 1vw, 0.75rem)', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
             <p style={{ fontSize: 'clamp(0.85rem, 3vw, 1.3rem)', fontWeight: 400, opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px', margin: '0 auto 0.2rem', padding: '0 0.5rem' }}>
