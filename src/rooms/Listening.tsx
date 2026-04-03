@@ -341,7 +341,7 @@ function AlbumCover({
     const offset = scrollOffset.current
     // Wrap index so covers cycle infinitely
     let relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
-    // Center the range so covers sit behind camera too
+    // Hide covers that would wrap in front of camera
     if (relIndex > totalTracks / 2) relIndex -= totalTracks
 
     // Detect wrap — if relIndex jumped more than half the stack
@@ -350,6 +350,12 @@ function AlbumCover({
       wrapFade.current = -1 // hide and wait to teleport
     }
     prevRelIndex.current = relIndex
+
+    // Hide covers with negative relIndex (they'd appear between camera and stack)
+    if (relIndex < 0) {
+      if (meshRef.current) meshRef.current.visible = false
+      return
+    }
 
     const targetX = 0
     const targetY = 0
