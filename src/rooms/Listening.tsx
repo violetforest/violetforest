@@ -301,7 +301,6 @@ function AlbumCover({
   const hoverValue = useRef(0)
   const hoverTimeout = useRef<ReturnType<typeof setTimeout>>()
   const isMobile = useRef(typeof window !== 'undefined' && 'ontouchstart' in window)
-  const tappedOpen = useRef(false)
   const prevRelIndex = useRef(0)
   const wrapFade = useRef(1) // 1 = visible, 0 = hidden
 
@@ -404,27 +403,8 @@ function AlbumCover({
       ref={meshRef}
       onClick={(e) => {
         e.stopPropagation()
-        if (isMobile.current) {
-          // Mobile: first tap lifts, second tap selects
-          if (tappedOpen.current) {
-            tappedOpen.current = false
-            hoverTarget.current = 0
-            targetOffset.current = index + 1
-            scrollOffset.current = index + 1
-            onSelect(index % totalTracks)
-          } else {
-            tappedOpen.current = true
-            hoverTarget.current = 1
-            // Auto-close after 3s
-            if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
-            hoverTimeout.current = setTimeout(() => { tappedOpen.current = false; hoverTarget.current = 0 }, 3000)
-          }
-        } else {
-          // Desktop: click to skip
-          targetOffset.current = index + 1
-          scrollOffset.current = index + 1
-          onSelect(index % totalTracks)
-        }
+        targetOffset.current = index + 1
+        onSelect(index % totalTracks)
       }}
       onPointerOver={(e) => {
         if (isMobile.current) return
