@@ -100,17 +100,58 @@ const DEFAULT_CONFIG: Config = {
 }
 
 
+// ── FPS tracker (runs inside Canvas) ─────────────────────────
+function FpsTracker({ fpsRef }: { fpsRef: React.MutableRefObject<number> }) {
+  const frames = useRef(0)
+  const lastTime = useRef(performance.now())
+
+  useFrame(() => {
+    frames.current++
+    const now = performance.now()
+    if (now - lastTime.current >= 1000) {
+      fpsRef.current = frames.current
+      frames.current = 0
+      lastTime.current = now
+    }
+  })
+
+  return null
+}
+
+// ── FPS display (polls ref every 500ms) ──────────────────────
+function FpsDisplay({ fpsRef }: { fpsRef: React.MutableRefObject<number> }) {
+  const [fps, setFps] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setFps(fpsRef.current), 500)
+    return () => clearInterval(id)
+  }, [fpsRef])
+  return (
+    <span style={{
+      fontSize: '0.65rem',
+      fontWeight: 600,
+      color: fps >= 50 ? '#4a4' : fps >= 30 ? '#aa4' : '#a44',
+      background: 'rgba(0,0,0,0.05)',
+      padding: '2px 6px',
+      borderRadius: '3px',
+    }}>
+      {fps} fps
+    </span>
+  )
+}
+
 // ── Slider Panel ─────────────────────────────────────────────
 function SliderPanel({
   config,
   onChange,
   visible,
   onToggle,
+  fpsRef,
 }: {
   config: Config
   onChange: (key: keyof Config, value: number | boolean) => void
   visible: boolean
   onToggle: () => void
+  fpsRef: React.MutableRefObject<number>
 }) {
   const [copied, setCopied] = useState(false)
 
@@ -195,7 +236,10 @@ function SliderPanel({
             fontFamily: 'monospace', fontSize: '0.65rem',
           }}
         >
-          <p style={{ fontWeight: 600, marginBottom: '0.75rem', fontSize: '0.7rem' }}>Scene Controls</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <p style={{ fontWeight: 600, fontSize: '0.7rem' }}>Scene Controls</p>
+            <FpsDisplay fpsRef={fpsRef} />
+          </div>
 
           {toggles.map(({ key, label }) => (
             <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', cursor: 'pointer' }}>
@@ -300,15 +344,12 @@ function AlbumCover({
     // Center the range so covers sit behind camera too
     if (relIndex > totalTracks / 2) relIndex -= totalTracks
 
-    // Detect wrap — if relIndex jumped more than half the stack, fade out and teleport
+    // Detect wrap — if relIndex jumped more than half the stack
     const jumped = Math.abs(relIndex - prevRelIndex.current) > totalTracks * 0.4
     if (jumped && ease >= 1) {
-      wrapFade.current = 0 // instantly hide
+      wrapFade.current = -1 // hide and wait to teleport
     }
     prevRelIndex.current = relIndex
-
-    // Fade back in
-    wrapFade.current = THREE.MathUtils.lerp(wrapFade.current, 1, 0.15)
 
     const targetX = 0
     const targetY = 0
@@ -322,12 +363,20 @@ function AlbumCover({
     const y = THREE.MathUtils.lerp(rand.startY, targetY + lift, ease)
     const z = THREE.MathUtils.lerp(rand.startZ, targetZ, ease)
 
-    // When wrapping, teleport instantly instead of sliding
-    if (wrapFade.current < 0.1) {
-      meshRef.current.position.x = x
-      meshRef.current.position.y = y
-      meshRef.current.position.z = z
+    if (wrapFade.current < 0) {
+      // Fully hidden — teleport instantly, then start fading in
+      meshRef.current.position.set(x, y, z)
+      meshRef.current.visible = false
+      wrapFade.current = 0
+    } else if (wrapFade.current < 1) {
+      // Fading back in after teleport
+      meshRef.current.visible = true
+      wrapFade.current = Math.min(1, wrapFade.current + 0.08)
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, x, 0.07)
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, y, 0.07)
+      meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, z, 0.07)
     } else {
+      meshRef.current.visible = true
       meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, x, 0.07)
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, y, 0.07)
       meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, z, 0.07)
@@ -631,14 +680,13 @@ function StackGroup({ config, children }: { config: React.MutableRefObject<Confi
 
 // ── Scene ────────────────────────────────────────────────────
 function Scene({
-  tracks, scrollOffset, targetOffset, activeIndex, onSelect, mousePos, loaded, config,
+  tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, config,
 }: {
   tracks: Track[]
   scrollOffset: React.MutableRefObject<number>
   targetOffset: React.MutableRefObject<number>
   activeIndex: number
   onSelect: (i: number) => void
-  mousePos: React.MutableRefObject<{ x: number; y: number }>
   loaded: boolean
   config: React.MutableRefObject<Config>
 }) {
@@ -681,22 +729,27 @@ export function Listening() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [loaded, setLoaded] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(1)
+  const [activeIndex, setActiveIndex] = useState(0)
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
   const scrollOffset = useRef(0)
   const targetOffset = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const mousePos = useRef({ x: 0, y: 0 })
-  const snapTimeout = useRef<ReturnType<typeof setTimeout>>()
+
   const configRef = useRef<Config>({ ...DEFAULT_CONFIG })
+  const fpsRef = useRef(0)
 
   useEffect(() => { configRef.current = configState }, [configState])
 
-  // Sync player with active cover on scroll
+  // Sync player with active cover — debounced so iframe doesn't thrash on scroll
+  const playerTimeout = useRef<ReturnType<typeof setTimeout>>()
   useEffect(() => {
-    if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
+    if (playerTimeout.current) clearTimeout(playerTimeout.current)
+    playerTimeout.current = setTimeout(() => {
+      if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
+    }, 400)
+    return () => { if (playerTimeout.current) clearTimeout(playerTimeout.current) }
   }, [activeIndex, tracks])
 
   const updateConfig = useCallback((key: keyof Config, value: number | boolean) => {
@@ -729,6 +782,16 @@ export function Listening() {
     return () => cancelAnimationFrame(raf)
   }, [])
 
+  // Debounced activeIndex update — avoids re-renders during fast scrolling
+  const activeTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const updateActive = useCallback(() => {
+    if (activeTimeout.current) clearTimeout(activeTimeout.current)
+    activeTimeout.current = setTimeout(() => {
+      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
+      setActiveIndex(wrapped)
+    }, 150)
+  }, [tracks.length])
+
   // Scroll to cycle through the stack
   useEffect(() => {
     const el = containerRef.current
@@ -738,13 +801,11 @@ export function Listening() {
       e.preventDefault()
       const dir = e.deltaY > 0 ? 1 : -1
       targetOffset.current += dir
-      // Active = one behind the front (the prominent fully-opaque cover)
-      const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
-      setActiveIndex(wrapped)
+      updateActive()
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
-  }, [tracks.length])
+  }, [tracks.length, updateActive])
 
   // Touch to cycle
   useEffect(() => {
@@ -757,15 +818,14 @@ export function Listening() {
       if (Math.abs(delta) > 30) {
         const dir = delta > 0 ? 1 : -1
         targetOffset.current += dir
-        const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
-        setActiveIndex(wrapped)
+        updateActive()
         touchStartY = e.touches[0].clientY
       }
     }
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => { window.removeEventListener('touchstart', onTouchStart); window.removeEventListener('touchmove', onTouchMove) }
-  }, [tracks.length])
+  }, [tracks.length, updateActive])
 
   const selectTrack = useCallback((i: number) => {
     setActiveIndex(i)
@@ -798,13 +858,14 @@ export function Listening() {
             style={{ background: 'transparent' }}
             gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
           >
-            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} mousePos={mousePos} loaded={loaded} config={configRef} />
+            <FpsTracker fpsRef={fpsRef} />
+            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} config={configRef} />
           </Canvas>
         </div>
       )}
 
       <div className="listening-controls-wrapper">
-        <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} />
+        <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} fpsRef={fpsRef} />
       </div>
 
       {/* Top overlay */}
