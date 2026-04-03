@@ -983,7 +983,7 @@ export function Listening() {
             }}
           >
             <p style={{ opacity: 0.7 }}>
-              if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 10 most recent tracks I've liked on soundcloud
+              if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 10 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
             </p>
             <p style={{ opacity: 0.5, marginTop: '0.75rem', fontSize: '0.65rem' }}>
               └ ᵥᵢₒₗₑₜ ᶠᵒʳᵉˢᵗ ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡ ̶̶̷̸̲̱❉҈҉҈҉҈҇
