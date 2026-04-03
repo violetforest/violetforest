@@ -908,7 +908,7 @@ export function Listening() {
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
       const delta = touchStartY - e.touches[0].clientY
-      if (Math.abs(delta) > 30) {
+      if (Math.abs(delta) > 15) {
         const dir = delta > 0 ? 1 : -1
         targetOffset.current += dir
         updateActive()
