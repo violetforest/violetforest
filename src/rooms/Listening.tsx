@@ -318,6 +318,7 @@ function AlbumCover({
     tex.minFilter = THREE.LinearFilter
     tex.magFilter = THREE.LinearFilter
     tex.colorSpace = THREE.SRGBColorSpace
+    tex.premultiplyAlpha = false
     return tex
   }, [track.artwork_url])
 
@@ -385,9 +386,12 @@ function AlbumCover({
 
     meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, c.coverScale, 0.07))
 
+    const isActive = Math.abs(relIndex + 1) < 0.5
+    meshRef.current.renderOrder = isActive ? 100 : 0
+
     if (materialRef.current) {
       const targetOpacity = c.opacity * wrapFade.current * ease
-      materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
+      materialRef.current.opacity = isActive ? 1 : THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
       materialRef.current.roughness = c.roughness
       materialRef.current.metalness = c.metalness
       materialRef.current.clearcoat = c.clearcoat
@@ -420,6 +424,8 @@ function AlbumCover({
         map={texture}
         color={texture ? '#ffffff' : '#1a1520'}
         transparent
+        depthWrite
+        alphaTest={0.01}
         opacity={1}
         side={THREE.DoubleSide}
         roughness={1}
@@ -617,12 +623,12 @@ function PastelClouds({ config }: { config: React.MutableRefObject<Config> }) {
   return (
     <>
       <Clouds material={THREE.MeshLambertMaterial}>
-        <Cloud position={[-6, 3, -8]} speed={0} opacity={c.cloudOpacity} color="#f8c8d8" segments={20} volume={4 * s} />
-        <Cloud position={[5, 4, -10]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f0b0c8" segments={15} volume={3.5 * s} />
-        <Cloud position={[-3, 5, -12]} speed={0} opacity={c.cloudOpacity * 0.85} color="#fad0e0" segments={18} volume={3 * s} />
-        <Cloud position={[7, 2, -6]} speed={0} opacity={c.cloudOpacity} color="#f5c0d5" segments={12} volume={2.5 * s} />
-        <Cloud position={[0, 6, -15]} speed={0} opacity={c.cloudOpacity * 0.75} color="#fce0ec" segments={22} volume={5 * s} />
-        <Cloud position={[-8, 4, -14]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f8d0e0" segments={16} volume={3.5 * s} />
+        <Cloud position={[-6, 3, -8]} speed={0} opacity={c.cloudOpacity} color="#f8c8d8" segments={20} volume={4 * s} seed={1} concentrate="inside" />
+        <Cloud position={[5, 4, -10]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f0b0c8" segments={15} volume={3.5 * s} seed={2} concentrate="inside" />
+        <Cloud position={[-3, 5, -12]} speed={0} opacity={c.cloudOpacity * 0.85} color="#fad0e0" segments={18} volume={3 * s} seed={3} concentrate="inside" />
+        <Cloud position={[7, 2, -6]} speed={0} opacity={c.cloudOpacity} color="#f5c0d5" segments={12} volume={2.5 * s} seed={4} concentrate="inside" />
+        <Cloud position={[0, 6, -15]} speed={0} opacity={c.cloudOpacity * 0.75} color="#fce0ec" segments={22} volume={5 * s} seed={5} concentrate="inside" />
+        <Cloud position={[-8, 4, -14]} speed={0} opacity={c.cloudOpacity * 0.9} color="#f8d0e0" segments={16} volume={3.5 * s} seed={6} concentrate="inside" />
       </Clouds>
       <Sparkles position={[-6, 3, -8]} count={30} scale={5 * s} size={3} speed={0.4} color="#ffe0f0" opacity={0.7} />
       <Sparkles position={[5, 4, -10]} count={25} scale={4.5 * s} size={2.5} speed={0.3} color="#ffd0e8" opacity={0.6} />
@@ -941,6 +947,9 @@ export function Listening() {
 
       {/* Top overlay */}
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0' }}>
+        <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
+          ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
+        </p>
         <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
           listening
         </p>
