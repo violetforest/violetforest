@@ -299,8 +299,6 @@ function AlbumCover({
   const entranceProgress = useRef(0)
   const hoverTarget = useRef(0)
   const hoverValue = useRef(0)
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout>>()
-  const isMobile = useRef(typeof window !== 'undefined' && 'ontouchstart' in window)
   const prevRelIndex = useRef(0)
   const wrapFade = useRef(1) // 1 = visible, 0 = hidden
 
@@ -406,18 +404,8 @@ function AlbumCover({
         targetOffset.current = index + 1
         onSelect(index % totalTracks)
       }}
-      onPointerOver={(e) => {
-        if (isMobile.current) return
-        e.stopPropagation()
-        if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
-        hoverTarget.current = 1
-        document.body.style.cursor = 'pointer'
-      }}
-      onPointerOut={() => {
-        if (isMobile.current) return
-        hoverTimeout.current = setTimeout(() => { hoverTarget.current = 0 }, 50)
-        document.body.style.cursor = 'default'
-      }}
+      onPointerOver={() => { document.body.style.cursor = 'pointer' }}
+      onPointerOut={() => { document.body.style.cursor = 'default' }}
     >
       <planeGeometry args={[2.2, 2.2]} />
       <meshPhysicalMaterial
