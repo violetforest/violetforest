@@ -339,10 +339,8 @@ function AlbumCover({
     // Infinite cycling stack — wraps around
     const stackSpacing = c.depthSpacing * 0.1
     const offset = scrollOffset.current
-    // Wrap index so covers cycle infinitely
-    let relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
-    // Center the range so covers wrap behind camera
-    if (relIndex > totalTracks / 2) relIndex -= totalTracks
+    // Wrap index so covers cycle infinitely (all positive — no covers between camera and stack)
+    const relIndex = ((index - offset) % totalTracks + totalTracks) % totalTracks
 
     // Detect wrap — if relIndex jumped more than half the stack
     const jumped = Math.abs(relIndex - prevRelIndex.current) > totalTracks * 0.4
@@ -410,8 +408,8 @@ function AlbumCover({
           if (tappedOpen.current) {
             tappedOpen.current = false
             hoverTarget.current = 0
-            targetOffset.current = index + 2
-            scrollOffset.current = index + 2
+            targetOffset.current = index
+            scrollOffset.current = index
             onSelect(index % totalTracks)
           } else {
             tappedOpen.current = true
@@ -422,8 +420,8 @@ function AlbumCover({
           }
         } else {
           // Desktop: click to skip
-          targetOffset.current = index + 2
-          scrollOffset.current = index + 2
+          targetOffset.current = index
+          scrollOffset.current = index
           onSelect(index % totalTracks)
         }
       }}
@@ -863,9 +861,8 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          const frontIdx = ((0 - 2) % data.length + data.length) % data.length
-          setActiveIndex(frontIdx)
-          if (data[frontIdx]) setNowPlaying(data[frontIdx].permalink_url)
+          setActiveIndex(0)
+          if (data.length > 0) setNowPlaying(data[0].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -885,7 +882,7 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = (((Math.round(targetOffset.current) - 2) % tracks.length) + tracks.length) % tracks.length
+      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
       setActiveIndex(wrapped)
     }, 150)
   }, [tracks.length])
