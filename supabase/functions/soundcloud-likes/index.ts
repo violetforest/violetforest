@@ -41,7 +41,7 @@ serve(async (req) => {
         return {
           title: t.title,
           artist: t.user?.username || 'Unknown',
-          artwork_url: t.artwork_url?.replace('-large', '-t300x300') || null,
+          artwork_url: (t.artwork_url || t.user?.avatar_url)?.replace('-large', '-t300x300') || null,
           permalink_url: t.permalink_url,
           duration: t.duration,
         }

@@ -50,7 +50,7 @@ interface Config {
 }
 
 const DEFAULT_CONFIG: Config = {
-  depthSpacing: 4.0,
+  depthSpacing: 6.0,
   xSpread: 0,
   ySpread: 0,
   parallax: 1.0,
