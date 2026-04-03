@@ -392,17 +392,22 @@ function AlbumCover({
 
     meshRef.current.scale.setScalar(THREE.MathUtils.lerp(meshRef.current.scale.x, c.coverScale, 0.07))
 
-    // Track which cover is most centered on screen (= visual front)
+    // Track which cover is the visual front (biggest visible on screen)
     if (meshRef.current.visible && wrapFade.current >= 0.5) {
       meshRef.current.getWorldPosition(_worldPos)
-      // Project to screen space — closest to center of screen wins
       const projected = _worldPos.clone().project(camera)
-      const screenDist = Math.sqrt(projected.x * projected.x + projected.y * projected.y)
-      const frame = Math.floor(clock.elapsedTime * 60)
-      if (frame !== frontCoverRef.current.frame) {
-        frontCoverRef.current = { index, dist: screenDist, frame }
-      } else if (screenDist < frontCoverRef.current.dist) {
-        frontCoverRef.current = { index, dist: screenDist, frame }
+      // Only consider covers actually on screen and in front of camera
+      const onScreen = projected.z > 0 && projected.z < 1 &&
+        Math.abs(projected.x) < 1.2 && Math.abs(projected.y) < 1.2
+      if (onScreen) {
+        // Closest to camera = biggest on screen = visual front
+        const dist = _worldPos.distanceTo(camera.position)
+        const frame = Math.floor(clock.elapsedTime * 60)
+        if (frame !== frontCoverRef.current.frame) {
+          frontCoverRef.current = { index, dist, frame }
+        } else if (dist < frontCoverRef.current.dist) {
+          frontCoverRef.current = { index, dist, frame }
+        }
       }
     }
 
