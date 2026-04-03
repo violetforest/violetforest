@@ -821,7 +821,7 @@ export function Listening() {
   const [tracks, setTracks] = useState<Track[]>([])
   const [loading, setLoading] = useState(true)
   const [loaded, setLoaded] = useState(false)
-  const [activeIndex, setActiveIndex] = useState(1)
+  const [activeIndex, setActiveIndex] = useState(0)
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
@@ -860,7 +860,7 @@ export function Listening() {
       .then((data) => {
         if (Array.isArray(data)) {
           setTracks(data)
-          if (data.length > 1) setNowPlaying(data[1].permalink_url)
+          if (data.length > 0) setNowPlaying(data[0].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -880,7 +880,7 @@ export function Listening() {
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
     activeTimeout.current = setTimeout(() => {
-      const wrapped = (((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length
+      const wrapped = ((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length
       setActiveIndex(wrapped)
     }, 150)
   }, [tracks.length])
