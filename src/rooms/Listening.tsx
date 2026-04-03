@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
+import { MeshReflectorMaterial, Cloud, Clouds, Sparkles, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { motion } from 'framer-motion'
 
@@ -458,6 +458,11 @@ function AlbumCover({
         ior={1.5}
         envMapIntensity={0}
       />
+      <Html center position={[0, -1.4, 0.01]} style={{ pointerEvents: 'none' }}>
+        <div style={{ background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '2px 6px', borderRadius: 4, fontSize: '11px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
+          [{index}] {track.title.slice(0, 20)}
+        </div>
+      </Html>
     </mesh>
   )
 }
