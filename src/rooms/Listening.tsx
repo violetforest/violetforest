@@ -513,20 +513,22 @@ export function Listening() {
 
   useEffect(() => {
     const el = containerRef.current
-    if (!el) return
+    if (!el || tracks.length === 0) return
     let touchStartY = 0, touchStartOffset = 0
     const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; touchStartOffset = targetOffset.current }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
-      targetOffset.current = Math.max(0, Math.min(tracks.length - 1, touchStartOffset + (touchStartY - e.touches[0].clientY) * 0.01))
+      const delta = (touchStartY - e.touches[0].clientY) * 0.015
+      targetOffset.current = Math.max(0, Math.min(tracks.length - 1, touchStartOffset + delta))
       const newIndex = Math.round(targetOffset.current)
       if (newIndex !== activeIndex && newIndex >= 0 && newIndex < tracks.length) setActiveIndex(newIndex)
     }
     const onTouchEnd = () => scheduleSnap()
-    el.addEventListener('touchstart', onTouchStart, { passive: true })
-    el.addEventListener('touchmove', onTouchMove, { passive: false })
-    el.addEventListener('touchend', onTouchEnd)
-    return () => { el.removeEventListener('touchstart', onTouchStart); el.removeEventListener('touchmove', onTouchMove); el.removeEventListener('touchend', onTouchEnd) }
+    // Use window-level listeners so the Canvas overlay doesn't block them
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onTouchEnd)
+    return () => { window.removeEventListener('touchstart', onTouchStart); window.removeEventListener('touchmove', onTouchMove); window.removeEventListener('touchend', onTouchEnd) }
   }, [tracks.length, activeIndex, scheduleSnap])
 
   const selectTrack = useCallback((i: number) => {
