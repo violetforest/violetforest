@@ -909,13 +909,25 @@ export function Listening() {
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  // Debounced activeIndex update — avoids re-renders during fast scrolling
+  // Wait for scroll to settle, then read which cover is centered on screen
   const activeTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const activeRaf = useRef<number>()
   const updateActive = useCallback(() => {
     if (activeTimeout.current) clearTimeout(activeTimeout.current)
+    if (activeRaf.current) cancelAnimationFrame(activeRaf.current)
+    // Small debounce to batch rapid scroll events
     activeTimeout.current = setTimeout(() => {
-      setActiveIndex(frontCoverRef.current.index)
-    }, 150)
+      const waitForSettle = () => {
+        const diff = Math.abs(scrollOffset.current - targetOffset.current)
+        if (diff < 0.15) {
+          // Scroll has settled — read the centered cover
+          setActiveIndex(frontCoverRef.current.index)
+        } else {
+          activeRaf.current = requestAnimationFrame(waitForSettle)
+        }
+      }
+      waitForSettle()
+    }, 50)
   }, [])
 
   // Scroll to cycle through the stack
