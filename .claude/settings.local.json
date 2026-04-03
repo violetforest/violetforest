@@ -21,7 +21,17 @@
       "Bash(python3 scripts/gen-cybertwee-textures.py)",
       "Bash(git status:*)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(f''''{i}: {t[\"\"title\"\"][:40]} | artwork: {t[\"\"artwork_url\"\"]}''''\\) for i,t in enumerate\\(data\\)]\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(grep -oP '\\\\.scene\\\\b|new .{0,30}Light|DirectionalLight|PointLight|SpotLight|RectAreaLight|HemisphereLight|AmbientLight' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
+      "Bash(grep -o 'class [A-Za-z_$]* extends[^{]*{[^}]*isSpotLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isDirectionalLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isRectAreaLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isHemisphereLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isAmbientLight' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
+      "Bash(grep -o 'new [A-Za-z_$]*Light\\\\|new Ta\\\\|new rh\\\\|new ul\\\\|new ih\\\\|new Rs' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
+      "Bash(grep -oE 'const [a-zA-Z_$]+=new \\(rh|ul|ih|Ta\\)\\\\\\([^\\)]*\\\\\\)[^;]*;[^;]*position[^;]*;' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
+      "Bash(grep -o 'class [A-Za-z_$]* extends[^{]*{[^}]*isPlaneGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMesh[^S][^t]\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshBasicMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isGroup\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isBufferGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isShaderMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshPhongMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshStandardMaterial' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)"
     ]
   }
 }
