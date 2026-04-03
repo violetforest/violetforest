@@ -961,55 +961,44 @@ export function Listening() {
         <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} fpsRef={fpsRef} />
       </div>
 
-      {/* About button */}
-      <button
-        onClick={() => setAboutVisible((v) => !v)}
-        style={{
-          position: 'absolute', top: '1rem', left: '1rem', zIndex: 10,
-          background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.1)',
-          borderRadius: '4px', padding: '0.4rem 0.7rem', fontSize: '0.7rem',
-          cursor: 'pointer', fontFamily: 'monospace', opacity: 0.6,
-        }}
-      >
-        {aboutVisible ? 'close' : 'about'}
-      </button>
-
-      {aboutVisible && (
-        <div
-          style={{
-            position: 'absolute', top: '3rem', left: '1rem', zIndex: 10,
-            background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
-            padding: '1.2rem', maxWidth: '280px',
-            fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-          }}
-        >
-          <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.75rem' }}>about this page</p>
-          <p style={{ opacity: 0.7 }}>
-            if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 10 most recent tracks I've liked on soundcloud
-          </p>
-          <p style={{ opacity: 0.5, marginTop: '0.75rem', fontSize: '0.65rem' }}>
-            └ ᵥᵢₒₗₑₜ ᶠᵒʳᵉˢᵗ ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡ ̶̶̷̸̲̱❉҈҉҈҉҈҇
-          </p>
-          <a
-            href="https://soundcloud.com/hypermiami"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
-          >
-            soundcloud.com/hypermiami
-          </a>
-        </div>
-      )}
-
       {/* Top overlay */}
-      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0', pointerEvents: 'none' }}>
-        <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem' }}>
+      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0' }}>
+        <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
           listening
         </p>
-        <h2 style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7 }}>
+        <h2
+          onClick={() => setAboutVisible((v) => !v)}
+          style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7, cursor: 'pointer', position: 'relative', display: 'inline-block' }}
+        >
           what i'm listening to
         </h2>
+
+        {aboutVisible && (
+          <div
+            style={{
+              margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
+              background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
+              padding: '1.2rem', textAlign: 'left',
+              fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
+            }}
+          >
+            <p style={{ opacity: 0.7 }}>
+              if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 10 most recent tracks I've liked on soundcloud
+            </p>
+            <p style={{ opacity: 0.5, marginTop: '0.75rem', fontSize: '0.65rem' }}>
+              └ ᵥᵢₒₗₑₜ ᶠᵒʳᵉˢᵗ ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡ ̶̶̷̸̲̱❉҈҉҈҉҈҇
+            </p>
+            <a
+              href="https://soundcloud.com/hypermiami"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
+            >
+              soundcloud.com/hypermiami
+            </a>
+          </div>
+        )}
       </div>
 
       {loading && (
