@@ -1008,8 +1008,8 @@ export function Listening() {
       {activeTrack && (
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 
-          <div style={{ textAlign: 'center', fontSize: '0.6rem', opacity: 0.4, fontFamily: 'monospace', marginBottom: '0.25rem' }}>
-            idx={activeIndex} offset={Math.round(targetOffset.current)} | showing: {tracks.map((_, i) => i).filter(i => ((i - Math.round(targetOffset.current)) % tracks.length + tracks.length) % tracks.length <= 2).map(i => `[${i}]${tracks[i]?.title?.slice(0,12)}`).join(' → ')}
+          <div style={{ textAlign: 'center', fontSize: '1.1rem', opacity: 0.9, fontFamily: 'monospace', marginBottom: '0.5rem', background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', maxWidth: '90vw', margin: '0 auto 0.5rem', wordBreak: 'break-all' }}>
+            idx={activeIndex} off={Math.round(targetOffset.current)} front=[{((Math.round(targetOffset.current) % tracks.length) + tracks.length) % tracks.length}] +1=[{(((Math.round(targetOffset.current) + 1) % tracks.length) + tracks.length) % tracks.length}]
           </div>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(0.35rem, 1vw, 0.75rem)', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
             <p style={{ fontSize: 'clamp(0.85rem, 3vw, 1.3rem)', fontWeight: 400, opacity: 0.9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px', margin: '0 auto 0.2rem', padding: '0 0.5rem' }}>
