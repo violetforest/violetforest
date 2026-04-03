@@ -584,11 +584,13 @@ function StarField() {
     const cloudCenters: [number, number, number][] = [
       [-6, 3, -8], [5, 4, -10], [-3, 5, -12],
       [7, 2, -6], [0, 6, -15], [-8, 4, -14],
+      [3, 5, -9], [-5, 6, -11], [8, 5, -13],
+      [-2, 3, -7], [6, 6, -16], [-7, 5, -10],
     ]
     const result: { pos: [number, number, number]; speed: number; color: string }[] = []
     const colors = ['#fff8fc', '#ffe0f0', '#ffd0e8', '#ffffff', '#fff0f8']
     for (const center of cloudCenters) {
-      const count = 3 + Math.floor(Math.random() * 3)
+      const count = 5 + Math.floor(Math.random() * 4)
       for (let i = 0; i < count; i++) {
         result.push({
           pos: [
