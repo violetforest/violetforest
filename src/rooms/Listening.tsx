@@ -866,7 +866,7 @@ export function Listening() {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement)?.closest?.('[data-settings-panel]')) return
       e.preventDefault()
-      const dir = e.deltaY > 0 ? 1 : -1
+      const dir = e.deltaY > 0 ? -1 : 1
       targetOffset.current += dir
       updateActive()
     }
@@ -886,7 +886,7 @@ export function Listening() {
       const delta = touchStartY - e.touches[0].clientY
       if (Math.abs(delta) > 15) {
         swiped = true
-        const dir = delta > 0 ? -1 : 1
+        const dir = delta > 0 ? 1 : -1
         targetOffset.current += dir
         updateActive()
       }
