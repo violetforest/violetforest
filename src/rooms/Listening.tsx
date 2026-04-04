@@ -724,8 +724,9 @@ function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<
     for (let i = 0; i < MAX; i++) {
       if (i < alive.length) {
         const p = alive[i]
-        const scale = p.size * Math.min(1, p.life * 3)
+        const scale = p.size * Math.min(1, p.life * 3) * 8
         dummy.position.set(p.x, p.y, p.z)
+        dummy.rotation.z = p.x * 10 + p.life * 2
         dummy.scale.setScalar(scale)
         dummy.updateMatrix()
         meshRef.current.setMatrixAt(i, dummy.matrix)
@@ -742,9 +743,8 @@ function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<
   })
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX]}>
-      <sphereGeometry args={[1, 6, 6]} />
-      <meshBasicMaterial transparent opacity={0.8} />
+    <instancedMesh ref={meshRef} args={[starGeometry, undefined, MAX]}>
+      <meshBasicMaterial transparent opacity={0.8} side={THREE.DoubleSide} />
     </instancedMesh>
   )
 }
