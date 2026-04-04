@@ -881,17 +881,15 @@ export function Listening() {
   // Touch to cycle
   useEffect(() => {
     if (tracks.length === 0) return
-    let touchStartY = 0
-    let swiped = false
-    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; swiped = false }
+    let lastTouchY = 0
+    const onTouchStart = (e: TouchEvent) => { lastTouchY = e.touches[0].clientY }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
-      if (swiped) return
-      const delta = touchStartY - e.touches[0].clientY
-      if (Math.abs(delta) > 15) {
-        swiped = true
-        const dir = delta > 0 ? 1 : -1
-        targetOffset.current += dir
+      const currentY = e.touches[0].clientY
+      const delta = lastTouchY - currentY
+      if (Math.abs(delta) > 5) {
+        targetOffset.current += delta / 30
+        lastTouchY = currentY
         updateActive()
       }
     }
