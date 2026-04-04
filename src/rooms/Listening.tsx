@@ -888,7 +888,7 @@ export function Listening() {
       const currentY = e.touches[0].clientY
       const delta = lastTouchY - currentY
       if (Math.abs(delta) > 5) {
-        targetOffset.current += delta / 12
+        targetOffset.current += delta / 5
         lastTouchY = currentY
         updateActive()
       }
