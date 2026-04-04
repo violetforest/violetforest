@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Track {
   title: string
@@ -815,15 +815,6 @@ export function Listening() {
 
   useEffect(() => { configRef.current = configState }, [configState])
 
-  // Sync player with active cover — debounced so iframe doesn't thrash on scroll
-  const playerTimeout = useRef<ReturnType<typeof setTimeout>>()
-  useEffect(() => {
-    if (playerTimeout.current) clearTimeout(playerTimeout.current)
-    playerTimeout.current = setTimeout(() => {
-      if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
-    }, 400)
-    return () => { if (playerTimeout.current) clearTimeout(playerTimeout.current) }
-  }, [activeIndex, tracks])
 
   const updateConfig = useCallback((key: keyof Config, value: number | boolean) => {
     setConfigState((prev) => ({ ...prev, [key]: value }))
@@ -947,11 +938,11 @@ export function Listening() {
 
       {/* Top overlay */}
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0' }}>
-        <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
-          ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
-        </p>
         <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
           listening
+        </p>
+        <p style={{ fontSize: '18px', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
+          ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
         </p>
         <h2
           onClick={() => setAboutVisible((v) => !v)}
@@ -960,29 +951,35 @@ export function Listening() {
           what i'm listening to
         </h2>
 
-        {aboutVisible && (
-          <div
-            style={{
-              margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
-              background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
-              padding: '1.2rem', textAlign: 'left',
-              fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-            }}
-          >
-            <p style={{ opacity: 0.7 }}>
-              if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
-            </p>
-            <a
-              href="https://soundcloud.com/hypermiami"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
+        <AnimatePresence>
+          {aboutVisible && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
+                background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
+                padding: '1.2rem', textAlign: 'left',
+                fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
+              }}
             >
-              soundcloud.com/hypermiami
-            </a>
-          </div>
-        )}
+              <p style={{ opacity: 0.7 }}>
+                if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
+              </p>
+              <a
+                href="https://soundcloud.com/hypermiami"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
+              >
+                soundcloud.com/hypermiami
+              </a>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {loading && (
