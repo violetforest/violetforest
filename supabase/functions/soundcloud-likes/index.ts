@@ -29,7 +29,7 @@ serve(async (req) => {
     const user = await userRes.json()
 
     // Fetch likes
-    const likesUrl = `https://api-v2.soundcloud.com/users/${user.id}/likes?client_id=${clientId}&limit=50&offset=0`
+    const likesUrl = `https://api-v2.soundcloud.com/users/${user.id}/likes?client_id=${clientId}&limit=30&offset=0`
     const likesRes = await fetch(likesUrl)
     if (!likesRes.ok) throw new Error(`Likes fetch failed: ${likesRes.status}`)
     const likesData = await likesRes.json()
