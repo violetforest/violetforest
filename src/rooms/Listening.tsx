@@ -869,7 +869,7 @@ export function Listening() {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement)?.closest?.('[data-settings-panel]')) return
       e.preventDefault()
-      const amount = Math.min(3, Math.max(1, Math.abs(e.deltaY) / 40))
+      const amount = Math.min(5, Math.max(1, Math.abs(e.deltaY) / 20))
       const dir = e.deltaY > 0 ? -1 : 1
       targetOffset.current += dir * amount
       updateActive()
@@ -983,7 +983,7 @@ export function Listening() {
                   onClick={(e) => { e.stopPropagation(); setAboutVisible(false) }}
                   style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)', cursor: 'pointer' }}
                 >
-                  ooo cool
+                  oooo cool (click me)
                 </span>
               </motion.div>
             )}
