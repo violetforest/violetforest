@@ -751,7 +751,7 @@ function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<
 
 // ── Scene ────────────────────────────────────────────────────
 function Scene({
-  tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, config,
+  tracks, scrollOffset, targetOffset, activeIndex, onSelect, loaded, loading, config,
 }: {
   tracks: Track[]
   scrollOffset: React.MutableRefObject<number>
@@ -759,6 +759,7 @@ function Scene({
   activeIndex: number
   onSelect: (i: number) => void
   loaded: boolean
+  loading: boolean
   config: React.MutableRefObject<Config>
 }) {
   const c = config.current
@@ -772,25 +773,27 @@ function Scene({
       <DprController config={config} />
       <CameraRig config={config} />
       {c.showClouds && <PastelClouds config={config} />}
-      <ScrollGlitter scrollOffset={scrollOffset} />
+      {!loading && <ScrollGlitter scrollOffset={scrollOffset} />}
 
-      <StackGroup config={config}>
-        {tracks.map((track, i) => (
-          <AlbumCover
-            key={track.permalink_url}
-            track={track}
-            index={i}
-            scrollOffset={scrollOffset}
-            targetOffset={targetOffset}
-            totalTracks={tracks.length}
-            loaded={loaded}
-            config={config}
-            onSelect={onSelect}
-          />
-        ))}
+      {!loading && (
+        <StackGroup config={config}>
+          {tracks.map((track, i) => (
+            <AlbumCover
+              key={track.permalink_url}
+              track={track}
+              index={i}
+              scrollOffset={scrollOffset}
+              targetOffset={targetOffset}
+              totalTracks={tracks.length}
+              loaded={loaded}
+              config={config}
+              onSelect={onSelect}
+            />
+          ))}
 
-        {c.showGlow && <ActiveGlow tracks={tracks} activeIndex={activeIndex} scrollOffset={scrollOffset} config={config} />}
-      </StackGroup>
+          {c.showGlow && <ActiveGlow tracks={tracks} activeIndex={activeIndex} scrollOffset={scrollOffset} config={config} />}
+        </StackGroup>
+      )}
       {c.showReflection && <ReflectionFloor config={config} />}
     </>
   )
@@ -805,7 +808,7 @@ export function Listening() {
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
-  const [aboutVisible, setAboutVisible] = useState(false)
+  const [aboutVisible, setAboutVisible] = useState(true)
   const scrollOffset = useRef(0)
   const targetOffset = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -866,8 +869,9 @@ export function Listening() {
     const onWheel = (e: WheelEvent) => {
       if ((e.target as HTMLElement)?.closest?.('[data-settings-panel]')) return
       e.preventDefault()
+      const amount = Math.min(3, Math.max(1, Math.abs(e.deltaY) / 40))
       const dir = e.deltaY > 0 ? -1 : 1
-      targetOffset.current += dir
+      targetOffset.current += dir * amount
       updateActive()
     }
     el.addEventListener('wheel', onWheel, { passive: false })
@@ -918,78 +922,77 @@ export function Listening() {
           .listening-controls-wrapper { display: none !important; }
         }
       `}</style>
-      {tracks.length > 0 && (
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <Canvas
-            camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 6] }}
-            dpr={[1, configState.dpr]}
-            style={{ background: 'transparent' }}
-            gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
-          >
-            <FpsTracker fpsRef={fpsRef} />
-            <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} config={configRef} />
-          </Canvas>
-        </div>
-      )}
-
-      <div className="listening-controls-wrapper">
-        <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} fpsRef={fpsRef} />
-      </div>
-
-      {/* Top overlay */}
-      <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0' }}>
-        <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
-          listening
-        </p>
-        <p style={{ fontSize: '18px', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
-          ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
-        </p>
-        <h2
-          onClick={() => setAboutVisible((v) => !v)}
-          style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7, cursor: 'pointer', position: 'relative', display: 'inline-block' }}
-        >
-          what i'm listening to
-        </h2>
-
-        <AnimatePresence>
-          {aboutVisible && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
-                background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
-                padding: '1.2rem', textAlign: 'left',
-                fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-              }}
-            >
-              <p style={{ opacity: 0.7 }}>
-                if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
-              </p>
-              <a
-                href="https://soundcloud.com/hypermiami"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)' }}
-              >
-                soundcloud.com/hypermiami
-              </a>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
           <p style={{ opacity: 0.4, fontStyle: 'italic' }}>loading...</p>
         </div>
       )}
 
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <Canvas
+          camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 6] }}
+          dpr={[1, configState.dpr]}
+          style={{ background: 'transparent' }}
+          gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        >
+          <FpsTracker fpsRef={fpsRef} />
+          <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} loading={loading} config={configRef} />
+        </Canvas>
+      </div>
+
+      {!loading && (
+        <div className="listening-controls-wrapper">
+          <SliderPanel config={configState} onChange={updateConfig} visible={panelVisible} onToggle={() => setPanelVisible((v) => !v)} fpsRef={fpsRef} />
+        </div>
+      )}
+
+      {/* Top overlay */}
+      {!loading && (
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '2rem 1rem 0' }}>
+          <p style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', letterSpacing: '0.15em', textTransform: 'lowercase', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
+            listening
+          </p>
+          <p style={{ fontSize: '18px', opacity: 0.35, marginBottom: '0.5rem', pointerEvents: 'none' }}>
+            ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
+          </p>
+          <h2
+            style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7, position: 'relative', display: 'inline-block' }}
+          >
+            what i'm listening to
+          </h2>
+
+          <AnimatePresence>
+            {aboutVisible && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
+                  background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
+                  padding: '1.2rem', textAlign: 'left',
+                  fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
+                }}
+              >
+                <p style={{ opacity: 0.7 }}>
+                  if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
+                </p>
+                <span
+                  onClick={(e) => { e.stopPropagation(); setAboutVisible(false) }}
+                  style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)', cursor: 'pointer' }}
+                >
+                  ooo cool
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Bottom overlay */}
-      {activeTrack && (
+      {!loading && activeTrack && (
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 
           <div style={{ textAlign: 'center', marginBottom: 'clamp(0.35rem, 1vw, 0.75rem)', pointerEvents: 'auto', cursor: 'pointer' }} onClick={playActive}>
