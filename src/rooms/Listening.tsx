@@ -724,7 +724,7 @@ function ScrollGlitter({ scrollOffset }: { scrollOffset: React.MutableRefObject<
     for (let i = 0; i < MAX; i++) {
       if (i < alive.length) {
         const p = alive[i]
-        const scale = p.size * Math.min(1, p.life * 3) * 8
+        const scale = p.size * Math.min(1, p.life * 3) * 40
         dummy.position.set(p.x, p.y, p.z)
         dummy.rotation.z = p.x * 10 + p.life * 2
         dummy.scale.setScalar(scale)
@@ -977,7 +977,7 @@ export function Listening() {
                 }}
               >
                 <p style={{ opacity: 0.7 }}>
-                  if you ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
+                  if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 30 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
                 </p>
                 <span
                   onClick={(e) => { e.stopPropagation(); setAboutVisible(false) }}
