@@ -887,8 +887,8 @@ export function Listening() {
       e.preventDefault()
       const currentY = e.touches[0].clientY
       const delta = lastTouchY - currentY
-      if (Math.abs(delta) > 5) {
-        targetOffset.current += delta / 5
+      if (Math.abs(delta) > 8) {
+        targetOffset.current += delta / 12
         lastTouchY = currentY
         updateActive()
       }
