@@ -975,7 +975,7 @@ export function Listening() {
                 }}
               >
                 <p style={{ opacity: 0.7 }}>
-                  if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 30 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
+                  if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
                 </p>
                 <span
                   onClick={(e) => { e.stopPropagation(); setAboutVisible(false) }}
