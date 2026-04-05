@@ -11,7 +11,19 @@
     <link rel="webmention" href="https://webmention.io/violetforest.com/webmention" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000"><span style="color:#8844ff;font-family:monospace;font-size:14px">Loading...</span></div></div>
+    <script>
+      // GitHub Pages SPA redirect handler
+      (function() {
+        var q = new URLSearchParams(window.location.search);
+        var p = q.get('p');
+        if (p) {
+          q.delete('p');
+          var qs = q.toString();
+          window.history.replaceState(null, '', p + (qs ? '?' + qs : '') + window.location.hash);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

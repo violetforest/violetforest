@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <script>
       // Single-page app redirect for GitHub Pages
-      // Redirects all 404s to index.html with the path preserved
-      var path = window.location.pathname
-      window.location.replace(window.location.origin + path)
+      // Converts path to query string so index.html can restore it
+      var segments = window.location.pathname.split('/').filter(Boolean)
+      var query = segments.length ? '?p=/' + segments.join('/') : ''
+      window.location.replace(window.location.origin + '/' + query + window.location.hash)
     </script>
   </head>
   <body></body>
