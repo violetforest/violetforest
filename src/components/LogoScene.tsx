@@ -131,15 +131,6 @@ function ChromeLogo() {
       .catch(e => console.error('Failed to load logo paths:', e))
   }, [])
 
-  // Load texture
-  const logoTexture = useMemo(() => {
-    const tex = new THREE.TextureLoader().load('/logo_texture.png')
-    tex.colorSpace = THREE.SRGBColorSpace
-    tex.minFilter = THREE.LinearFilter
-    tex.magFilter = THREE.LinearFilter
-    return tex
-  }, [])
-
   // Create environment map for chrome reflections
   const envMap = useMemo(() => {
     const cubeRT = new THREE.WebGLCubeRenderTarget(256)
@@ -192,15 +183,9 @@ function ChromeLogo() {
   }, [gl])
 
   // Build geometry from paths
-  const { meshes, frontPlaneData } = useMemo(() => {
-    if (!paths) return { meshes: [], frontPlaneData: null }
+  const meshes = useMemo(() => {
+    if (!paths) return []
 
-    let minX = Infinity, maxX = -Infinity
-    let minY = Infinity, maxY = -Infinity
-    paths.forEach(c => c.points.forEach(([x, y]) => {
-      minX = Math.min(minX, x); maxX = Math.max(maxX, x)
-      minY = Math.min(minY, y); maxY = Math.max(maxY, y)
-    }))
 
     const extrudeSettings = {
       depth: 1.0,
@@ -239,16 +224,7 @@ function ChromeLogo() {
       } catch (_) { /* skip bad shapes */ }
     })
 
-    return {
-      meshes: geos,
-      frontPlaneData: {
-        width: maxX - minX,
-        height: maxY - minY,
-        centerX: (minX + maxX) / 2,
-        centerY: (minY + maxY) / 2,
-        depth: extrudeSettings.depth,
-      },
-    }
+    return geos
   }, [paths, envMap])
 
   // Gentle bob
@@ -266,25 +242,6 @@ function ChromeLogo() {
       {meshes.map((m, i) => (
         <mesh key={i} geometry={m.geometry} material={m.material} position-z={m.zOffset} />
       ))}
-      {frontPlaneData && (
-        <mesh
-          position={[
-            frontPlaneData.centerX,
-            frontPlaneData.centerY,
-            frontPlaneData.depth / 2 + 0.25,
-          ]}
-          renderOrder={10}
-        >
-          <planeGeometry args={[frontPlaneData.width, frontPlaneData.height]} />
-          <meshBasicMaterial
-            map={logoTexture}
-            transparent
-            side={THREE.FrontSide}
-            depthTest
-            depthWrite={false}
-          />
-        </mesh>
-      )}
     </group>
   )
 }
