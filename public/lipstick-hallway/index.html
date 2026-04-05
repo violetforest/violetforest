@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>📱🌹💄</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link href="https://fonts.googleapis.com/css?family=Audiowide|Exo+2:300|VT323" rel="stylesheet">
+    <link href="./lib/styles.css" rel="stylesheet">
+	</head>
+	<body>
+		<div id="scroll-container" style="height:500vh;position:relative;">
+		<div id="container" style="position:fixed;top:0;left:0;width:100%;height:100vh;"></div>
+		</div>
+		<iframe id="end-scene" src="../violet-forest-3d/dist/index.html" style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;z-index:10;transition:opacity 0.8s ease;"></iframe>
+
+		<script id="fragmentShader" type="x-shader/x-vertex">
+			uniform vec3 glowColor;
+			varying float intensity;
+			void main()
+			{
+				vec3 glow = glowColor * intensity;
+			   gl_FragColor = vec4( glow, 0.5 );
+			}
+		</script>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+			uniform vec3 viewVector;
+			uniform float c;
+			uniform float p;
+			varying float intensity;
+			void main() {
+			  vec3 vNormal = normalize( normalMatrix * normal );
+				vec3 vNormel = normalize( normalMatrix * viewVector );
+				intensity = pow( c - dot(vNormal, vNormel), p );
+			  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script>
+			// detect mobile OS because point lights don't work on some android phones
+			var usePointLights;
+			if ( /Android/i.test(navigator.userAgent) ) {
+				usePointLights = false;
+			} else {
+				usePointLights = true;
+			};
+		</script>
+		<script src="./lib/three.js"></script>
+		<script src="./lib/Mirror.js"></script>
+		<script src="./lib/OrbitControls.js"></script>
+		<script src="./lib/FresnelShader.js"></script>
+		<script src="./lib/OBJLoader.js"></script>
+
+		<script>
+			// scene size
+			var WIDTH = window.innerWidth,
+				HEIGHT = window.innerHeight;
+
+			// camera
+			var VIEW_ANGLE = 35,
+				ASPECT = WIDTH / HEIGHT,
+				NEAR = 1,
+				FAR = 10000;
+
+			var camera, scene, renderer, models = [];
+			var scrollProgress = 0;
+			var CAMERA_START_Z = 600;
+			var CAMERA_END_Z = -80;
+
+			var clock = new THREE.Clock();
+    	var shader = THREE.FresnelShader;
+	    var uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+
+			init();
+			animate();
+
+			function init() {
+
+				var container = document.getElementById( 'container' );
+
+				// renderer
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( WIDTH, HEIGHT );
+				renderer.setClearColor( 0xffffff, 0);
+
+				container.appendChild( renderer.domElement );
+
+        // scene
+				scene = new THREE.Scene()
+
+				// cube bg
+				var cube = new THREE.BoxBufferGeometry( 1000, 1000, 1000 );
+				// invert the geometry on the x-axis so that all of the faces point inward
+				cube.scale( - 1, 1, 1 );
+				var gridMaterial = new THREE.MeshBasicMaterial( {
+					map: new THREE.TextureLoader().load( './cubeTexture/grid.jpeg' )
+				} );
+				cubeBackgroundMesh = new THREE.Mesh( cube, gridMaterial );
+				scene.add( cubeBackgroundMesh );
+
+				// camera
+				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+				camera.position.set( 0, 100, 600 );
+
+				// scroll-driven walk
+				window.addEventListener('scroll', function() {
+					var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+					scrollProgress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+				});
+
+				// model
+			  var texture = new THREE.Texture();
+
+				var materialFresnel = new THREE.ShaderMaterial( {
+          uniforms: uniforms,
+          vertexShader: shader.vertexShader,
+          fragmentShader: shader.fragmentShader
+				} );
+
+				var materialGlow = new THREE.ShaderMaterial({
+			    uniforms: {
+						"c":   { type: "f", value: 1.0 },
+						"p":   { type: "f", value: 1.4 },
+						glowColor: { type: "c", value: new THREE.Color(0xFF1493) },
+						viewVector: { type: "v3", value: camera.position }
+					},
+					vertexShader:   document.getElementById( 'vertexShader'   ).textContent,
+					fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+					side: THREE.FrontSide,
+					blending: THREE.AdditiveBlending,
+					transparent: true
+				});
+
+				var materialNormal = new THREE.MeshNormalMaterial( { overdraw: 1 } );
+
+				var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+					console.log( item, loaded, total );
+				};
+
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+
+		  	var loader = new THREE.OBJLoader(manager);
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/lipstick.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				   });
+		    		object.position.x = ((Math.random() * window.innerWidth)-window.innerWidth) % 1000;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 40 - 0;
+				    object.rotation.z = Math.random() * 40 - 0;
+				    object.scale.x = 11;
+				    object.scale.y = 11;
+				    object.scale.z = 11;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/clutch.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+		    		object.position.x = ((Math.random() * window.innerWidth) - window.innerWidth);
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 90 - 0;
+				    object.rotation.z = Math.random() * 90 - 0;
+				    object.scale.x = object.scale.y = object.scale.z = 40;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("./obj/plant.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+				    object.scale.x = object.scale.y = object.scale.z = 40;
+				    object.position.x = -150;
+				    object.position.z = -300;
+				    object.position.y = 25;
+
+				    obj = object;
+				    scene.add(obj);
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/plant.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+				    object.scale.x = object.scale.y = object.scale.z = 40;
+				    object.position.x = 150;
+				    object.position.z = -300;
+				    object.position.y = 25;
+				    obj = object;
+				    scene.add(obj);
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/rose.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 90 - 0;
+				    object.rotation.z = Math.random() * 100 - 50;
+				    object.scale.x = object.scale.y = object.scale.z = 20;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+
+
+	      for ( var i = 0; i < 3; i ++ ) {
+		  		loader.load("obj/heart.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialGlow;
+		            materialGlow.side = THREE.DoubleSide;
+			      }
+				   });
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 90 - 0;
+				    object.rotation.z = Math.random() * 90 - 0;
+				    object.scale.x = object.scale.y = object.scale.z = 15;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/lighter.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialGlow;
+		            materialGlow.side = THREE.DoubleSide;
+			      }
+				   });
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 90 - 0;
+				    object.rotation.z = Math.random() * 90 - 0;
+				    object.scale.x = object.scale.y = object.scale.z = 12;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+
+				for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/cellphone.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				   });
+		    		object.position.x = ((Math.random() * 100-100));
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 40 - 0;
+				    object.rotation.y = Math.random() * 40 - 0;
+				    object.rotation.z = Math.random() * 40 - 0;
+				    object.scale.x = object.scale.y = object.scale.z = 0.05;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				  });
+		  	}
+				//
+
+				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
+
+				// MIRROR planes
+
+				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
+					clipBias: 0.003,
+					textureWidth: WIDTH * window.devicePixelRatio,
+					textureHeight: HEIGHT * window.devicePixelRatio,
+					color: 0x777777
+				} );
+
+				groundMirror.rotateX( - Math.PI / 2 );
+				scene.add( groundMirror );
+
+				var verticalMirror = new THREE.Mirror( 120, 120, {
+					clipBias: 0.003,
+					textureWidth: WIDTH * window.devicePixelRatio,
+					textureHeight: HEIGHT * window.devicePixelRatio,
+					color: 0x777777
+				} );
+
+				verticalMirror.position.y = 95;
+				verticalMirror.position.z = -85;
+				scene.add( verticalMirror );
+
+				// walls
+
+				var wallMaterial;
+				if (usePointLights) {
+					wallMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
+					wallMaterialTop = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
+				} else {
+					wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5b23aa} );
+					wallMaterialTop = new THREE.MeshBasicMaterial( { color: 0x3e0c71} );
+				}
+
+				var planeTop =  new THREE.Mesh( planeGeo, wallMaterialTop );
+				planeTop.position.y = 200;
+				planeTop.rotateX( Math.PI / 2 );
+				scene.add( planeTop );
+
+				var planeBack = new THREE.Mesh( planeGeo, wallMaterial );
+				planeBack.position.z = -100;
+				planeBack.position.y = 100;
+				scene.add( planeBack );
+
+				var planeFront =  new THREE.Mesh( planeGeo, wallMaterial );
+				planeFront.position.z = 100;
+				planeFront.position.y = 100;
+				planeFront.rotateY( Math.PI );
+				scene.add( planeFront );
+
+				// lights
+				var mainPurpleLight = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight.position.y = 120;
+				scene.add( mainPurpleLight );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 50 );
+				hotPinkLight.position.set( 550, 100, 0 );
+				scene.add( hotPinkLight );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 500 );
+				hotPinkLight.position.set( - 550, 100, 0 );
+				scene.add( hotPinkLight );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 1000 );
+				hotPinkLight.position.set( 0, 100, 550 );
+				scene.add( hotPinkLight );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+			}
+
+			function onWindowResize() {
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+        var delta = clock.getDelta();
+				var timer = 0.0001 * Date.now();
+
+				// ease the scroll progress
+				var eased = scrollProgress < 0.5
+					? 2 * scrollProgress * scrollProgress
+					: 1 - Math.pow(-2 * scrollProgress + 2, 2) / 2;
+
+				// move camera through the hallway
+				var z = CAMERA_START_Z - eased * (CAMERA_START_Z - CAMERA_END_Z);
+				camera.position.set(0, 100, z);
+				camera.lookAt(0, 100, z - 200);
+
+				for ( var i = 0; i < models.length; i ++ ) {
+					if (usePointLights) {
+						models[i].rotation.x += delta * 0.3 * ( i % 2 ? 1 : -1 );
+					}
+          models[i].position.x = 50 * Math.sin( timer + i );
+				}
+				renderer.render(scene, camera);
+			}
+
+		</script>
+	</body>
+</html>

@@ -7,6 +7,7 @@ import { Listening } from './rooms/Listening'
 import { Thinking } from './rooms/Thinking'
 import { Making } from './rooms/Making'
 import { DopamineHit } from './rooms/DopamineHit'
+import { LipstickHallway } from './rooms/LipstickHallway'
 import { useSpaceStore } from './store'
 import { useEffect } from 'react'
 
@@ -69,6 +70,7 @@ export default function App() {
             <Route path="/stories" element={<Stories />} />
             <Route path="/dm" element={<SendDM />} />
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
+            <Route path="/lipstick" element={<LipstickHallway />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
