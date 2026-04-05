@@ -959,35 +959,42 @@ export function Listening() {
             what i'm listening to
           </h2>
 
-          <AnimatePresence>
-            {aboutVisible && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  margin: '0.75rem auto 0', maxWidth: '300px', zIndex: 10,
-                  background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px',
-                  padding: '1.2rem', textAlign: 'left',
-                  fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-                }}
-              >
-                <p style={{ opacity: 0.7 }}>
-                  if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
-                </p>
-                <span
-                  onClick={(e) => { e.stopPropagation(); setAboutVisible(false) }}
-                  style={{ display: 'inline-block', marginTop: '0.6rem', opacity: 0.5, fontSize: '0.65rem', borderBottom: '1px solid rgba(0,0,0,0.15)', cursor: 'pointer' }}
-                >
-                  oooo cool (click me)
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       )}
+
+      <AnimatePresence>
+        {aboutVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setAboutVisible(false)}
+            onTouchStart={() => setAboutVisible(false)}
+            onWheel={() => setAboutVisible(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{
+              maxWidth: '300px', padding: '1.5rem', textAlign: 'left',
+              fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
+              background: 'rgba(255,255,255,0.92)', borderRadius: '8px',
+              border: '1px solid rgba(0,0,0,0.08)',
+            }}>
+              <p style={{ opacity: 0.7 }}>
+                if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
+              </p>
+              <p style={{ marginTop: '0.8rem', opacity: 0.35, fontSize: '0.6rem', textAlign: 'center' }}>
+                click anywhere to enter
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom overlay */}
       {!loading && activeTrack && (
