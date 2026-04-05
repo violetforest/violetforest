@@ -903,6 +903,45 @@ export function Listening() {
     setNowPlaying(tracks[i]?.permalink_url || null)
   }, [tracks])
 
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Auto-advance to next track when current finishes
+  useEffect(() => {
+    const iframe = iframeRef.current
+    if (!iframe || !nowPlaying) return
+
+    let widget: any
+    const setup = () => {
+      const SC = (window as any).SC
+      if (!SC?.Widget) return
+      widget = SC.Widget(iframe)
+      widget.bind(SC.Widget.Events.FINISH, () => {
+        const next = activeIndex + 1
+        if (next < tracks.length) {
+          selectTrack(next)
+          targetOffset.current = next
+        }
+      })
+    }
+
+    // Load SC Widget API if not present
+    if (!(window as any).SC?.Widget) {
+      const script = document.createElement('script')
+      script.src = 'https://w.soundcloud.com/player/api.js'
+      script.onload = setup
+      document.head.appendChild(script)
+    } else {
+      setup()
+    }
+
+    return () => {
+      if (widget) {
+        const SC = (window as any).SC
+        if (SC?.Widget) widget.unbind(SC.Widget.Events.FINISH)
+      }
+    }
+  }, [nowPlaying, activeIndex, tracks.length, selectTrack])
+
   const playActive = useCallback(() => {
     if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
   }, [tracks, activeIndex])
@@ -1012,8 +1051,9 @@ export function Listening() {
           {nowPlaying && (
             <div style={{ maxWidth: '500px', margin: '0 auto clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
               <iframe
+                ref={iframeRef}
                 width="100%" height="80" scrolling="no" frameBorder="no" allow="autoplay"
-                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
+                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
                 style={{ borderRadius: '8px', opacity: 0.9 }}
               />
             </div>
