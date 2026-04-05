@@ -1,6 +1,5 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
 const HALLWAY_LENGTH = 14
@@ -238,16 +237,9 @@ function createLiquidMetalMaterial(envMap: THREE.Texture) {
   return material
 }
 
-function CameraRig({ scrollProgress, onReachEnd }: { scrollProgress: number; onReachEnd: (reached: boolean) => void }) {
+function CameraRig({ scrollProgress }: { scrollProgress: number }) {
   const { camera } = useThree()
-  const atEnd = useRef(false)
   useFrame(() => {
-    const reached = scrollProgress >= 0.85
-    if (reached !== atEnd.current) {
-      atEnd.current = reached
-      onReachEnd(reached)
-    }
-    if (reached) return
     const startZ = HALLWAY_LENGTH + 1
     const endZ = -4
     const wp = Math.min(scrollProgress / 0.85, 1)
@@ -678,7 +670,7 @@ interface Props {
 export function Hallway({ scrollProgress }: Props) {
   const [logoRefs, setLogoRefs] = useState<LogoRefs | null>(null)
   const [panelVisible, setPanelVisible] = useState(false)
-  const [orbitEnabled, setOrbitEnabled] = useState(false)
+
 
   return (
     <div
@@ -706,18 +698,7 @@ export function Hallway({ scrollProgress }: Props) {
         <pointLight position={[0, 3.5, HALLWAY_LENGTH * 0.7]} intensity={0.3} distance={HALLWAY_LENGTH} />
         <pointLight position={[0, 3, 6]} intensity={0.5} distance={8} />
 
-        <CameraRig scrollProgress={scrollProgress} onReachEnd={setOrbitEnabled} />
-        {orbitEnabled && (
-          <OrbitControls
-            target={[0, HALLWAY_HEIGHT / 2, LOGO_Z]}
-            enableZoom={true}
-            enablePan={false}
-            minDistance={3}
-            maxDistance={15}
-            dampingFactor={0.05}
-            enableDamping
-          />
-        )}
+        <CameraRig scrollProgress={scrollProgress} />
         <HallwayGeometry />
         <SceneContent onRefs={setLogoRefs} />
       </Canvas>
