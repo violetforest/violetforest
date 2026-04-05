@@ -38,8 +38,8 @@ THREE.FresnelShader = {
 
 			"vReflect = reflect( I, worldNormal );",
 			"vRefract[0] = refract( normalize( I ), worldNormal, mRefractionRatio );",
-			"vRefract[1] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.99 );",
-			"vRefract[2] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.98 );",
+			"vRefract[1] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.3 );",
+			"vRefract[2] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.2 );",
 			"vReflectionFactor = mFresnelBias + mFresnelScale * pow( 1.0 + dot( normalize( I ), worldNormal ), mFresnelPower );",
 
 			"gl_Position = projectionMatrix * mvPosition;",
