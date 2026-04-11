@@ -109,7 +109,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
     >
       {isStory && (
         <p style={{ fontSize: '1.05rem', opacity: 0.45, fontStyle: 'italic', marginBottom: '0.75rem' }}>
-          disappears in 24 hours
+          disappears in 7 days
         </p>
       )}
 

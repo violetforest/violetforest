@@ -19,6 +19,7 @@ const Links = lazy(() => import('./rooms/Links').then(m => ({ default: m.Links }
 const Stories = lazy(() => import('./rooms/Stories').then(m => ({ default: m.Stories })))
 const SendDM = lazy(() => import('./rooms/SendDM').then(m => ({ default: m.SendDM })))
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
+const PlasmaTunnel = lazy(() => import('./rooms/PlasmaTunnel').then(m => ({ default: m.PlasmaTunnel })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
 
 const ROOM_MAP: Record<string, number> = {
@@ -36,6 +37,7 @@ const ROOM_MAP: Record<string, number> = {
   '/admin': 0,
   '/graveyard/instagram': 0,
   '/graveyard/instagram/3d': 0,
+  '/tunnel': 0,
 }
 
 export default function App() {
@@ -53,7 +55,7 @@ export default function App() {
 
   return (
     <>
-      <WebGLBackground roomIndex={roomIndex} />
+      {location.pathname !== '/tunnel' && <WebGLBackground roomIndex={roomIndex} />}
       <AnimatePresence mode="wait">
         <Suspense fallback={null}>
           <Routes location={location} key={location.pathname}>
@@ -71,6 +73,7 @@ export default function App() {
             <Route path="/dm" element={<SendDM />} />
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
+            <Route path="/tunnel" element={<PlasmaTunnel />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
