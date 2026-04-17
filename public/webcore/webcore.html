@@ -12,7 +12,7 @@
   #cursor-layer {
     position: fixed; inset: 0;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 60000;   /* above email/chat/popups (25500/30000), below BSOD (99999) */
   }
   .cursor {
     position: absolute;
@@ -66,7 +66,6 @@
   body.freeze-active .poll-popup,
   body.freeze-active .email-window,
   body.freeze-active #email-icon,
-  body.freeze-active #cursor-layer,
   body.freeze-active #stats,
   body.freeze-active #settings-toggle,
   body.freeze-active #settings-panel,
@@ -77,7 +76,7 @@
   .xp-popup {
     position: absolute;
     pointer-events: auto;
-    cursor: default;
+    cursor: none;           /* let the custom cursor trail show through */
     user-select: none;
     box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
     font-family: 'Tahoma', 'Segoe UI', sans-serif;
@@ -1071,6 +1070,30 @@ const chromeMat = _isMobileDevice
 const bobbers = [];
 function addSphere(x, z, r) {
   r *= 8;
+  const padding = 1.5;
+  // Nudge the sphere away from any existing one it would overlap with.
+  // Up to 12 iterations — each pass walks this sphere out along the overlap axis.
+  for (let attempt = 0; attempt < 12; attempt++) {
+    let overlap = false;
+    for (const b of bobbers) {
+      const dx = x - b.mesh.position.x;
+      const dz = z - b.mesh.position.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      const minDist = r + b.radius + padding;
+      if (dist < minDist) {
+        // Push along the axis between centers (or pick a side if dist ≈ 0)
+        const push = (minDist - dist) + 0.1;
+        if (dist > 0.001) {
+          x += (dx / dist) * push;
+          z += (dz / dist) * push;
+        } else {
+          x += push;  // identical positions — just move one
+        }
+        overlap = true;
+      }
+    }
+    if (!overlap) break;
+  }
   const s = new THREE.Mesh(sphereGeo, chromeMat);
   const gy = Math.max(0, hillHeight(x, z) + HILL_Y_OFFSET);
   s.position.set(x, gy + r + 1.5, z);
@@ -1098,10 +1121,37 @@ addSphere(15,  1250, 1.0);
 addSphere(-20, 1550, 1.8);
 addSphere(8,   1850, 2.2);
 
+// Extra spheres clustered near the spawn point (player spawns around z=-280 to -380)
+// Gives the opening view immediate visual density
+addSphere(-6,  -330, 1.2);
+addSphere(12,  -310, 0.9);
+addSphere(-14, -290, 0.7);
+addSphere(7,   -270, 1.5);
+addSphere(-22, -240, 1.1);
+addSphere(20,  -220, 1.3);
+addSphere(-3,  -200, 0.6);
+addSphere(16,  -180, 1.7);
+addSphere(-11, -160, 0.8);
+addSphere(4,   -140, 1.0);
+addSphere(-19, -120, 1.4);
+addSphere(13,  -100, 0.6);
+// Spheres BEHIND the spawn point (z < -380) — visible when the player turns around
+addSphere(-10, -420, 1.3);
+addSphere(14,  -440, 0.8);
+addSphere(-18, -460, 1.6);
+addSphere(6,   -480, 1.0);
+addSphere(-4,  -500, 0.7);
+addSphere(17,  -520, 1.4);
+addSphere(-22, -540, 0.9);
+addSphere(9,   -560, 1.1);
+addSphere(-13, -580, 1.5);
+addSphere(0,   -590, 0.6);
+
 
 // --- Scatter many more spheres across the valley + lower hills ---
 // deterministic-ish pseudo random so positions are stable per reload
-let __seed = 1337;
+// Randomized seed — spheres land in different spots every reload
+let __seed = (Math.random() * 2147483647) | 0;
 function rnd() { __seed = (__seed * 9301 + 49297) % 233280; return __seed / 233280; }
 
 // Scatter spheres across the entire map — valley, hills, everywhere
@@ -1272,7 +1322,7 @@ scene.add(ringSprite);
 // --- GIF / WebP billboards — auto-discovered from gifs/ folder ---
 const GIFS_BASE = 'gifs/';
 const GIF_EXTENSIONS = ['.gif', '.webp', '.png', '.jpg', '.jpeg'];
-const GIF_BLOCKLIST = ['tumblr_604249baa0561e3ebc3c3a3a7fd86cce_6b4ba3f0_250', 'tumblr_d32d77f538937448073beebd3bf088c4_d0b346db_250', 'tumblr_683faf05f2bb6a141698a882fd01ffa1_4ff4a665_500', '.jpg', '.jpeg'];
+const GIF_BLOCKLIST = ['tumblr_604249baa0561e3ebc3c3a3a7fd86cce_6b4ba3f0_250', 'tumblr_d32d77f538937448073beebd3bf088c4_d0b346db_250', 'tumblr_683faf05f2bb6a141698a882fd01ffa1_4ff4a665_500', 'email.gif', 'enter.webp', 'enter.gif', '.jpg', '.jpeg'];
 
 // Try to crawl the server's directory listing (works on Python http.server
 // locally). Most production hosts (Netlify, Vercel, GitHub Pages, IPFS
@@ -2135,9 +2185,10 @@ async function exportScreenshots() {
   const origPR = renderer.getPixelRatio();
   const origAspect = camera.aspect;
   try {
-    await _captureOne(1630, 2220, 'webcore-full-card.png');
-    await _captureOne(1600, 1600, 'webcore-square.png');
-    console.log('✓ Exported webcore-full-card.png (1630×2220) and webcore-square.png (1600×1600)');
+    // Export at 2x the minimum spec — sharper source for the designer's workflow
+    await _captureOne(3260, 4440, 'webcore-full-card.png');
+    await _captureOne(3200, 3200, 'webcore-square.png');
+    console.log('✓ Exported webcore-full-card.png (3260×4440) and webcore-square.png (3200×3200)');
   } finally {
     // Restore regardless
     renderer.setPixelRatio(origPR);
@@ -2362,8 +2413,8 @@ function animate() {
 let fpsFrames = 0, fpsLast = performance.now(), lastFps = 0;
 const statsEl = document.getElementById('stats');
 renderer.info.autoReset = false;
-// Auto-show stats overlay (FPS etc) on both mobile and desktop
-statsEl.style.display = '';
+// Stats overlay hidden by default. Toggle via window.__debug if needed.
+statsEl.style.display = 'none';
 
 // --- Settings panel wiring ---
 document.getElementById('settings-toggle').addEventListener('click', () => {
@@ -2598,10 +2649,31 @@ const POPUP_DRAG = [
 let popupCount = 0;
 // activeModalPopups declared near movement code
 
+function playFreezeChime() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Two-tone short "ding" — triangle waves, distinct from the crash blip
+  const tones = [880, 1174.66];   // A5 → D6, a perfect-fourth chime
+  tones.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0, now + i * 0.06);
+    g.gain.linearRampToValueAtTime(0.06, now + i * 0.06 + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.09);
+    osc.connect(g); g.connect(audioCtx.destination); // bypass masterGain (about to mute)
+    osc.start(now + i * 0.06);
+    osc.stop(now + i * 0.06 + 0.1);
+  });
+}
+
 function spawn2DPopup() {
   if (typeof bsodActive !== 'undefined' && bsodActive) return;
   activeModalPopups++;
   document.body.classList.add('freeze-active');
+  // Freeze chime — plays direct to output so the mute below doesn't silence it
+  playFreezeChime();
   // Mute audio
   if (masterGain && audioCtx) {
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -2890,15 +2962,6 @@ const CHAT_PERSONAS = [
       default: ["'the rain / is like / my soul / but wetter'", "thank u thank u i write from the heart", "i only use all lowercase now its a style", "my old boss said im 'interesting'", "i put this on my blog"],
       hi: ["greetings fellow wanderer 🌙", "hi 🌹"],
       default_mid: ["feel free to borrow any line for ur away profile", "sometimes the cursor blinks and i weep", "my cat inspired this one"],
-    }
-  },
-  {
-    name: "anime_xX_kaz_Xx",
-    greet: "did u watch the new ep yet?? NO SPOILERS",
-    responses: {
-      default: ["the fansub came out like 10 min ago", "the ending theme made me emotional", "im writing the fan-fic right now", "im drawing fanart in my sketchbook again", "i saved up to buy the manga at the bookstore"],
-      hi: ["hi! *waves with big anime eyes*", "konnichiwa lol"],
-      default_mid: ["i need to finish my cosplay", "im gonna go to the con next weekend", "ill send u the .rar of episode 14"],
     }
   },
 ];
@@ -4371,7 +4434,7 @@ function showEmailIcon() {
     `;
     emailIconEl.innerHTML = `
       <div style="position:relative;">
-        <img src="gifs/alert/Z4JHGU5L6FA4BG2ABD2TC5SMPDMJRUKB.gif" style="width:120px;height:auto;display:block;image-rendering:pixelated;">
+        <img src="gifs/alert/email.gif" style="width:120px;height:auto;display:block;image-rendering:pixelated;">
         <div class="email-badge" style="position:absolute;top:-6px;right:-6px;background:#e40000;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font:bold 14px sans-serif;border:2px solid #fff;"></div>
       </div>
     `;
@@ -4432,7 +4495,7 @@ function openEmailWindow() {
       <button class="email-close" style="background:none;border:none;color:#fff;font-weight:bold;cursor:pointer;padding:4px 12px;font-size:18px;min-width:36px;min-height:30px;touch-action:manipulation;">×</button>
     </div>
     <div class="email-list" style="position:absolute;top:30px;left:0;right:0;bottom:0;background:#fff;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;font-size:12px;box-sizing:border-box;touch-action:pan-y;"></div>
-    <div class="email-view" style="display:none;position:absolute;top:30px;left:0;right:0;bottom:0;background:#fff;padding:12px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;font-size:13px;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;touch-action:pan-y;"></div>
+    <div class="email-view" style="display:none;position:absolute;top:30px;left:0;right:0;bottom:0;background:#fff;padding:12px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;font-size:13px;word-break:break-word;overflow-wrap:anywhere;box-sizing:border-box;touch-action:pan-y;"></div>
   `;
   document.body.appendChild(emailWindowEl);
   const closeEmail = () => { emailWindowEl.style.display = 'none'; };
@@ -4546,13 +4609,32 @@ const bsodEl = document.getElementById('bsod');
 let bsodShown = false;
 let bsodActive = false;
 let bsodDismissableAt = 0;
+function playCrashBlip() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  // Single short, curt blip — one quick square tone, ~80ms total
+  const osc = audioCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.value = 520;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0, now);
+  g.gain.linearRampToValueAtTime(0.08, now + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+  osc.connect(g); g.connect(audioCtx.destination);  // bypass masterGain (about to mute)
+  osc.start(now);
+  osc.stop(now + 0.09);
+}
+
 function showBSOD() {
   bsodEl.classList.add('show');
   bsodActive = true;
   bsodShown = true;
   // Prevent dismissal for the first 1.5 seconds to avoid accidental keypresses
   bsodDismissableAt = Date.now() + 1500;
-  // Mute all audio
+  // Crash sound — plays directly to audio output so the master-mute below
+  // doesn't silence it
+  playCrashBlip();
+  // Mute all other audio
   if (masterGain && audioCtx) {
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
     masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
