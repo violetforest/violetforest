@@ -833,11 +833,13 @@ export function Listening() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setTracks(data)
-          // Visual front is at relIndex -1 = last track when offset=0
-          const frontIdx = (data.length - 1) % data.length
+          // SoundCloud likes return most-recent first; reverse so the
+          // most-recent track lands at the visual front (relIndex -1).
+          const ordered = [...data].reverse()
+          setTracks(ordered)
+          const frontIdx = (ordered.length - 1) % ordered.length
           setActiveIndex(frontIdx)
-          if (data[frontIdx]) setNowPlaying(data[frontIdx].permalink_url)
+          if (ordered[frontIdx]) setNowPlaying(ordered[frontIdx].permalink_url)
         }
         setLoading(false)
         setTimeout(() => setLoaded(true), 100)
@@ -948,10 +950,42 @@ export function Listening() {
 
   const activeTrack = tracks[activeIndex]
 
+  const [rotate, setRotate] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      const isPortrait = window.innerHeight > window.innerWidth
+      setRotate(isTouch && isPortrait)
+    }
+    check()
+    window.addEventListener('resize', check)
+    window.addEventListener('orientationchange', check)
+    return () => {
+      window.removeEventListener('resize', check)
+      window.removeEventListener('orientationchange', check)
+    }
+  }, [])
+
+  const wrapperStyle: React.CSSProperties = rotate
+    ? {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        width: '100vh',
+        height: '100vw',
+        transform: 'translate(-50%, -50%) rotate(90deg)',
+        transformOrigin: 'center center',
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }
+    : { position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+
   return (
     <motion.div
       ref={containerRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      style={wrapperStyle}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}
     >
       <style>{`
@@ -1021,7 +1055,8 @@ export function Listening() {
             <div style={{
               maxWidth: '300px', padding: '1.5rem', textAlign: 'left',
               fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-              background: 'rgba(255,255,255,0.92)', borderRadius: '8px',
+              color: '#1a1a1a',
+              background: 'rgba(255,255,255,0.95)', borderRadius: '8px',
               border: '1px solid rgba(0,0,0,0.08)',
             }}>
               <p style={{ opacity: 0.7 }}>

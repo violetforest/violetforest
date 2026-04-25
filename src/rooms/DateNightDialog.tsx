@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 
@@ -66,6 +67,33 @@ export function DateNightDialog() {
             <div style={{ fontSize: 'clamp(16px, 1.7vw, 20px)', opacity: 0.7 }}>
               three.js
             </div>
+            <Link
+              to="/listening"
+              style={{
+                display: 'inline-block',
+                marginTop: '1.25em',
+                pointerEvents: 'auto',
+                fontSize: 'clamp(16px, 1.7vw, 20px)',
+                color: 'rgba(255, 255, 255, 0.55)',
+                transition: 'color 200ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.95)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.55)'
+              }}
+            >
+              Next
+              <span
+                style={{
+                  animation: 'date-night-caret 0.9s steps(1) infinite',
+                  marginLeft: 4,
+                }}
+              >
+                ▌
+              </span>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
