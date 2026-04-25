@@ -102,6 +102,10 @@
 				cameraControls.target.set(0, 100, 0);
 				cameraControls.maxDistance = 250;
 				cameraControls.minDistance = 10;
+				// Keep the camera in front of the back wall and above the floor.
+				cameraControls.minAzimuthAngle = -Math.PI / 3;
+				cameraControls.maxAzimuthAngle =  Math.PI / 3;
+				cameraControls.maxPolarAngle  =  Math.PI / 2;
 				cameraControls.update();
 
 				// model
@@ -342,11 +346,16 @@
 		  	}
 				//
 
-				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
+				// Room dimensions — walls and floor must share the same width
+				// or you see the floor extending past the wall edges.
+				var ROOM_WIDTH = 1000;
+				var ROOM_DEPTH = 200;
+				var WALL_HEIGHT = 200;
+				var planeGeo = new THREE.PlaneBufferGeometry( ROOM_WIDTH, WALL_HEIGHT );
 
 				// MIRROR planes
 
-				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
+				var groundMirror = new THREE.Mirror( ROOM_WIDTH, ROOM_DEPTH, {
 					clipBias: 0.003,
 					textureWidth: WIDTH * window.devicePixelRatio,
 					textureHeight: HEIGHT * window.devicePixelRatio,
@@ -454,11 +463,7 @@
 			function onWindowResize() {
 				windowHalfX = window.innerWidth / 2;
 				windowHalfY = window.innerHeight / 2;
-				var aspect = window.innerWidth / window.innerHeight;
-				camera.aspect = aspect;
-				// Widen FOV when the viewport is narrower than landscape so the
-				// 8 floating objects (spread x ∈ ±150) all stay in frame.
-				camera.fov = aspect >= 1 ? VIEW_ANGLE : VIEW_ANGLE / Math.sqrt( aspect );
+				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
