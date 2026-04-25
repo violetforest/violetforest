@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 // New home: full-screen iframe of the standalone 3D logo page (public/violet-forest-3d/).
 // On mobile portrait, the iframe is rotated 90° so the wide logo fills the screen
@@ -48,10 +49,14 @@ export function Home() {
       }
 
   return (
-    <iframe
+    <motion.iframe
       src="/violet-forest-3d/index.html"
       title="Violet Forest"
       style={rotatedStyle}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.6, ease: 'easeInOut' }}
     />
   )
 }

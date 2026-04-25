@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { WebGLBackground } from './components/WebGLBackground'
@@ -19,6 +19,7 @@ const AskBox = lazy(() => import('./rooms/AskBox').then(m => ({ default: m.AskBo
 const Links = lazy(() => import('./rooms/Links').then(m => ({ default: m.Links })))
 const Stories = lazy(() => import('./rooms/Stories').then(m => ({ default: m.Stories })))
 const SendDM = lazy(() => import('./rooms/SendDM').then(m => ({ default: m.SendDM })))
+const PhotoPile = lazy(() => import('./rooms/PhotoPile').then(m => ({ default: m.PhotoPile })))
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
 
@@ -37,10 +38,12 @@ const ROOM_MAP: Record<string, number> = {
   '/admin': 0,
   '/graveyard/instagram': 0,
   '/graveyard/instagram/3d': 0,
+  '/photos': 0,
 }
 
 export default function App() {
   const location = useLocation()
+  const navigate = useNavigate()
   const roomIndex = ROOM_MAP[location.pathname] ?? 0
   const { markVisited, incrementVisits } = useSpaceStore()
 
@@ -52,12 +55,35 @@ export default function App() {
     markVisited(location.pathname)
   }, [location.pathname])
 
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'navigate' && typeof e.data.to === 'string') {
+        navigate(e.data.to)
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [navigate])
+
+  const blackBgRoute = location.pathname === '/' || location.pathname === '/lipstick'
+
   return (
     <>
       {location.pathname !== '/' && <WebGLBackground roomIndex={roomIndex} />}
+      {blackBgRoute && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#000',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+      )}
       <AnimatePresence mode="wait">
-        <Suspense fallback={null}>
-          <Routes location={location} key={location.pathname}>
+        <Suspense key={location.pathname} fallback={null}>
+          <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/classic" element={<HomeClassic />} />
             <Route path="/listening" element={<Listening />} />
@@ -72,6 +98,7 @@ export default function App() {
             <Route path="/stories" element={<Stories />} />
             <Route path="/dm" element={<SendDM />} />
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
+            <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
           </Routes>
         </Suspense>

@@ -60,7 +60,7 @@
 				NEAR = 1,
 				FAR = 10000;
 
-			var camera, scene, renderer, models = [];
+			var camera, scene, renderer, models = [], clickables = [];
 
 			var clock = new THREE.Clock();
     	var shader = THREE.FresnelShader;
@@ -162,8 +162,10 @@
 				    object.scale.y = 11;
 				    object.scale.z = 11;
 				    obj = object;
+				    obj.userData.url = '/making';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 
@@ -184,8 +186,10 @@
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 40;
 				    obj = object;
+				    obj.userData.url = '/photos';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 
@@ -242,8 +246,10 @@
 				    object.rotation.z = Math.random() * 100 - 50;
 				    object.scale.x = object.scale.y = object.scale.z = 20;
 				    obj = object;
+				    obj.userData.url = '/guestbook';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 
@@ -264,8 +270,10 @@
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 15;
 				    obj = object;
+				    obj.userData.url = '/ask';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 
@@ -285,8 +293,10 @@
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 12;
 				    obj = object;
+				    obj.userData.url = '/stories';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 
@@ -308,8 +318,10 @@
 				    object.rotation.z = Math.random() * 40 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 0.05;
 				    obj = object;
+				    obj.userData.url = '/dm';
 				    scene.add(obj);
 				    models.push(obj);
+				    clickables.push(obj);
 				  });
 		  	}
 				//
@@ -384,6 +396,38 @@
 				scene.add( hotPinkLight );
 
 				window.addEventListener( 'resize', onWindowResize, false );
+
+				// Click-to-navigate on objects
+				var raycaster = new THREE.Raycaster();
+				var mouse = new THREE.Vector2();
+
+				function pickClickable( event ) {
+					var rect = renderer.domElement.getBoundingClientRect();
+					mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
+					mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
+					raycaster.setFromCamera( mouse, camera );
+					for ( var i = 0; i < clickables.length; i++ ) {
+						if ( raycaster.intersectObject( clickables[i], true ).length > 0 ) {
+							return clickables[i];
+						}
+					}
+					return null;
+				}
+
+				renderer.domElement.addEventListener( 'click', function ( event ) {
+					var hit = pickClickable( event );
+					if ( !hit || !hit.userData.url ) return;
+					var url = hit.userData.url;
+					if ( window.parent && window.parent !== window ) {
+						window.parent.postMessage( { type: 'navigate', to: url }, '*' );
+					} else {
+						window.location.href = url;
+					}
+				} );
+
+				renderer.domElement.addEventListener( 'mousemove', function ( event ) {
+					renderer.domElement.style.cursor = pickClickable( event ) ? 'pointer' : 'move';
+				} );
 			}
 
 			function onWindowResize() {

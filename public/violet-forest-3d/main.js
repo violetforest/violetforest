@@ -428,3 +428,25 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// ============ CLICK LOGO → LIPSTICK PAGE ============
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+renderer.domElement.addEventListener('click', (event) => {
+    if (!window.logoGroup) return;
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(window.logoGroup.children, true);
+    if (intersects.length > 0) {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'navigate', to: '/lipstick' }, '*');
+        } else {
+            window.location.href = '/lipstick';
+        }
+    }
+});
+
+renderer.domElement.style.cursor = 'pointer';
