@@ -1,7 +1,6 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense } from 'react'
-import { WebGLBackground } from './components/WebGLBackground'
 import { Home } from './rooms/Home'
 import { HomeClassic } from './rooms/HomeClassic'
 import { Listening } from './rooms/Listening'
@@ -23,28 +22,9 @@ const PhotoPile = lazy(() => import('./rooms/PhotoPile').then(m => ({ default: m
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
 
-const ROOM_MAP: Record<string, number> = {
-  '/': 0,
-  '/listening': 1,
-  '/thinking': 2,
-  '/making': 3,
-  '/dopamine-hit': 3,
-  '/feed': 0,
-  '/guestbook': 0,
-  '/ask': 0,
-  '/links': 0,
-  '/stories': 0,
-  '/dm': 0,
-  '/admin': 0,
-  '/graveyard/instagram': 0,
-  '/graveyard/instagram/3d': 0,
-  '/photos': 0,
-}
-
 export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
-  const roomIndex = ROOM_MAP[location.pathname] ?? 0
   const { markVisited, incrementVisits } = useSpaceStore()
 
   useEffect(() => {
@@ -65,22 +45,17 @@ export default function App() {
     return () => window.removeEventListener('message', onMessage)
   }, [navigate])
 
-  const blackBgRoute = location.pathname === '/' || location.pathname === '/lipstick'
-
   return (
     <>
-      {location.pathname !== '/' && <WebGLBackground roomIndex={roomIndex} />}
-      {blackBgRoute && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: '#000',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }}
-        />
-      )}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#000',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       <AnimatePresence mode="wait">
         <Suspense key={location.pathname} fallback={null}>
           <Routes location={location}>

@@ -11,6 +11,40 @@
   50%, 100% { opacity: 0; }
 }
 
+.letter-page,
+.letter-page * {
+  font-family: 'VT323', 'Menlo', ui-monospace, monospace !important;
+  letter-spacing: 1px !important;
+  font-style: normal !important;
+}
+
+.letter-page,
+.letter-page a,
+.letter-page p,
+.letter-page span,
+.letter-page label,
+.letter-page button,
+.letter-page input,
+.letter-page textarea {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.letter-page input,
+.letter-page textarea {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.letter-page input::placeholder,
+.letter-page textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.letter-page button {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+}
+
 html, body, #root {
   width: 100%;
   height: 100%;

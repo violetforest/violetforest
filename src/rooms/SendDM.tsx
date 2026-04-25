@@ -27,7 +27,7 @@ export function SendDM() {
 
   return (
     <ScrollableRoomLayout>
-      <div style={{ width: '100%', textAlign: 'center' }}>
+      <div className="letter-page" style={{ width: '100%', textAlign: 'center' }}>
         <div
           style={{
             display: 'flex',

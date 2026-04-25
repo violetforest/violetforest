@@ -152,16 +152,17 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = ((Math.random() * window.innerWidth)-window.innerWidth) % 1000;
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+		    		object.position.x = -150;
+		    		object.position.y = 140;
+						object.position.z = -30;
+				    obj = object;
+				    obj.userData.baseX = -150;
 
 				    object.rotation.x = Math.random() * 40 - 0;
 				    object.rotation.z = Math.random() * 40 - 0;
 				    object.scale.x = 11;
 				    object.scale.y = 11;
 				    object.scale.z = 11;
-				    obj = object;
 				    obj.userData.url = '/making';
 				    scene.add(obj);
 				    models.push(obj);
@@ -178,14 +179,15 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
-		    		object.position.x = ((Math.random() * window.innerWidth) - window.innerWidth);
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+		    		object.position.x = -150;
+		    		object.position.y = 70;
+						object.position.z = 20;
+				    obj = object;
+				    obj.userData.baseX = -150;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 40;
-				    obj = object;
 				    obj.userData.url = '/photos';
 				    scene.add(obj);
 				    models.push(obj);
@@ -239,13 +241,15 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+		    		object.position.x = -50;
+		    		object.position.y = 140;
+						object.position.z = -20;
+				    obj = object;
+				    obj.userData.baseX = -50;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 100 - 50;
 				    object.scale.x = object.scale.y = object.scale.z = 20;
-				    obj = object;
 				    obj.userData.url = '/guestbook';
 				    scene.add(obj);
 				    models.push(obj);
@@ -254,6 +258,12 @@
 		  	}
 
 
+	      var heartSlots = [
+				    { x:   50, y: 140, z: -30 },
+				    { x:  -50, y:  70, z:  15 },
+				    { x:  150, y:  70, z:  20 },
+				];
+				var heartIdx = 0;
 	      for ( var i = 0; i < 3; i ++ ) {
 		  		loader.load("obj/heart.obj", function(object) {
 		    		object.traverse(function(child) {
@@ -263,13 +273,16 @@
 		            materialGlow.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+				    var slot = heartSlots[heartIdx++];
+		    		object.position.x = slot.x;
+		    		object.position.y = slot.y;
+						object.position.z = slot.z;
+				    obj = object;
+				    obj.userData.baseX = slot.x;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 15;
-				    obj = object;
 				    obj.userData.url = '/ask';
 				    scene.add(obj);
 				    models.push(obj);
@@ -286,13 +299,15 @@
 		            materialGlow.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+		    		object.position.x = 150;
+		    		object.position.y = 140;
+						object.position.z = -10;
+				    obj = object;
+				    obj.userData.baseX = 150;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 12;
-				    obj = object;
 				    obj.userData.url = '/stories';
 				    scene.add(obj);
 				    models.push(obj);
@@ -309,15 +324,16 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = ((Math.random() * 100-100));
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
+		    		object.position.x = 50;
+		    		object.position.y = 80;
+						object.position.z = 10;
+				    obj = object;
+				    obj.userData.baseX = 50;
 
 				    object.rotation.x = Math.random() * 40 - 0;
 				    object.rotation.y = Math.random() * 40 - 0;
 				    object.rotation.z = Math.random() * 40 - 0;
-				    object.scale.x = object.scale.y = object.scale.z = 0.05;
-				    obj = object;
+				    object.scale.x = object.scale.y = object.scale.z = 0.1;
 				    obj.userData.url = '/dm';
 				    scene.add(obj);
 				    models.push(obj);
@@ -447,7 +463,8 @@
 					if (usePointLights) {
 						models[i].rotation.x += delta * 0.3 * ( i % 2 ? 1 : -1 );
 					}
-          models[i].position.x = 50 * Math.sin( timer + i );
+					var baseX = models[i].userData.baseX || 0;
+					models[i].position.x = baseX + 18 * Math.sin( timer + i );
 				}
 				renderer.render(scene, camera);
 			}

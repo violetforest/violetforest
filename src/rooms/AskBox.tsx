@@ -50,7 +50,7 @@ export function AskBox() {
 
   return (
     <ScrollableRoomLayout>
-      <div style={{ width: '100%' }}>
+      <div className="letter-page" style={{ width: '100%' }}>
         <div
           style={{
             display: 'flex',

@@ -48,7 +48,7 @@ export function Guestbook() {
 
   return (
     <ScrollableRoomLayout>
-      <div style={{ width: '100%' }}>
+      <div className="letter-page" style={{ width: '100%' }}>
         <div
           style={{
             display: 'flex',
