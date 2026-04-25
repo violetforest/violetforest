@@ -808,7 +808,6 @@ export function Listening() {
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
-  const [aboutVisible, setAboutVisible] = useState(true)
   const scrollOffset = useRef(0)
   const targetOffset = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1003,42 +1002,7 @@ export function Listening() {
         </div>
       )}
 
-      <AnimatePresence>
-        {aboutVisible && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            onClick={() => setAboutVisible(false)}
-            onTouchStart={() => setAboutVisible(false)}
-            onWheel={() => setAboutVisible(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 20,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-              cursor: 'pointer',
-            }}
-          >
-            <div style={{
-              maxWidth: '300px', padding: '1.5rem', textAlign: 'left',
-              fontFamily: 'monospace', fontSize: '0.7rem', lineHeight: 1.6,
-              color: '#1a1a1a',
-              background: 'rgba(255,255,255,0.95)', borderRadius: '8px',
-              border: '1px solid rgba(0,0,0,0.08)',
-            }}>
-              <p style={{ opacity: 0.7 }}>
-                if you've ever wondered what its like being in my mind allday, this is it. loops looping over and over and over of the 20 most recent tracks I've liked on soundcloud. this updates automatically whenever i like a new track.
-              </p>
-              <p style={{ marginTop: '0.8rem', opacity: 0.35, fontSize: '0.6rem', textAlign: 'center' }}>
-                click anywhere to enter
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom overlay */}
+{/* Bottom overlay */}
       {!loading && activeTrack && (
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 1rem clamp(0.75rem, 2vw, 1.5rem)', background: 'linear-gradient(transparent, rgba(240, 234, 245, 0.92) 35%)', pointerEvents: 'none' }}>
 

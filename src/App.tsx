@@ -22,6 +22,13 @@ const PhotoPile = lazy(() => import('./rooms/PhotoPile').then(m => ({ default: m
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
 
+// Static-page redirect — Vite/SPA catch-all swallows /webcore so the static
+// /webcore/index.html never loads. This route forwards there.
+function StaticRedirect({ to }: { to: string }) {
+  useEffect(() => { window.location.replace(to) }, [to])
+  return <div style={{ position: 'fixed', inset: 0, background: '#000' }} />
+}
+
 export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -79,6 +86,8 @@ export default function App() {
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
             <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
+            <Route path="/webcore" element={<StaticRedirect to={`${import.meta.env.BASE_URL}webcore/index.html`} />} />
+            <Route path="/webcore/*" element={<StaticRedirect to={`${import.meta.env.BASE_URL}webcore/index.html`} />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
