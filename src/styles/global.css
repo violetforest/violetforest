@@ -49,8 +49,8 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
-  color: #fff;
+  background: #f0eaf5;
+  color: #1a1a1a;
   font-family: Georgia, 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
   touch-action: manipulation;
