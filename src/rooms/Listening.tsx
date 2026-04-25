@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 interface Track {
   title: string
