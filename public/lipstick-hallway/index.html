@@ -60,7 +60,7 @@
 				NEAR = 1,
 				FAR = 10000;
 
-			var camera, scene, renderer, models = [], clickables = [];
+			var camera, scene, renderer, models = [];
 
 			var clock = new THREE.Clock();
     	var shader = THREE.FresnelShader;
@@ -102,10 +102,6 @@
 				cameraControls.target.set(0, 100, 0);
 				cameraControls.maxDistance = 250;
 				cameraControls.minDistance = 10;
-				// Keep the camera in front of the back wall and above the floor.
-				cameraControls.minAzimuthAngle = -Math.PI / 3;
-				cameraControls.maxAzimuthAngle =  Math.PI / 3;
-				cameraControls.maxPolarAngle  =  Math.PI / 2;
 				cameraControls.update();
 
 				// model
@@ -156,21 +152,18 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = -150;
-		    		object.position.y = 140;
-						object.position.z = -30;
-				    obj = object;
-				    obj.userData.baseX = -150;
+		    		object.position.x = ((Math.random() * window.innerWidth)-window.innerWidth) % 1000;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 40 - 0;
 				    object.rotation.z = Math.random() * 40 - 0;
 				    object.scale.x = 11;
 				    object.scale.y = 11;
 				    object.scale.z = 11;
-				    obj.userData.url = '/making';
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 
@@ -183,19 +176,16 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
-		    		object.position.x = -150;
-		    		object.position.y = 70;
-						object.position.z = 20;
-				    obj = object;
-				    obj.userData.baseX = -150;
+		    		object.position.x = ((Math.random() * window.innerWidth) - window.innerWidth);
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 40;
-				    obj.userData.url = '/photos';
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 
@@ -245,29 +235,19 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
-		    		object.position.x = -50;
-		    		object.position.y = 140;
-						object.position.z = -20;
-				    obj = object;
-				    obj.userData.baseX = -50;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 100 - 50;
 				    object.scale.x = object.scale.y = object.scale.z = 20;
-				    obj.userData.url = '/guestbook';
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 
 
-	      var heartSlots = [
-				    { x:   50, y: 140, z: -30 },
-				    { x:  -50, y:  70, z:  15 },
-				    { x:  150, y:  70, z:  20 },
-				];
-				var heartIdx = 0;
 	      for ( var i = 0; i < 3; i ++ ) {
 		  		loader.load("obj/heart.obj", function(object) {
 		    		object.traverse(function(child) {
@@ -277,20 +257,15 @@
 		            materialGlow.side = THREE.DoubleSide;
 			      }
 				   });
-				    var slot = heartSlots[heartIdx++];
-		    		object.position.x = slot.x;
-		    		object.position.y = slot.y;
-						object.position.z = slot.z;
-				    obj = object;
-				    obj.userData.baseX = slot.x;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 15;
-				    obj.userData.url = '/ask';
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 
@@ -303,19 +278,15 @@
 		            materialGlow.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = 150;
-		    		object.position.y = 140;
-						object.position.z = -10;
-				    obj = object;
-				    obj.userData.baseX = 150;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 90 - 0;
 				    object.rotation.z = Math.random() * 90 - 0;
 				    object.scale.x = object.scale.y = object.scale.z = 12;
-				    obj.userData.url = '/stories';
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 
@@ -328,34 +299,26 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = 50;
-		    		object.position.y = 80;
-						object.position.z = 10;
-				    obj = object;
-				    obj.userData.baseX = 50;
+		    		object.position.x = ((Math.random() * 100-100));
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
 
 				    object.rotation.x = Math.random() * 40 - 0;
 				    object.rotation.y = Math.random() * 40 - 0;
 				    object.rotation.z = Math.random() * 40 - 0;
-				    object.scale.x = object.scale.y = object.scale.z = 0.1;
-				    obj.userData.url = '/dm';
+				    object.scale.x = object.scale.y = object.scale.z = 0.05;
+				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
-				    clickables.push(obj);
 				  });
 		  	}
 				//
 
-				// Room dimensions — walls and floor must share the same width
-				// or you see the floor extending past the wall edges.
-				var ROOM_WIDTH = 1000;
-				var ROOM_DEPTH = 200;
-				var WALL_HEIGHT = 200;
-				var planeGeo = new THREE.PlaneBufferGeometry( ROOM_WIDTH, WALL_HEIGHT );
+				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
 
 				// MIRROR planes
 
-				var groundMirror = new THREE.Mirror( ROOM_WIDTH, ROOM_DEPTH, {
+				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
 					clipBias: 0.003,
 					textureWidth: WIDTH * window.devicePixelRatio,
 					textureHeight: HEIGHT * window.devicePixelRatio,
@@ -421,43 +384,6 @@
 				scene.add( hotPinkLight );
 
 				window.addEventListener( 'resize', onWindowResize, false );
-				window.addEventListener( 'orientationchange', function () {
-					setTimeout( onWindowResize, 100 );
-					setTimeout( onWindowResize, 400 );
-				}, false );
-				onWindowResize();
-
-				// Click-to-navigate on objects
-				var raycaster = new THREE.Raycaster();
-				var mouse = new THREE.Vector2();
-
-				function pickClickable( event ) {
-					var rect = renderer.domElement.getBoundingClientRect();
-					mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
-					mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
-					raycaster.setFromCamera( mouse, camera );
-					for ( var i = 0; i < clickables.length; i++ ) {
-						if ( raycaster.intersectObject( clickables[i], true ).length > 0 ) {
-							return clickables[i];
-						}
-					}
-					return null;
-				}
-
-				renderer.domElement.addEventListener( 'click', function ( event ) {
-					var hit = pickClickable( event );
-					if ( !hit || !hit.userData.url ) return;
-					var url = hit.userData.url;
-					if ( window.parent && window.parent !== window ) {
-						window.parent.postMessage( { type: 'navigate', to: url }, '*' );
-					} else {
-						window.location.href = url;
-					}
-				} );
-
-				renderer.domElement.addEventListener( 'mousemove', function ( event ) {
-					renderer.domElement.style.cursor = pickClickable( event ) ? 'pointer' : 'move';
-				} );
 			}
 
 			function onWindowResize() {
@@ -477,8 +403,7 @@
 					if (usePointLights) {
 						models[i].rotation.x += delta * 0.3 * ( i % 2 ? 1 : -1 );
 					}
-					var baseX = models[i].userData.baseX || 0;
-					models[i].position.x = baseX + 18 * Math.sin( timer + i );
+          models[i].position.x = 50 * Math.sin( timer + i );
 				}
 				renderer.render(scene, camera);
 			}
