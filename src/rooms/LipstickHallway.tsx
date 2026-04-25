@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { DateNightDialog } from './DateNightDialog'
-import { NextLetterLink } from '../components/NextLetterLink'
+import { NextRandomLink } from '../components/NextRandomLink'
 
 export function LipstickHallway() {
   return (
@@ -24,7 +24,7 @@ export function LipstickHallway() {
         }}
       />
       <DateNightDialog />
-      <NextLetterLink />
+      <NextRandomLink />
     </motion.div>
   )
 }

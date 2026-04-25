@@ -1,10 +1,23 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
-const LETTER_ROUTES = ['/guestbook', '/ask', '/dm']
+const NET_ART_ROUTES = [
+  '/lipstick',
+  '/webcore',
+  '/scroll-spiral',
+  '/sludge-flower',
+  '/tones',
+  '/myspace',
+  '/flower-mirror',
+]
 
-export function NextLetterLink() {
-  const to = useMemo(() => LETTER_ROUTES[Math.floor(Math.random() * LETTER_ROUTES.length)], [])
+export function NextRandomLink() {
+  const { pathname } = useLocation()
+
+  const to = useMemo(() => {
+    const others = NET_ART_ROUTES.filter((r) => r !== pathname)
+    return others[Math.floor(Math.random() * others.length)]
+  }, [pathname])
 
   return (
     <div

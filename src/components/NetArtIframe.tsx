@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
-import { NextLetterLink } from './NextLetterLink'
+import { NextRandomLink } from './NextRandomLink'
 
-export function NetArtIframe({ src, title }: { src: string; title: string }) {
+export function NetArtIframe({ src, title, showNext = true }: { src: string; title: string; showNext?: boolean }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -22,7 +22,7 @@ export function NetArtIframe({ src, title }: { src: string; title: string }) {
           background: '#000',
         }}
       />
-      <NextLetterLink />
+      {showNext && <NextRandomLink />}
     </motion.div>
   )
 }
