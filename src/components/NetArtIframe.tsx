@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion'
-import { DateNightDialog } from './DateNightDialog'
-import { NextLetterLink } from '../components/NextLetterLink'
+import { NextLetterLink } from './NextLetterLink'
 
-export function LipstickHallway() {
+export function NetArtIframe({ src, title }: { src: string; title: string }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -12,8 +11,8 @@ export function LipstickHallway() {
       style={{ position: 'fixed', inset: 0 }}
     >
       <iframe
-        src={`${import.meta.env.BASE_URL}lipstick-hallway/index.html`}
-        title="Lipstick Hallway"
+        src={src}
+        title={title}
         style={{
           position: 'absolute',
           inset: 0,
@@ -23,7 +22,6 @@ export function LipstickHallway() {
           background: '#000',
         }}
       />
-      <DateNightDialog />
       <NextLetterLink />
     </motion.div>
   )

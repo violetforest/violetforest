@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense } from 'react'
+import { NetArtIframe } from './components/NetArtIframe'
 import { Home } from './rooms/Home'
 import { HomeClassic } from './rooms/HomeClassic'
 import { Listening } from './rooms/Listening'
@@ -21,13 +22,6 @@ const SendDM = lazy(() => import('./rooms/SendDM').then(m => ({ default: m.SendD
 const PhotoPile = lazy(() => import('./rooms/PhotoPile').then(m => ({ default: m.PhotoPile })))
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
-
-// Static-page redirect — Vite/SPA catch-all swallows /webcore so the static
-// /webcore/index.html never loads. This route forwards there.
-function StaticRedirect({ to }: { to: string }) {
-  useEffect(() => { window.location.replace(to) }, [to])
-  return <div style={{ position: 'fixed', inset: 0, background: '#000' }} />
-}
 
 export default function App() {
   const location = useLocation()
@@ -86,8 +80,12 @@ export default function App() {
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
             <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
-            <Route path="/webcore" element={<StaticRedirect to={`${import.meta.env.BASE_URL}webcore/index.html`} />} />
-            <Route path="/webcore/*" element={<StaticRedirect to={`${import.meta.env.BASE_URL}webcore/index.html`} />} />
+            <Route path="/webcore" element={<NetArtIframe src={`${import.meta.env.BASE_URL}webcore/index.html`} title="webcore" />} />
+            <Route path="/scroll-spiral" element={<NetArtIframe src={`${import.meta.env.BASE_URL}scroll-spiral/index.html`} title="scroll-spiral" />} />
+            <Route path="/sludge-flower" element={<NetArtIframe src={`${import.meta.env.BASE_URL}sludge-flower/index.html`} title="sludge-flower" />} />
+            <Route path="/tones" element={<NetArtIframe src={`${import.meta.env.BASE_URL}tones/index.html`} title="tones" />} />
+            <Route path="/myspace" element={<NetArtIframe src={`${import.meta.env.BASE_URL}myspace/index.html`} title="myspace" />} />
+            <Route path="/flower-mirror" element={<NetArtIframe src={`${import.meta.env.BASE_URL}flower-mirror/index.html`} title="flower-mirror" />} />
           </Routes>
         </Suspense>
       </AnimatePresence>

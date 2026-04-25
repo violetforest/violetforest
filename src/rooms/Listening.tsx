@@ -947,6 +947,19 @@ export function Listening() {
     if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
   }, [tracks, activeIndex])
 
+  // Sync the SoundCloud widget to whatever cover is currently in front,
+  // using the SC Widget API so we don't reload (and re-autoplay) the iframe
+  // every time the user scrolls.
+  useEffect(() => {
+    const iframe = iframeRef.current
+    const track = tracks[activeIndex]
+    if (!iframe || !track) return
+    const SC = (window as any).SC
+    if (!SC?.Widget) return
+    const widget = SC.Widget(iframe)
+    widget.load(track.permalink_url, { auto_play: false, color: 'b8a8e0' })
+  }, [activeIndex, tracks])
+
   const activeTrack = tracks[activeIndex]
 
   return (
@@ -1026,13 +1039,21 @@ export function Listening() {
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: 'clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
-            <a href="https://soundcloud.com/hypermiami" target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', opacity: 0.35, borderBottom: '1px solid rgba(0,0,0,0.15)', paddingBottom: '2px' }}>
-              soundcloud
-            </a>
-            <Link to="/" style={{ fontSize: 'clamp(0.65rem, 1.2vw, 0.75rem)', opacity: 0.35, borderBottom: '1px solid rgba(0,0,0,0.15)', paddingBottom: '2px' }}>
-              back
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
+            <Link
+              to="/thinking"
+              style={{
+                fontFamily: '"VT323", "Menlo", ui-monospace, monospace',
+                fontSize: 'clamp(1.4rem, 2.6vw, 1.6rem)',
+                letterSpacing: '1px',
+                color: 'rgba(0, 0, 0, 0.55)',
+                transition: 'color 200ms ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(0, 0, 0, 0.9)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(0, 0, 0, 0.55)' }}
+            >
+              Next
+              <span style={{ animation: 'date-night-caret 0.9s steps(1) infinite', marginLeft: 4 }}>▌</span>
             </Link>
           </div>
         </div>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>­░⡷⠂༺ˢ͙ˡ͙ᵘ͙ᵈ͙ᵍ͙ᵉ͙ ᶠ͙ˡ͙ᵒ͙ʷ͙ᵉ͙ʳ͙༻⠐⢾░</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Audiowide|Exo+2:300|VT323" rel="stylesheet">
+    <link href="./../cara/css/styles.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="flower">
+      <!-- <button id="start" style="position: absolute; z-index: 1000">Start</button>
+      <button id="stop" style="position: absolute; z-index: 1000; top: 30px">Stop</button> -->
+      <!-- <a class="next-link" href="../lipstick/">Next</a> -->
+    <script src="/js/CCapture.all.min.js"></script>
+    <script src="./../cara/build/three.js"></script>
+    <script src="./../cara/js/loaders/OBJLoader.js"></script>
+    <script id="vertexShader" type="x-shader/x-vertex">
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+      }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+      uniform sampler2D baseTexture;
+      uniform float baseSpeed;
+      uniform sampler2D noiseTexture;
+      uniform float noiseScale;
+      uniform float alpha;
+      uniform float time;
+      uniform vec2 resolution;
+
+      varying vec2 vUv;
+      void main()
+      {
+        vec2 uvTimeShift = vUv + vec2( -0.3, 1.5 ) * time * baseSpeed;
+        vec4 noiseGeneratorTimeShift = texture2D( noiseTexture, uvTimeShift );
+        vec2 uvNoiseTimeShift = vUv + noiseScale * vec2( noiseGeneratorTimeShift.r, noiseGeneratorTimeShift.b );
+        vec4 baseColor = texture2D( baseTexture, uvNoiseTimeShift );
+
+        baseColor.a = alpha;
+        gl_FragColor = baseColor;
+      }
+    </script>
+
+    <script>
+      var container;
+      var camera, cameraBg, scene, sceneBg, renderer;
+      var canvas = document.getElementById(canvas);
+      var mouseX = 0, mouseY = 0;
+      var windowHalfX = window.innerWidth / 2;
+      var windowHalfY = window.innerHeight / 2;
+      var clock = new THREE.Clock();
+      var noiseTexture = new THREE.ImageUtils.loadTexture( '/flowers/seamless5.png' );
+      var noiseTexture2 = new THREE.ImageUtils.loadTexture( '/flowers/seamless2.png' );
+      var capturer = new CCapture( { 
+        format: 'webm',         
+        framerate: 60,
+        verbose: true } );
+      var light1, light2, light3, light4;
+      noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
+
+      init();
+      animate();
+      function init() {
+        container = document.createElement( 'div' );
+        document.body.appendChild( container );
+
+        var dVB = document.getElementById( 'stop' );
+        var start = document.getElementById('start');
+
+        // dVB.addEventListener( 'click', function( e ) {
+        //   capturer.stop();
+        //   this.style.display = 'none';
+        //   capturer.save();
+        // }, false );
+
+        // start.addEventListener( 'click', function( e ) {
+        //   capturer.start();
+        //   this.style.display = 'none';
+        // }, false );
+
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
+        camera.position.set(0, 0, 275);
+        this.customUniforms2 = {
+          baseSpeed:    { type: "f", value: 0.05 },
+          noiseTexture:   { type: "t", value: noiseTexture },
+          noiseScale:   { type: "f", value: 0.5337 },
+          alpha:      { type: "f", value: 1.0 },
+          time:       { type: "f", value: 10.0 }
+        };
+
+        this.customUniforms3 = {
+          baseSpeed:    { type: "f", value: 0.05 },
+          noiseTexture:   { type: "t", value: noiseTexture2 },
+          noiseScale:   { type: "f", value: 0.5337 },
+          alpha:      { type: "f", value: 1.0 },
+          time:       { type: "f", value: 10.0 }
+        };
+        // scene
+        scene = new THREE.Scene();
+        var texture = new THREE.Texture();
+
+        var materialNormal = new THREE.MeshNormalMaterial( { overdraw: 0.1 } );
+
+        var materialShader = new THREE.ShaderMaterial( {
+          uniforms: customUniforms2,
+          vertexShader: document.getElementById( 'vertexShader' ).textContent,
+          fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+        } );
+
+        var materialShader2 = new THREE.ShaderMaterial( {
+          uniforms: customUniforms3,
+          vertexShader: document.getElementById( 'vertexShader' ).textContent,
+          fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+        } );
+
+        var manager = new THREE.LoadingManager();
+        manager.onProgress = function ( item, loaded, total ) {
+          console.log( item, loaded, total );
+        };
+
+        var onProgress = function ( xhr ) {
+          if ( xhr.lengthComputable ) {
+            var percentComplete = xhr.loaded / xhr.total * 100;
+            console.log( Math.round(percentComplete, 2) + '% downloaded' );
+          }
+        };
+
+        var loader = new THREE.OBJLoader(manager);
+				const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
+				const delta = clock.getDelta();
+
+				light1 = new THREE.PointLight( 0x6824b5, 2, 75 );
+				light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x6824b5 } ) ) );
+				scene.add( light1 );
+
+				light2 = new THREE.PointLight( 0x00b5a8, 2, 75 );//cyan
+				light2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x00b5a8 } ) ) );
+				scene.add( light2 );
+
+				light3 = new THREE.PointLight( 0x80ff80, 2, 75 );//green
+				light3.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x80ff80 } ) ) );
+				scene.add( light3 );
+
+				light4 = new THREE.PointLight( 0xffaa00, 2, 75 );//yellow
+				light4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xffaa00 } ) ) );
+				scene.add( light4 );
+
+        for ( var i = 0; i < 1; i ++ ) {
+          loader.load("/flowers/obj/hand.obj", function(object) {
+            object.traverse(function(child) {
+           });
+            object.position.x = 8;
+            object.position.y = -3;
+            object.position.z = 0;
+
+            console.log("object.position.x" + object.position.x);
+            console.log("object.position.y" + object.position.y);
+            console.log("object.position.z" + object.position.z);
+
+            object.scale.x = 60;
+            object.scale.y = 60;
+            object.scale.z = 60;
+            obj = object;
+            scene.add(obj);
+          });
+        }
+
+        
+        for ( var i = 0; i < 1; i ++ ) {
+          loader.load("/flowers/obj/bouquet.obj", function(object) {
+            object.traverse(function(child) {
+           });
+            object.position.x = 8;
+            object.position.y = -3;
+            object.position.z = 0;
+
+            console.log("object.position.x" + object.position.x);
+            console.log("object.position.y" + object.position.y);
+            console.log("object.position.z" + object.position.z);
+
+            object.scale.x = 60;
+            object.scale.y = 60;
+            object.scale.z = 60;
+            obj = object;
+            scene.add(obj);
+          });
+        }
+        var geometry = new THREE.PlaneBufferGeometry( (window.innerWidth - 50), (window.innerHeight - 100));
+        var meshWall = new THREE.Mesh( geometry, materialShader );
+        meshWall.position.z = -800;
+        scene.add( meshWall );
+        
+        //
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.autoClear = false;
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setFaceCulling( THREE.CullFaceNone );
+        container.appendChild( renderer.domElement );
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+        //
+        window.addEventListener( 'resize', onWindowResize, false );
+      }
+
+      function onWindowResize() {
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+        camera.aspect = window.innerWidth, window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+      function onDocumentMouseMove( event ) {
+        mouseX = ( event.clientX - windowHalfX ) / 2;
+        mouseY = ( event.clientY - windowHalfY ) / 2;
+      }
+      //
+      function animate() {
+        requestAnimationFrame( animate );
+        render();
+        var delta = clock.getDelta();
+        customUniforms2.time.value += delta;
+      }
+      function render() {
+        camera.position.x += ( - mouseX - camera.position.x ) * .001;
+        camera.position.y += ( mouseY - camera.position.y ) * .001;
+        //camera.position.x = Math.sin( Date.now() * 0.001 * 0.3 ) * 40;
+
+        if (camera.position.x > 120) {
+          camera.position.x = 120;
+        } else if (camera.position.x < -120) {
+          camera.position.x = -120;
+        }
+
+        if (camera.position.y > 30) {
+          camera.position.y = 30;
+        } else if (camera.position.y < -20) {
+          camera.position.y = -20;
+        }
+
+        light1.position.x = Math.sin( Date.now() * 0.0005 * 0.7 ) * 20;
+				light1.position.y = 75;
+				light1.position.z = Math.cos( Date.now() * 0.0005 * 0.3 ) * 30;
+
+				light2.position.x = Math.cos( Date.now() * 0.005 * 0.3 ) * 30;
+				light2.position.y = Math.sin( Date.now() * 0.0005 * 0.5 ) * 40;
+				light2.position.z = Math.sin( Date.now() * 0.0005 * 0.7 ) * 30;
+
+				light3.position.x = Math.sin( Date.now() * 0.0005 * 0.7 ) * 30;
+				light3.position.y = Math.cos( Date.now() * 0.0005 * 0.3 );
+				light3.position.z = Math.sin( Date.now() * 0.0005 * 0.5 ) * 30;
+
+				light4.position.x = Math.sin( Date.now() * 0.0005 * 0.3 ) * 30;
+				light4.position.y = Math.cos( Date.now() * 0.0005 * 0.7 ) * 30;
+				light4.position.z = Math.sin( Date.now() * 0.0005 * 0.5 ) * 30;
+
+        camera.lookAt( scene.position );
+        renderer.render( scene, camera );
+        if( capturer ) capturer.capture( renderer.domElement );
+      }
+    </script>
+
+  </body>
+</html>
