@@ -412,6 +412,11 @@
 				scene.add( hotPinkLight );
 
 				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener( 'orientationchange', function () {
+					setTimeout( onWindowResize, 100 );
+					setTimeout( onWindowResize, 400 );
+				}, false );
+				onWindowResize();
 
 				// Click-to-navigate on objects
 				var raycaster = new THREE.Raycaster();
@@ -449,7 +454,11 @@
 			function onWindowResize() {
 				windowHalfX = window.innerWidth / 2;
 				windowHalfY = window.innerHeight / 2;
-				camera.aspect = window.innerWidth / window.innerHeight;
+				var aspect = window.innerWidth / window.innerHeight;
+				camera.aspect = aspect;
+				// Widen FOV when the viewport is narrower than landscape so the
+				// 8 floating objects (spread x ∈ ±150) all stay in frame.
+				camera.fov = aspect >= 1 ? VIEW_ANGLE : VIEW_ANGLE / Math.sqrt( aspect );
 				camera.updateProjectionMatrix();
 				renderer.setSize( window.innerWidth, window.innerHeight );
 			}
