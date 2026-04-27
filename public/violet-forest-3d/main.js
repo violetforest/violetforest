@@ -437,7 +437,7 @@ const NET_ART_ROUTES = [
     '/scroll-spiral',
     '/sludge-flower',
     '/tones',
-    '/flower-mirror',
+    '/listening',
 ];
 
 const raycaster = new THREE.Raycaster();

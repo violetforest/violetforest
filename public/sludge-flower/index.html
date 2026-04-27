@@ -47,8 +47,15 @@
     </script>
 
     <script>
-      var container;
+      var container, meshWall;
       var camera, cameraBg, scene, sceneBg, renderer;
+      function sizeShaderPlane() {
+        if ( ! meshWall || ! camera ) return;
+        var distance = camera.position.z - meshWall.position.z;
+        var visHeight = 2 * distance * Math.tan( camera.fov * Math.PI / 360 );
+        var visWidth = visHeight * camera.aspect;
+        meshWall.scale.set( visWidth, visHeight, 1 );
+      }
       var canvas = document.getElementById(canvas);
       var mouseX = 0, mouseY = 0;
       var windowHalfX = window.innerWidth / 2;
@@ -190,9 +197,10 @@
             scene.add(obj);
           });
         }
-        var geometry = new THREE.PlaneBufferGeometry( (window.innerWidth - 50), (window.innerHeight - 100));
-        var meshWall = new THREE.Mesh( geometry, materialShader );
+        var geometry = new THREE.PlaneBufferGeometry( 1, 1 );
+        meshWall = new THREE.Mesh( geometry, materialShader );
         meshWall.position.z = -800;
+        sizeShaderPlane();
         scene.add( meshWall );
         
         //
@@ -211,9 +219,10 @@
       function onWindowResize() {
         windowHalfX = window.innerWidth / 2;
         windowHalfY = window.innerHeight / 2;
-        camera.aspect = window.innerWidth, window.innerHeight;
+        camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize( window.innerWidth, window.innerHeight );
+        sizeShaderPlane();
       }
       function onDocumentMouseMove( event ) {
         mouseX = ( event.clientX - windowHalfX ) / 2;

@@ -111,7 +111,6 @@ export default function App() {
                 }
               />
             } />
-            <Route path="/flower-mirror" element={<NetArtIframe src={`${import.meta.env.BASE_URL}flower-mirror/index.html`} title="flower-mirror" />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
