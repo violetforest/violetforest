@@ -437,7 +437,6 @@ const NET_ART_ROUTES = [
     '/scroll-spiral',
     '/sludge-flower',
     '/tones',
-    '/myspace',
     '/flower-mirror',
 ];
 

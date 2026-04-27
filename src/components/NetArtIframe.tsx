@@ -1,7 +1,19 @@
+import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { NextRandomLink } from './NextRandomLink'
+import { NetArtInfo } from './NetArtInfo'
 
-export function NetArtIframe({ src, title, showNext = true }: { src: string; title: string; showNext?: boolean }) {
+export function NetArtIframe({
+  src,
+  title,
+  showNext = true,
+  info,
+}: {
+  src: string
+  title: string
+  showNext?: boolean
+  info?: ReactNode
+}) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -22,6 +34,7 @@ export function NetArtIframe({ src, title, showNext = true }: { src: string; tit
           background: '#000',
         }}
       />
+      {info && <NetArtInfo>{info}</NetArtInfo>}
       {showNext && <NextRandomLink />}
     </motion.div>
   )

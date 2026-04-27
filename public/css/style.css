@@ -1,0 +1,191 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,900);
+@import url(https://fonts.googleapis.com/css?family=Playfair+Display:400italic);
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: 0.05em;
+}
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+.rainbow-scroll {
+  cursor: s-resize;
+  position: relative;
+  display: block;
+  height: 100%;
+  z-index: 1;
+}
+body ::-moz-selection {
+  background: #EDC919;
+}
+body ::selection {
+  background: #EDC919;
+}
+
+#app {
+  position: realtive;
+  display: block;
+}
+
+.app {
+  position: relative;
+  display: block;
+  background-color: #000;
+}
+
+.container {
+  position: fixed;
+  width: 100%;
+}
+
+.container div {
+  -webkit-animation: AnimationName 30s ease infinite;
+  -moz-animation: AnimationName 30s ease infinite;
+  animation: AnimationName 30s ease infinite;
+}
+
+.card-plane {
+  position: absolute;
+  width: 100%;
+  height: 320px;
+  margin: 0;
+}
+.card-plane .card-face {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  border-radius: 100%;
+}
+.card-plane .card-face.front {
+  background-color: black;
+  color: white;
+  font-style: italic;
+  font-family: 'Playfair Display', Serif;
+}
+.card-plane .card-face.front .title {
+  font-size: 21px;
+  padding: 22px 22px;
+}
+.card-plane .card-face.front .title hr {
+  margin: 7px 0;
+}
+.card-plane .card-face.front .scroll {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  color: #7D7D7D;
+  bottom: -30px;
+  font-size: 12px;
+}
+.card-plane .card-face.back {
+  /* reversed for the back of the card */
+  width: 320px;
+  height: 182.85714px;
+  -webkit-transform: rotateZ(90deg) rotateX(180deg) translate3d(68.57143px, -68.57143px, 0px);
+          transform: rotateZ(90deg) rotateX(180deg) translate3d(68.57143px, -68.57143px, 0px);
+}
+
+.arrow {
+  font-size: 24px;
+  font-family: 'Times New Roman', serif;
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  top: 320px;
+}
+
+#links {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 9vmin;
+  padding: 4vmin;
+  font-weight: 900;
+  width: 100vmin;
+  margin: auto;
+  position: relative;
+}
+#links .line {
+  line-height: 7.5vmin;
+  margin-bottom: 2.5vmin;
+}
+#links .line:nth-of-type(5n+1) {
+  color: #FD556F;
+}
+#links .line:nth-of-type(5n+2) {
+  color: #EDC919;
+}
+#links .line:nth-of-type(5n+3) {
+  color: #76919A;
+}
+#links .line:nth-of-type(5n+4) {
+  color: #257A97;
+}
+#links .line:nth-of-type(5n+5) {
+  color: #7A486E;
+}
+#links a {
+  color: black;
+  border-bottom: 0.7vmin solid black;
+  margin-bottom: -0.7vmin;
+  padding-bottom: 0.6vmin;
+  text-decoration: none;
+  display: inline-block;
+  color: inherit;
+  border-color: inherit;
+}
+#links a:hover {
+  border-bottom-style: solid;
+  font-style: italic;
+}
+#links .slash {
+  font-weight: 200;
+}
+.top-center {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+}
+.bottom-svg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  max-width: 50px;
+  margin: auto;
+  padding: 2em 0 4em;
+  color: black;
+}
+.top-svg {
+  width: 100%;
+  max-width: 75px;
+  display: block;
+  margin: auto;
+}
+.bottom-center {
+  position: relative;
+  bottom: 0;
+  z-index: 100;
+  width: 100%;
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+}
+
+.bottom-link {
+  position: relative;
+  display: block;
+}
