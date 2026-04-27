@@ -54,8 +54,8 @@
       var windowHalfX = window.innerWidth / 2;
       var windowHalfY = window.innerHeight / 2;
       var clock = new THREE.Clock();
-      var noiseTexture = new THREE.ImageUtils.loadTexture( '/flowers/seamless5.png' );
-      var noiseTexture2 = new THREE.ImageUtils.loadTexture( '/flowers/seamless2.png' );
+      var noiseTexture = new THREE.ImageUtils.loadTexture( '/sludge-flower/seamless5.png' );
+      var noiseTexture2 = new THREE.ImageUtils.loadTexture( '/sludge-flower/seamless2.png' );
       var capturer = new CCapture( { 
         format: 'webm',         
         framerate: 60,
@@ -151,7 +151,7 @@
 				scene.add( light4 );
 
         for ( var i = 0; i < 1; i ++ ) {
-          loader.load("/flowers/obj/hand.obj", function(object) {
+          loader.load("/sludge-flower/obj/hand.obj", function(object) {
             object.traverse(function(child) {
            });
             object.position.x = 8;
@@ -172,7 +172,7 @@
 
         
         for ( var i = 0; i < 1; i ++ ) {
-          loader.load("/flowers/obj/bouquet.obj", function(object) {
+          loader.load("/sludge-flower/obj/bouquet.obj", function(object) {
             object.traverse(function(child) {
            });
             object.position.x = 8;
