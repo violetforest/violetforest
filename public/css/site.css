@@ -1,0 +1,12 @@
+#info-next {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 10;
+}
+#info-next svg {
+  width: 100%;
+  height: auto;
+}
