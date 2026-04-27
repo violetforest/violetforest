@@ -435,7 +435,6 @@ const NET_ART_ROUTES = [
     '/lipstick',
     '/webcore',
     '/scroll-spiral',
-    '/sludge-flower',
     '/tones',
     '/listening',
 ];

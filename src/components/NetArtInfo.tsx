@@ -10,7 +10,7 @@ export function NetArtInfo({ children }: { children: ReactNode }) {
         onClick={() => setOpen((o) => !o)}
         style={{
           position: 'fixed',
-          top: '2.5vh',
+          bottom: '2.5vh',
           right: '2vw',
           background: 'transparent',
           border: 'none',

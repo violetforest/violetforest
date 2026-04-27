@@ -11,7 +11,7 @@ export function DateNightDialog() {
         onClick={() => setRevealed(r => !r)}
         style={{
           position: 'fixed',
-          bottom: '2.5vh',
+          top: '2.5vh',
           right: '2vw',
           background: 'transparent',
           border: 'none',
