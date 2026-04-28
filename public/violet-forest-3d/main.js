@@ -15,7 +15,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 2.0;
+renderer.toneMappingExposure = 1.2;
 document.body.appendChild(renderer.domElement);
 
 // Orbit controls
@@ -27,46 +27,44 @@ controls.maxDistance = 100;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.3;
 
-// ============ LIGHTING FOR CHROME EFFECT ============
+// ============ LIGHTING (matches Hallway LogoLighting) ============
 
-const keyLight = new THREE.SpotLight(0xffffff, 2000);
+const keyLight = new THREE.SpotLight(0xffffff, 200);
 keyLight.position.set(25, 25, 35);
-keyLight.angle = Math.PI / 3;
-keyLight.penumbra = 0.2;
-keyLight.decay = 1.0;
+keyLight.angle = Math.PI / 6;
+keyLight.penumbra = 0.5;
+keyLight.decay = 2.0;
 scene.add(keyLight);
 
-const keyLight2 = new THREE.SpotLight(0xffffff, 1200);
+const keyLight2 = new THREE.SpotLight(0xffffff, 120);
 keyLight2.position.set(-25, 20, 30);
-keyLight2.angle = Math.PI / 3.5;
-keyLight2.penumbra = 0.3;
+keyLight2.angle = Math.PI / 6;
+keyLight2.penumbra = 0.5;
+keyLight2.decay = 2.0;
 scene.add(keyLight2);
 
-const topLight = new THREE.DirectionalLight(0xffffff, 6);
+const topLight = new THREE.DirectionalLight(0xffffff, 1.5);
 topLight.position.set(0, 35, 15);
 scene.add(topLight);
 
-const rimLight = new THREE.DirectionalLight(0x9955ff, 6);
+const rimLight = new THREE.DirectionalLight(0x9955ff, 2);
 rimLight.position.set(-20, 8, -25);
 scene.add(rimLight);
 
-const rimLight2 = new THREE.DirectionalLight(0x5555ff, 5);
+const rimLight2 = new THREE.DirectionalLight(0x5555ff, 1.5);
 rimLight2.position.set(20, -8, -20);
 scene.add(rimLight2);
 
-const hemiLight = new THREE.HemisphereLight(0x9977dd, 0x110022, 1.5);
-scene.add(hemiLight);
-
-const frontFill = new THREE.PointLight(0xffffff, 300, 70);
-frontFill.position.set(0, 0, 30);
+const frontFill = new THREE.PointLight(0xffffff, 80, 20);
+frontFill.position.set(0, 0, 8);
 scene.add(frontFill);
 
-const sideLight1 = new THREE.PointLight(0xccccff, 200, 50);
-sideLight1.position.set(30, 0, 10);
+const sideLight1 = new THREE.PointLight(0xccccff, 50, 15);
+sideLight1.position.set(8, 0, 3);
 scene.add(sideLight1);
 
-const sideLight2 = new THREE.PointLight(0xccccff, 200, 50);
-sideLight2.position.set(-30, 0, 10);
+const sideLight2 = new THREE.PointLight(0xccccff, 50, 15);
+sideLight2.position.set(-8, 0, 3);
 scene.add(sideLight2);
 
 // ============ 4-POINTED STAR PARTICLE SYSTEM ============
