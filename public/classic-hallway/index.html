@@ -10,21 +10,6 @@
 	</head>
 	<body style="cursor: move">
 		<div id="container"></div>
-
-		<div id="cameraPanel" style="position:fixed;top:1rem;right:1rem;z-index:10;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:0.6rem 0.8rem;font-family:monospace;font-size:0.7rem;color:#fff;backdrop-filter:blur(8px);min-width:200px;">
-			<div style="opacity:0.6;margin-bottom:0.4rem;">camera position</div>
-			<label style="display:block;margin-bottom:0.4rem;">
-				<div style="display:flex;justify-content:space-between;"><span>x</span><span id="camXVal">600</span></div>
-				<input id="camX" type="range" min="-1000" max="1000" step="10" value="600" style="width:100%;">
-			</label>
-			<label style="display:block;margin-bottom:0.4rem;">
-				<div style="display:flex;justify-content:space-between;"><span>y</span><span id="camYVal">100</span></div>
-				<input id="camY" type="range" min="0" max="500" step="5" value="100" style="width:100%;">
-			</label>
-			<label style="display:block;margin-bottom:0.4rem;">
-				<div style="display:flex;justify-content:space-between;"><span>z</span><span id="camZVal">0</span></div>
-				<input id="camZ" type="range" min="-1000" max="1000" step="10" value="0" style="width:100%;">
-			</label>
 		</div>
 
 		<script id="fragmentShader" type="x-shader/x-vertex">
@@ -113,27 +98,6 @@
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 				camera.position.set( 600, 100, 0 );
 				camera.lookAt( 0, 100, 0 );
-
-				// Wire the slider panel to camera.position. Sliders are kept in
-				// sync with whatever the page boots with.
-				(function () {
-					var inputs = ['camX', 'camY', 'camZ'].map(function (id) { return document.getElementById(id); });
-					var labels = ['camXVal', 'camYVal', 'camZVal'].map(function (id) { return document.getElementById(id); });
-					inputs[0].value = camera.position.x; labels[0].textContent = camera.position.x;
-					inputs[1].value = camera.position.y; labels[1].textContent = camera.position.y;
-					inputs[2].value = camera.position.z; labels[2].textContent = camera.position.z;
-					function update() {
-						var x = parseFloat(inputs[0].value);
-						var y = parseFloat(inputs[1].value);
-						var z = parseFloat(inputs[2].value);
-						camera.position.set(x, y, z);
-						camera.lookAt(0, 100, 0);
-						labels[0].textContent = x;
-						labels[1].textContent = y;
-						labels[2].textContent = z;
-					}
-					inputs.forEach(function (i) { i.addEventListener('input', update); });
-				})();
 
 				// model
 			  var texture = new THREE.Texture();
