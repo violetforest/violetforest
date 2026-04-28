@@ -284,6 +284,14 @@ function HallwayGeometry() {
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, HALLWAY_HEIGHT, hl]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_LENGTH + 4]} />
       </mesh>
+      {/* Left wall */}
+      <mesh rotation={[0, Math.PI / 2, 0]} position={[-HALLWAY_WIDTH / 2, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
+        <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
+      </mesh>
+      {/* Right wall */}
+      <mesh rotation={[0, -Math.PI / 2, 0]} position={[HALLWAY_WIDTH / 2, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
+        <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
+      </mesh>
       {/* Back wall */}
       <mesh position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH + 2]} rotation={[0, Math.PI, 0]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
