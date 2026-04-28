@@ -356,12 +356,12 @@
 				scene.add( planeTop );
 
 				var planeBack = new THREE.Mesh( planeGeo, wallMaterial );
-				planeBack.position.z = -200;
+				planeBack.position.z = -100;
 				planeBack.position.y = 100;
 				scene.add( planeBack );
 
 				var planeFront =  new THREE.Mesh( planeGeo, wallMaterial );
-				planeFront.position.z = 200;
+				planeFront.position.z = 100;
 				planeFront.position.y = 100;
 				planeFront.rotateY( Math.PI );
 				scene.add( planeFront );
