@@ -1,8 +1,6 @@
-import { useMemo, useRef, useEffect, useState, useCallback, Suspense } from 'react'
-import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
-import { MeshReflectorMaterial } from '@react-three/drei'
+import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 const HALLWAY_LENGTH = 14
 const HALLWAY_WIDTH = 5.4
@@ -254,61 +252,34 @@ function CameraRig({ scrollProgress }: { scrollProgress: number }) {
 }
 
 function HallwayGeometry() {
-  // Lipstick uses MeshPhongMaterial { color: 0xffffff, shininess: 100 } on
-  // its walls so the hot-pink/purple lights bounce around as bright specular
-  // highlights against white.
   const wallMat = useMemo(() =>
-    new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      shininess: 100,
-      side: THREE.FrontSide,
+    new THREE.MeshStandardMaterial({
+      color: '#c8b8d8', roughness: 0.9, side: THREE.DoubleSide,
+    }), [])
+  const floorMat = useMemo(() =>
+    new THREE.MeshStandardMaterial({
+      color: '#a898b8', roughness: 0.85, side: THREE.DoubleSide,
     }), [])
 
+  const hw = HALLWAY_WIDTH / 2
   const hl = HALLWAY_LENGTH / 2
 
   return (
     <>
-      {/* Reflective floor (matches lipstick groundMirror) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, hl]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, hl]} material={floorMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_LENGTH + 4]} />
-        <MeshReflectorMaterial
-          blur={[200, 100]}
-          resolution={512}
-          mixBlur={1}
-          mixStrength={1}
-          mirror={1}
-          roughness={0}
-          color="#ffffff"
-        />
       </mesh>
-      {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, HALLWAY_HEIGHT, hl]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_LENGTH + 4]} />
       </mesh>
-      {/* Left wall */}
-      <mesh rotation={[0, Math.PI / 2, 0]} position={[-HALLWAY_WIDTH / 2, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
+      <mesh rotation={[0, Math.PI / 2, 0]} position={[-hw, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
         <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
       </mesh>
-      {/* Right wall */}
-      <mesh rotation={[0, -Math.PI / 2, 0]} position={[HALLWAY_WIDTH / 2, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
+      <mesh rotation={[0, -Math.PI / 2, 0]} position={[hw, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
         <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
       </mesh>
-      {/* Back wall */}
       <mesh position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH + 2]} rotation={[0, Math.PI, 0]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
-      </mesh>
-      {/* Small vertical mirror standing in front of the back wall */}
-      <mesh position={[0, HALLWAY_HEIGHT * 0.475, HALLWAY_LENGTH + 1.9]}>
-        <planeGeometry args={[HALLWAY_WIDTH * 0.55, HALLWAY_HEIGHT * 0.6]} />
-        <MeshReflectorMaterial
-          blur={[100, 50]}
-          resolution={256}
-          mixBlur={0.5}
-          mixStrength={1}
-          mirror={1}
-          roughness={0}
-          color="#ffffff"
-        />
       </mesh>
     </>
   )
@@ -382,9 +353,7 @@ interface LogoRefs {
   baseY: React.MutableRefObject<number>
 }
 
-/** Liquid metal 3D extruded logo (currently disabled on the classic page) */
-// @ts-expect-error preserved for future use
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** Liquid metal 3D extruded logo */
 function Logo3D({ envMap, onRefs }: { envMap: THREE.Texture; onRefs?: (r: LogoRefs) => void }) {
   const groupRef = useRef<THREE.Group>(null)
   const materialRef = useRef<THREE.MeshPhysicalMaterial | null>(null)
@@ -566,72 +535,28 @@ function StarField() {
   return <group ref={groupRef} position={[0, HALLWAY_HEIGHT / 2, LOGO_Z]} />
 }
 
-/** Lipstick-hallway lighting (1 purple + 3 hot-pink point lights),
- * positioned inside the classic tunnel. */
+/** Lights to illuminate the chrome logo */
 function LogoLighting() {
-  const cz = HALLWAY_LENGTH / 2
   return (
     <>
-      <pointLight color="#7F00FF" intensity={1.5} distance={4.5} position={[0, HALLWAY_HEIGHT * 0.6, cz]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={1.125} position={[HALLWAY_WIDTH / 2 * 0.9, HALLWAY_HEIGHT / 2, 3]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={11.25} position={[-HALLWAY_WIDTH / 2 * 0.9, HALLWAY_HEIGHT / 2, cz]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={22.5} position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH]} />
+      <spotLight position={[25, HALLWAY_HEIGHT / 2 + 25, LOGO_Z + 35]} intensity={200} angle={Math.PI / 6} penumbra={0.5} decay={2.0} />
+      <spotLight position={[-25, HALLWAY_HEIGHT / 2 + 20, LOGO_Z + 30]} intensity={120} angle={Math.PI / 6} penumbra={0.5} decay={2.0} />
+      <directionalLight position={[0, HALLWAY_HEIGHT / 2 + 35, LOGO_Z + 15]} intensity={1.5} />
+      <directionalLight position={[-20, HALLWAY_HEIGHT / 2 + 8, LOGO_Z - 25]} intensity={2} color="#9955ff" />
+      <directionalLight position={[20, HALLWAY_HEIGHT / 2 - 8, LOGO_Z - 20]} intensity={1.5} color="#5555ff" />
+      <pointLight position={[0, HALLWAY_HEIGHT / 2, LOGO_Z + 8]} intensity={80} distance={20} />
+      <pointLight position={[8, HALLWAY_HEIGHT / 2, LOGO_Z + 3]} intensity={50} distance={15} color="#ccccff" />
+      <pointLight position={[-8, HALLWAY_HEIGHT / 2, LOGO_Z + 3]} intensity={50} distance={15} color="#ccccff" />
     </>
   )
 }
 
-/** Two lipstick palms: clones of plant.obj rendered with MeshNormalMaterial. */
-function Plants() {
-  const base = import.meta.env.BASE_URL || '/'
-  const obj = useLoader(OBJLoader, `${base}lipstick-hallway/obj/plant.obj`)
-
-  const [left, right] = useMemo(() => {
-    const mat = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide })
-    const make = () => {
-      const o = obj.clone(true)
-      o.traverse((c) => { if (c instanceof THREE.Mesh) c.material = mat })
-      return o
-    }
-    return [make(), make()]
-  }, [obj])
-
-  // Lipstick scales the palm 40× in a 200-tall scene; classic hallway is 4.5
-  // tall, so 40 × (4.5/200) = 0.9 keeps the proportional size.
-  const PLANT_SCALE = 0.9
+function SceneContent({ onRefs }: { onRefs?: (r: LogoRefs) => void }) {
+  const envMap = useEnvMap()
   return (
     <>
-      <primitive object={left} scale={PLANT_SCALE} position={[-2, 0, HALLWAY_LENGTH - 1]} />
-      <primitive object={right} scale={PLANT_SCALE} position={[2, 0, HALLWAY_LENGTH - 1]} />
-    </>
-  )
-}
-
-/** Lipstick grid skybox: 1000-unit box with grid.jpeg on every face,
- *  rendered from the inside via BackSide. */
-function SkyBox() {
-  const texture = useMemo(() => {
-    const base = import.meta.env.BASE_URL || '/'
-    const tex = new THREE.TextureLoader().load(`${base}lipstick-hallway/cubeTexture/grid.jpeg`)
-    tex.colorSpace = THREE.SRGBColorSpace
-    return tex
-  }, [])
-  return (
-    <mesh renderOrder={-1}>
-      <boxGeometry args={[500, 500, 500]} />
-      <meshBasicMaterial map={texture} side={THREE.BackSide} depthWrite={false} />
-    </mesh>
-  )
-}
-
-function SceneContent({ onRefs: _onRefs }: { onRefs?: (r: LogoRefs) => void }) {
-  useEnvMap()
-  return (
-    <>
-      <SkyBox />
+      <Logo3D envMap={envMap} onRefs={onRefs} />
       <StarField />
-      <Suspense fallback={null}>
-        <Plants />
-      </Suspense>
       <LogoLighting />
     </>
   )
@@ -764,10 +689,14 @@ export function Hallway({ scrollProgress }: Props) {
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
         }}
-        camera={{ position: [0, 1.6, 15], fov: 55, near: 0.1, far: 1500 }}
+        camera={{ position: [0, 1.6, 15], fov: 55, near: 0.1, far: 50 }}
         style={{ width: '100%', height: '100%' }}
       >
         <color attach="background" args={['#000000']} />
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[0, 4, 8]} intensity={0.4} />
+        <pointLight position={[0, 3.5, HALLWAY_LENGTH * 0.7]} intensity={0.3} distance={HALLWAY_LENGTH} />
+        <pointLight position={[0, 3, 6]} intensity={0.5} distance={8} />
 
         <CameraRig scrollProgress={scrollProgress} />
         <HallwayGeometry />
