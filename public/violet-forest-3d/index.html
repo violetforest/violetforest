@@ -35,11 +35,23 @@
         #enter-link:hover {
             text-decoration: underline;
         }
+        #spin-hint {
+            position: fixed;
+            top: 76%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8844ff;
+            font-family: monospace;
+            font-size: 14px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading...</div>
     <a id="enter-link" href="/listening">enter</a>
+    <div id="spin-hint">spin the logo</div>
     <script type="importmap">
     {
         "imports": {
