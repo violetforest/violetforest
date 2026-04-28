@@ -731,7 +731,7 @@ export function Hallway({ scrollProgress }: Props) {
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.2,
         }}
-        camera={{ position: [0, 1.6, 15], fov: 55, near: 0.1, far: 50 }}
+        camera={{ position: [0, 1.6, 15], fov: 55, near: 0.1, far: 1500 }}
         style={{ width: '100%', height: '100%' }}
       >
         <color attach="background" args={['#000000']} />
