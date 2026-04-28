@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>classic hallway</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link href="/cara/css/styles.css" rel="stylesheet">
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    #container { position: fixed; inset: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script>
+    // detect mobile OS because point lights don't work on some android phones
+    var usePointLights = !/Android/i.test(navigator.userAgent);
+  </script>
+  <script src="/cara/build/three.js"></script>
+  <script src="/cara/js/Mirror.js"></script>
+  <script src="/cara/js/controls/OrbitControls.js"></script>
+  <script src="/cara/js/loaders/OBJLoader.js"></script>
+
+  <script>
+    // Reuse the lipstick assets; no need to duplicate them.
+    var ASSET_BASE = '/lipstick-hallway/';
+
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+    var VIEW_ANGLE = 35;
+    var ASPECT = WIDTH / HEIGHT;
+    var NEAR = 1;
+    var FAR = 10000;
+
+    var camera, scene, renderer;
+    var clock = new THREE.Clock();
+
+    init();
+    animate();
+
+    function init() {
+      var container = document.getElementById('container');
+
+      // renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(WIDTH, HEIGHT);
+      renderer.setClearColor(0x000000, 1);
+      container.appendChild(renderer.domElement);
+
+      // scene
+      scene = new THREE.Scene();
+
+      // grid cube background — exactly like lipstick
+      var cube = new THREE.BoxBufferGeometry(1000, 1000, 1000);
+      cube.scale(-1, 1, 1);
+      var gridMaterial = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load(ASSET_BASE + 'cubeTexture/grid.jpeg')
+      });
+      scene.add(new THREE.Mesh(cube, gridMaterial));
+
+      // camera — fixed in place, looking down the tunnel
+      camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+      camera.position.set(0, 100, 600);
+      camera.lookAt(0, 100, 0);
+
+      // mirrors
+      var groundMirror = new THREE.Mirror(window.innerWidth, window.innerHeight / 2, {
+        clipBias: 0.003,
+        textureWidth: WIDTH * window.devicePixelRatio,
+        textureHeight: HEIGHT * window.devicePixelRatio,
+        color: 0x777777
+      });
+      groundMirror.rotateX(-Math.PI / 2);
+      scene.add(groundMirror);
+
+      var verticalMirror = new THREE.Mirror(120, 120, {
+        clipBias: 0.003,
+        textureWidth: WIDTH * window.devicePixelRatio,
+        textureHeight: HEIGHT * window.devicePixelRatio,
+        color: 0x777777
+      });
+      verticalMirror.position.y = 95;
+      verticalMirror.position.z = -85;
+      scene.add(verticalMirror);
+
+      // walls
+      var planeGeo = new THREE.PlaneBufferGeometry(window.innerWidth / 1.5, window.innerHeight / 2);
+      var wallMat, topMat;
+      if (usePointLights) {
+        wallMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 100 });
+        topMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 100 });
+      } else {
+        wallMat = new THREE.MeshBasicMaterial({ color: 0x5b23aa });
+        topMat = new THREE.MeshBasicMaterial({ color: 0x3e0c71 });
+      }
+
+      var planeTop = new THREE.Mesh(planeGeo, topMat);
+      planeTop.position.y = 200;
+      planeTop.rotateX(Math.PI / 2);
+      scene.add(planeTop);
+
+      // Hallway extended 2× on both ends (front/back walls at ±200 instead
+      // of ±100) so the tunnel feels longer.
+      var planeBack = new THREE.Mesh(planeGeo, wallMat);
+      planeBack.position.z = -200;
+      planeBack.position.y = 100;
+      scene.add(planeBack);
+
+      var planeFront = new THREE.Mesh(planeGeo, wallMat);
+      planeFront.position.z = 200;
+      planeFront.position.y = 100;
+      planeFront.rotateY(Math.PI);
+      scene.add(planeFront);
+
+      // two palms — same as lipstick, no other clutter
+      var normalMat = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide });
+      var loader = new THREE.OBJLoader();
+
+      [-150, 150].forEach(function (x) {
+        loader.load(ASSET_BASE + 'obj/plant.obj', function (object) {
+          object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) child.material = normalMat;
+          });
+          object.scale.set(40, 40, 40);
+          object.position.set(x, 25, -300);
+          scene.add(object);
+        });
+      });
+
+      // lights — exactly like lipstick
+      var purple = new THREE.PointLight(0x7F00FF, 1.5, 200);
+      purple.position.y = 120;
+      scene.add(purple);
+
+      scene.add(makePink(550, 100, 0, 50));
+      scene.add(makePink(-550, 100, 0, 500));
+      scene.add(makePink(0, 100, 550, 1000));
+
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function makePink(x, y, z, dist) {
+      var l = new THREE.PointLight(0xFF1493, 0.5, dist);
+      l.position.set(x, y, z);
+      return l;
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
