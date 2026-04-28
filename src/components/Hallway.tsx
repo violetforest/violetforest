@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 const HALLWAY_LENGTH = 14
@@ -252,34 +253,57 @@ function CameraRig({ scrollProgress }: { scrollProgress: number }) {
 }
 
 function HallwayGeometry() {
+  // Lipstick uses MeshPhongMaterial { color: 0xffffff, shininess: 100 } on
+  // its walls so the hot-pink/purple lights bounce around as bright specular
+  // highlights against white.
   const wallMat = useMemo(() =>
-    new THREE.MeshStandardMaterial({
-      color: '#c8b8d8', roughness: 0.9, side: THREE.DoubleSide,
-    }), [])
-  const floorMat = useMemo(() =>
-    new THREE.MeshStandardMaterial({
-      color: '#a898b8', roughness: 0.85, side: THREE.DoubleSide,
+    new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      shininess: 100,
+      side: THREE.FrontSide,
     }), [])
 
-  const hw = HALLWAY_WIDTH / 2
   const hl = HALLWAY_LENGTH / 2
 
   return (
     <>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, hl]} material={floorMat}>
+      {/* Reflective floor (matches lipstick groundMirror) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, hl]}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_LENGTH + 4]} />
+        <MeshReflectorMaterial
+          blur={[200, 100]}
+          resolution={512}
+          mixBlur={1}
+          mixStrength={1}
+          mirror={1}
+          roughness={0}
+          color="#ffffff"
+        />
       </mesh>
+      {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, HALLWAY_HEIGHT, hl]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_LENGTH + 4]} />
       </mesh>
-      <mesh rotation={[0, Math.PI / 2, 0]} position={[-hw, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
-        <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
-      </mesh>
-      <mesh rotation={[0, -Math.PI / 2, 0]} position={[hw, HALLWAY_HEIGHT / 2, hl]} material={wallMat}>
-        <planeGeometry args={[HALLWAY_LENGTH + 4, HALLWAY_HEIGHT]} />
-      </mesh>
+      {/* Back wall */}
       <mesh position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH + 2]} rotation={[0, Math.PI, 0]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
+      </mesh>
+      {/* Front (entrance) wall, FrontSide so the inbound camera sees through it */}
+      <mesh position={[0, HALLWAY_HEIGHT / 2, -2]} material={wallMat}>
+        <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
+      </mesh>
+      {/* Small vertical mirror standing in front of the back wall */}
+      <mesh position={[0, HALLWAY_HEIGHT * 0.475, HALLWAY_LENGTH + 1.9]}>
+        <planeGeometry args={[HALLWAY_WIDTH * 0.55, HALLWAY_HEIGHT * 0.6]} />
+        <MeshReflectorMaterial
+          blur={[100, 50]}
+          resolution={256}
+          mixBlur={0.5}
+          mixStrength={1}
+          mirror={1}
+          roughness={0}
+          color="#ffffff"
+        />
       </mesh>
     </>
   )
