@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
@@ -1070,23 +1069,6 @@ export function Listening() {
             </div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
-            <Link
-              to="/classic"
-              style={{
-                fontFamily: '"VT323", "Menlo", ui-monospace, monospace',
-                fontSize: 'clamp(1.4rem, 2.6vw, 1.6rem)',
-                letterSpacing: '1px',
-                color: 'rgba(0, 0, 0, 0.55)',
-                transition: 'color 200ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(0, 0, 0, 0.9)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(0, 0, 0, 0.55)' }}
-            >
-              Next
-              <span style={{ animation: 'date-night-caret 0.9s steps(1) infinite', marginLeft: 4 }}>▌</span>
-            </Link>
-          </div>
         </div>
       )}
 
