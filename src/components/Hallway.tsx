@@ -579,16 +579,19 @@ function LogoLighting() {
   )
 }
 
-/** Lipstick grid skybox: inverted box with grid.jpeg on every face. */
+/** Lipstick grid skybox: 1000-unit box with grid.jpeg on every face,
+ *  rendered from the inside via BackSide. */
 function SkyBox() {
   const texture = useMemo(() => {
     const base = import.meta.env.BASE_URL || '/'
-    return new THREE.TextureLoader().load(`${base}lipstick-hallway/cubeTexture/grid.jpeg`)
+    const tex = new THREE.TextureLoader().load(`${base}lipstick-hallway/cubeTexture/grid.jpeg`)
+    tex.colorSpace = THREE.SRGBColorSpace
+    return tex
   }, [])
   return (
-    <mesh scale={[-1, 1, 1]} renderOrder={-1}>
+    <mesh renderOrder={-1}>
       <boxGeometry args={[1000, 1000, 1000]} />
-      <meshBasicMaterial map={texture} depthWrite={false} />
+      <meshBasicMaterial map={texture} side={THREE.BackSide} depthWrite={false} />
     </mesh>
   )
 }
