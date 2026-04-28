@@ -1,7 +1,8 @@
-import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useMemo, useRef, useEffect, useState, useCallback, Suspense } from 'react'
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import * as THREE from 'three'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 
 const HALLWAY_LENGTH = 14
 const HALLWAY_WIDTH = 5.4
@@ -579,6 +580,32 @@ function LogoLighting() {
   )
 }
 
+/** Two lipstick palms: clones of plant.obj rendered with MeshNormalMaterial. */
+function Plants() {
+  const base = import.meta.env.BASE_URL || '/'
+  const obj = useLoader(OBJLoader, `${base}lipstick-hallway/obj/plant.obj`)
+
+  const [left, right] = useMemo(() => {
+    const mat = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide })
+    const make = () => {
+      const o = obj.clone(true)
+      o.traverse((c) => { if (c instanceof THREE.Mesh) c.material = mat })
+      return o
+    }
+    return [make(), make()]
+  }, [obj])
+
+  // Lipstick scales the palm 40× in a 200-tall scene; classic hallway is 4.5
+  // tall, so 40 × (4.5/200) = 0.9 keeps the proportional size.
+  const PLANT_SCALE = 0.9
+  return (
+    <>
+      <primitive object={left} scale={PLANT_SCALE} position={[-2, 0, HALLWAY_LENGTH - 1]} />
+      <primitive object={right} scale={PLANT_SCALE} position={[2, 0, HALLWAY_LENGTH - 1]} />
+    </>
+  )
+}
+
 /** Lipstick grid skybox: 1000-unit box with grid.jpeg on every face,
  *  rendered from the inside via BackSide. */
 function SkyBox() {
@@ -602,6 +629,9 @@ function SceneContent({ onRefs: _onRefs }: { onRefs?: (r: LogoRefs) => void }) {
     <>
       <SkyBox />
       <StarField />
+      <Suspense fallback={null}>
+        <Plants />
+      </Suspense>
       <LogoLighting />
     </>
   )
