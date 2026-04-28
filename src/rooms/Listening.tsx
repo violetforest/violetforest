@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 const HEADING_PHRASES = [
   'drag to scroll',
   'my soundcloud likes',
-  'updates when I like a new song',
+  'it updates when I like a song!',
 ]
 
 interface Track {

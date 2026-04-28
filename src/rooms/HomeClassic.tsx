@@ -128,20 +128,7 @@ export function HomeClassic() {
         <Hallway scrollProgress={hallwayProgress} />
       </div>
 
-      {/* 2. Dopamine Hit */}
-      <DoorSection>
-        <p style={{ fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', letterSpacing: '0.15em', opacity: 0.35, marginBottom: '1rem' }}>
-          dopamine hit
-        </p>
-        <h2 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3 }}>
-          a quick burst of something
-        </h2>
-        <Link to="/dopamine-hit" style={doorLinkStyle}>
-          enter
-        </Link>
-      </DoorSection>
-
-      {/* 3. Now */}
+      {/* 2. Now */}
       <DoorSection>
         <p style={{ fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', letterSpacing: '0.15em', opacity: 0.35, marginBottom: '1rem' }}>
           now
