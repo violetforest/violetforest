@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useSpaceStore } from '../store'
 import { DoorSection } from '../components/DoorSection'
-import { Hallway } from '../components/Hallway'
 
 interface Post {
   id: string
@@ -67,18 +66,7 @@ export function HomeClassic() {
 
   const [latestPost, setLatestPost] = useState<Post | null>(null)
   const [guestbookEntries, setGuestbookEntries] = useState<GuestbookEntry[]>([])
-  const [hallwayProgress, setHallwayProgress] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
-
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    // The hallway section is 300vh tall. Calculate progress within it.
-    const hallwayHeight = window.innerHeight * 3
-    const scrollTop = el.scrollTop
-    const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
-    setHallwayProgress(progress)
-  }, [])
 
   useEffect(() => {
     supabase
@@ -103,7 +91,6 @@ export function HomeClassic() {
   return (
     <motion.div
       ref={scrollRef}
-      onScroll={handleScroll}
       style={{
         position: 'fixed',
         inset: 0,
@@ -123,9 +110,15 @@ export function HomeClassic() {
         }
       `}</style>
 
-      {/* 1. Hallway — 300vh scroll space with sticky 3D canvas */}
+      {/* 1. Hallway — 300vh scroll space, sticky standalone three.js scene */}
       <div style={{ height: '300vh', position: 'relative' }}>
-        <Hallway scrollProgress={hallwayProgress} />
+        <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', zIndex: 2 }}>
+          <iframe
+            src={`${import.meta.env.BASE_URL}classic-hallway/index.html`}
+            title="Classic Hallway"
+            style={{ width: '100%', height: '100%', border: 'none', background: '#000' }}
+          />
+        </div>
       </div>
 
       {/* 2. Now */}
