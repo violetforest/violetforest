@@ -659,25 +659,15 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ============ CLICK LOGO → LISTENING ============
+// ============ ENTER LINK → LISTENING ============
 
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-renderer.domElement.addEventListener('click', (event) => {
-    if (!window.logoGroup) return;
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(window.logoGroup.children, true);
-    if (intersects.length > 0) {
-        const dest = '/listening';
+const enterLink = document.getElementById('enter-link');
+if (enterLink) {
+    enterLink.addEventListener('click', (event) => {
+        const dest = enterLink.getAttribute('href') || '/listening';
         if (window.parent && window.parent !== window) {
+            event.preventDefault();
             window.parent.postMessage({ type: 'navigate', to: dest }, '*');
-        } else {
-            window.location.href = dest;
         }
-    }
-});
-
-renderer.domElement.style.cursor = 'pointer';
+    });
+}

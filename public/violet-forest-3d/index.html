@@ -21,10 +21,25 @@
             font-family: monospace;
             font-size: 14px;
         }
+        #enter-link {
+            position: fixed;
+            top: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8844ff;
+            font-family: monospace;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #enter-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading...</div>
+    <a id="enter-link" href="/listening">enter</a>
     <script type="importmap">
     {
         "imports": {
