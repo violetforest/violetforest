@@ -590,7 +590,7 @@ function SkyBox() {
   }, [])
   return (
     <mesh renderOrder={-1}>
-      <boxGeometry args={[1000, 1000, 1000]} />
+      <boxGeometry args={[500, 500, 500]} />
       <meshBasicMaterial map={texture} side={THREE.BackSide} depthWrite={false} />
     </mesh>
   )
