@@ -288,10 +288,6 @@ function HallwayGeometry() {
       <mesh position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH + 2]} rotation={[0, Math.PI, 0]} material={wallMat}>
         <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
       </mesh>
-      {/* Front (entrance) wall, FrontSide so the inbound camera sees through it */}
-      <mesh position={[0, HALLWAY_HEIGHT / 2, -2]} material={wallMat}>
-        <planeGeometry args={[HALLWAY_WIDTH, HALLWAY_HEIGHT]} />
-      </mesh>
       {/* Small vertical mirror standing in front of the back wall */}
       <mesh position={[0, HALLWAY_HEIGHT * 0.475, HALLWAY_LENGTH + 1.9]}>
         <planeGeometry args={[HALLWAY_WIDTH * 0.55, HALLWAY_HEIGHT * 0.6]} />
