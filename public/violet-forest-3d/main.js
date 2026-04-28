@@ -237,6 +237,232 @@ function createEnvMap() {
 
 const envMap = createEnvMap();
 
+// ============ LIQUID METAL SHADER (ported from Hallway.tsx) ============
+
+const simplex3D = `
+  vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+  float snoise(vec3 v){
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+    vec3 i = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+    vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+    i = mod(i, 289.0);
+    vec4 p = permute(permute(permute(
+      i.z + vec4(0.0, i1.z, i2.z, 1.0))
+      + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+      + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 1.0/7.0;
+    vec3 ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ * ns.x + ns.yyyy;
+    vec4 y = y_ * ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+    vec3 p0 = vec3(a0.xy,h.x);
+    vec3 p1 = vec3(a0.zw,h.y);
+    vec3 p2 = vec3(a1.xy,h.z);
+    vec3 p3 = vec3(a1.zw,h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+  }
+`;
+
+function generateShapeMaskTexture(shapes, material) {
+    const bounds = new THREE.Box2();
+    for (const shape of shapes) {
+        for (const pt of shape.getPoints()) bounds.expandByPoint(pt);
+    }
+
+    const width = bounds.max.x - bounds.min.x;
+    const height = bounds.max.y - bounds.min.y;
+    const maxDim = Math.max(width, height);
+    const pad = maxDim * 0.25;
+    const paddedMinX = bounds.min.x - pad;
+    const paddedMinY = bounds.min.y - pad;
+    const paddedWidth = width + pad * 2;
+    const paddedHeight = height + pad * 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    const scaleX = 1024 / paddedWidth;
+    const scaleY = 1024 / paddedHeight;
+
+    ctx.save();
+    ctx.filter = 'blur(45px)';
+    ctx.fillStyle = 'white';
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-paddedMinX, -paddedMinY);
+
+    ctx.beginPath();
+    for (const shape of shapes) {
+        const pts = shape.getPoints(100);
+        if (pts.length) {
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        }
+        for (const hole of shape.holes) {
+            const hPts = hole.getPoints(100);
+            if (hPts.length) {
+                ctx.moveTo(hPts[0].x, hPts[0].y);
+                for (let i = 1; i < hPts.length; i++) ctx.lineTo(hPts[i].x, hPts[i].y);
+            }
+        }
+    }
+    ctx.fill('evenodd');
+    ctx.restore();
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.flipY = false;
+
+    material.userData.uShapeMask.value = tex;
+    material.userData.uShapeBounds.value.set(paddedMinX, paddedMinY, paddedWidth, paddedHeight);
+}
+
+function createLiquidMetalMaterial(envMap) {
+    const dummyTex = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+    dummyTex.needsUpdate = true;
+
+    const material = new THREE.MeshPhysicalMaterial({
+        color: 0xeeeeee,
+        metalness: 1.0,
+        roughness: 0.33,
+        clearcoat: 0.14,
+        clearcoatRoughness: 0.0,
+        iridescence: 1.0,
+        iridescenceIOR: 1.0,
+        iridescenceThicknessRange: [759, 800],
+        iridescenceThicknessMap: dummyTex,
+        envMap,
+        envMapIntensity: 0.0,
+        dithering: true,
+    });
+
+    material.userData = {
+        uTime: { value: 0 },
+        uSpeed: { value: 0.0 },
+        uScale: { value: 0.015 },
+        uDistortion: { value: 1.62 },
+        uEdgeProtection: { value: 1.0 },
+        uShapeReactivity: { value: 0.12 },
+        uShapeMask: { value: dummyTex },
+        uShapeBounds: { value: new THREE.Vector4(0, 0, 1, 1) },
+    };
+
+    material.onBeforeCompile = (shader) => {
+        shader.uniforms.uTime = material.userData.uTime;
+        shader.uniforms.uSpeed = material.userData.uSpeed;
+        shader.uniforms.uScale = material.userData.uScale;
+        shader.uniforms.uDistortion = material.userData.uDistortion;
+        shader.uniforms.uEdgeProtection = material.userData.uEdgeProtection;
+        shader.uniforms.uShapeReactivity = material.userData.uShapeReactivity;
+        shader.uniforms.uShapeMask = material.userData.uShapeMask;
+        shader.uniforms.uShapeBounds = material.userData.uShapeBounds;
+
+        shader.vertexShader = `
+          varying vec3 vWorldPos;
+          varying vec3 vLocalPos;
+          varying vec3 vOriginalNormal;
+        ` + shader.vertexShader;
+
+        shader.vertexShader = shader.vertexShader.replace(
+            '#include <worldpos_vertex>',
+            `#include <worldpos_vertex>
+             vWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+             vLocalPos = position;
+             vOriginalNormal = normal;`
+        );
+
+        shader.fragmentShader = `
+          uniform float uTime;
+          uniform float uSpeed;
+          uniform float uScale;
+          uniform float uDistortion;
+          uniform float uEdgeProtection;
+          uniform float uShapeReactivity;
+          uniform sampler2D uShapeMask;
+          uniform vec4 uShapeBounds;
+          varying vec3 vWorldPos;
+          varying vec3 vLocalPos;
+          varying vec3 vOriginalNormal;
+          float vFluidNoise;
+          ${simplex3D}
+        ` + shader.fragmentShader;
+
+        shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <normal_fragment_begin>',
+            `#include <normal_fragment_begin>
+
+             vec2 shapeUV = (vLocalPos.xy - uShapeBounds.xy) / uShapeBounds.zw;
+             vec2 texEps = vec2(4.0 / 1024.0);
+             float maskC = texture2D(uShapeMask, shapeUV).r;
+             float maskR = texture2D(uShapeMask, shapeUV + vec2(texEps.x, 0.0)).r;
+             float maskL = texture2D(uShapeMask, shapeUV - vec2(texEps.x, 0.0)).r;
+             float maskT = texture2D(uShapeMask, shapeUV + vec2(0.0, texEps.y)).r;
+             float maskB = texture2D(uShapeMask, shapeUV - vec2(0.0, texEps.y)).r;
+             float smoothDist = (maskC + maskR + maskL + maskT + maskB) * 0.2;
+             vec2 maskGrad = vec2(maskR - maskL, maskT - maskB) / (2.0 * texEps.x);
+
+             vec3 p = vLocalPos * uScale;
+             p.z += smoothDist * uShapeReactivity * 150.0 * uScale;
+             vec2 contourTangent = vec2(-maskGrad.y, maskGrad.x);
+             p.xy += contourTangent * (uTime * uSpeed * 0.5);
+             p.y -= uTime * uSpeed * 0.1;
+
+             vec3 warp;
+             warp.x = snoise(p + vec3(0.0, 0.0, uTime * 0.1));
+             warp.y = snoise(p + vec3(114.5, 22.1, uTime * 0.1));
+             warp.z = snoise(p + vec3(233.2, 51.5, uTime * 0.1));
+             vec3 warpedP = p + warp * 1.5;
+
+             float eps = 0.03;
+             float n0 = snoise(warpedP);
+             float nx = snoise(warpedP + vec3(eps, 0.0, 0.0));
+             float ny = snoise(warpedP + vec3(0.0, eps, 0.0));
+             float nz = snoise(warpedP + vec3(0.0, 0.0, eps));
+
+             vFluidNoise = n0 + (smoothDist * uShapeReactivity * 2.0);
+
+             vec3 noiseNormal = normalize(vec3(nx - n0, ny - n0, nz - n0));
+             vec3 viewNoiseNormal = normalize((viewMatrix * vec4(noiseNormal, 0.0)).xyz);
+             float isFlatFace = smoothstep(0.1, 0.9, abs(vOriginalNormal.z));
+             float edgeMask = mix(1.0, isFlatFace, uEdgeProtection);
+             normal = normalize(normal + viewNoiseNormal * uDistortion * edgeMask);`
+        );
+
+        shader.fragmentShader = shader.fragmentShader.replace(
+            /texture2D\(\s*iridescenceThicknessMap\s*,\s*vIridescenceThicknessMapUv\s*\)/g,
+            'vec4(vFluidNoise * 0.5 + 0.5)'
+        );
+    };
+
+    return material;
+}
+
 // ============ LOGO 3D MODEL WITH TEXTURED FRONT FACE ============
 
 async function loadAndCreateLogo() {
@@ -295,17 +521,9 @@ function createLogoMesh(logoTexture) {
         bevelSegments: 5
     };
     
-    // Chrome material for the sides
-    const chromeMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x3322bb,
-        metalness: 1.0,
-        roughness: 0.03,
-        envMap: envMap,
-        envMapIntensity: 3.0,
-        clearcoat: 0.5,
-        clearcoatRoughness: 0.1,
-        reflectivity: 1.0,
-    });
+    // Liquid metal material for the sides (matches Hallway logo)
+    const chromeMaterial = createLiquidMetalMaterial(envMap);
+    window.liquidMat = chromeMaterial;
     
     // Create shapes for each contour
     const shapes = [];
@@ -329,16 +547,20 @@ function createLogoMesh(logoTexture) {
         try {
             const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
             geometry.computeVertexNormals();
-            
+
             const mesh = new THREE.Mesh(geometry, chromeMaterial);
             // Position so front face is at z = extrudeSettings.depth / 2
             mesh.position.z = -extrudeSettings.depth / 2;
-            
+
             logoGroup.add(mesh);
         } catch (e) {
             console.warn(`Failed to extrude shape:`, e);
         }
     });
+
+    if (shapes.length > 0) {
+        generateShapeMaskTexture(shapes, chromeMaterial);
+    }
     
     // Create a single plane with the full logo texture on the front
     // Position it clearly in front of the 3D extrusion
@@ -417,6 +639,10 @@ function animate() {
     if (window.logoGroup) {
         window.logoGroup.position.y = Math.sin(elapsedTime * 0.4) * 0.12;
         window.logoGroup.rotation.x = Math.sin(elapsedTime * 0.2) * 0.01;
+    }
+
+    if (window.liquidMat) {
+        window.liquidMat.userData.uTime.value = elapsedTime;
     }
     
     controls.update();
