@@ -950,9 +950,15 @@ export function Listening() {
     }
 
     return () => {
-      if (widget) {
-        const SC = (window as any).SC
-        if (SC?.Widget) widget.unbind(SC.Widget.Events.FINISH)
+      // The widget calls iframe.contentWindow.postMessage during unbind, so if
+      // the iframe is already gone (route change, hot reload) it throws.
+      try {
+        if (widget && iframe.contentWindow) {
+          const SC = (window as any).SC
+          if (SC?.Widget) widget.unbind(SC.Widget.Events.FINISH)
+        }
+      } catch {
+        /* iframe already detached */
       }
     }
   }, [nowPlaying, activeIndex, tracks.length, selectTrack])
