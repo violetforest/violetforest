@@ -112,13 +112,15 @@
       planeTop.rotateX(Math.PI / 2);
       scene.add(planeTop);
 
+      // Hallway extended 2× on both ends (front/back walls at ±200 instead
+      // of ±100) so the tunnel feels longer.
       var planeBack = new THREE.Mesh(planeGeo, wallMat);
-      planeBack.position.z = -100;
+      planeBack.position.z = -200;
       planeBack.position.y = 100;
       scene.add(planeBack);
 
       var planeFront = new THREE.Mesh(planeGeo, wallMat);
-      planeFront.position.z = 100;
+      planeFront.position.z = 200;
       planeFront.position.y = 100;
       planeFront.rotateY(Math.PI);
       scene.add(planeFront);
