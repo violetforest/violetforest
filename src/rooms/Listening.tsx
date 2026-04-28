@@ -6,9 +6,9 @@ import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const HEADING_PHRASES = [
-  "what i'm listening to",
-  'scroll through the carousel',
+  'drag to scroll',
   'my soundcloud likes',
+  'updates when I like a new song',
 ]
 
 interface Track {
