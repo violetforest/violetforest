@@ -34,7 +34,7 @@
     var NEAR = 1;
     var FAR = 10000;
 
-    var camera, scene, renderer, cameraControls;
+    var camera, scene, renderer;
     var clock = new THREE.Clock();
 
     init();
@@ -61,20 +61,10 @@
       });
       scene.add(new THREE.Mesh(cube, gridMaterial));
 
-      // camera
+      // camera — fixed in place, looking down the tunnel
       camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
       camera.position.set(0, 100, 600);
-
-      cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
-      cameraControls.target.set(0, 100, 0);
-      cameraControls.maxDistance = 250;
-      cameraControls.minDistance = 10;
-      // auto-rotate gives the embed life without forcing the visitor to drag
-      cameraControls.autoRotate = true;
-      cameraControls.autoRotateSpeed = 0.4;
-      cameraControls.enableDamping = true;
-      cameraControls.dampingFactor = 0.08;
-      cameraControls.update();
+      camera.lookAt(0, 100, 0);
 
       // mirrors
       var groundMirror = new THREE.Mirror(window.innerWidth, window.innerHeight / 2, {
@@ -166,7 +156,6 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      cameraControls.update();
       renderer.render(scene, camera);
     }
   </script>
