@@ -3,7 +3,13 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, Cloud, Clouds, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+
+const HEADING_PHRASES = [
+  "what i'm listening to",
+  'scroll through the carousel',
+  'my soundcloud likes',
+]
 
 interface Track {
   title: string
@@ -814,8 +820,16 @@ export function Listening() {
 
   const configRef = useRef<Config>({ ...DEFAULT_CONFIG })
   const fpsRef = useRef(0)
+  const [headingIndex, setHeadingIndex] = useState(0)
 
   useEffect(() => { configRef.current = configState }, [configState])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setHeadingIndex((i) => (i + 1) % HEADING_PHRASES.length)
+    }, 3000)
+    return () => clearInterval(id)
+  }, [])
 
 
   const updateConfig = useCallback((key: keyof Config, value: number | boolean) => {
@@ -1007,9 +1021,20 @@ export function Listening() {
             ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
           </p>
           <h2
-            style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7, position: 'relative', display: 'inline-block' }}
+            style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', fontWeight: 400, fontStyle: 'italic', lineHeight: 1.3, opacity: 0.7, position: 'relative', display: 'inline-block', minHeight: '1.3em' }}
           >
-            what i'm listening to
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={headingIndex}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                style={{ display: 'inline-block' }}
+              >
+                {HEADING_PHRASES[headingIndex]}
+              </motion.span>
+            </AnimatePresence>
           </h2>
 
         </div>
