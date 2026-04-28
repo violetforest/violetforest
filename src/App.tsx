@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { NetArtIframe } from './components/NetArtIframe'
 import { Home } from './rooms/Home'
 import { HomeClassic } from './rooms/HomeClassic'
@@ -10,6 +10,7 @@ import { Making } from './rooms/Making'
 import { DopamineHit } from './rooms/DopamineHit'
 import { LipstickHallway } from './rooms/LipstickHallway'
 import { useSpaceStore } from './store'
+import { useEffect } from 'react'
 
 const Feed = lazy(() => import('./rooms/Feed').then(m => ({ default: m.Feed })))
 const Admin = lazy(() => import('./rooms/Admin').then(m => ({ default: m.Admin })))
@@ -26,7 +27,6 @@ export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
   const { markVisited, incrementVisits } = useSpaceStore()
-  const [rotate, setRotate] = useState(false)
 
   useEffect(() => {
     incrementVisits()
@@ -46,39 +46,10 @@ export default function App() {
     return () => window.removeEventListener('message', onMessage)
   }, [navigate])
 
-  // Rotate the whole app 90° on touch devices held in portrait so layouts
-  // designed for landscape fill the screen.
-  useEffect(() => {
-    const check = () => {
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-      const isPortrait = window.innerHeight > window.innerWidth
-      setRotate(isTouch && isPortrait)
-    }
-    check()
-    window.addEventListener('resize', check)
-    window.addEventListener('orientationchange', check)
-    return () => {
-      window.removeEventListener('resize', check)
-      window.removeEventListener('orientationchange', check)
-    }
-  }, [])
-
   const blackBgRoute = location.pathname === '/' || location.pathname === '/lipstick'
 
-  const wrapperStyle: React.CSSProperties = rotate
-    ? {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        width: '100vh',
-        height: '100vw',
-        transform: 'translate(-50%, -50%) rotate(90deg)',
-        transformOrigin: 'center center',
-      }
-    : { position: 'fixed', inset: 0 }
-
   return (
-    <div style={wrapperStyle}>
+    <>
       {blackBgRoute && (
         <div
           style={{
@@ -143,6 +114,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </AnimatePresence>
-    </div>
+    </>
   )
 }
