@@ -353,7 +353,9 @@ interface LogoRefs {
   baseY: React.MutableRefObject<number>
 }
 
-/** Liquid metal 3D extruded logo */
+/** Liquid metal 3D extruded logo (currently disabled on the classic page) */
+// @ts-expect-error preserved for future use
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Logo3D({ envMap, onRefs }: { envMap: THREE.Texture; onRefs?: (r: LogoRefs) => void }) {
   const groupRef = useRef<THREE.Group>(null)
   const materialRef = useRef<THREE.MeshPhysicalMaterial | null>(null)
@@ -535,27 +537,23 @@ function StarField() {
   return <group ref={groupRef} position={[0, HALLWAY_HEIGHT / 2, LOGO_Z]} />
 }
 
-/** Lights to illuminate the chrome logo */
+/** Lipstick-hallway lighting (1 purple + 3 hot-pink point lights), scaled
+ * down to fit the classic hallway (factor 0.0225 = 4.5 / 200). */
 function LogoLighting() {
   return (
     <>
-      <spotLight position={[25, HALLWAY_HEIGHT / 2 + 25, LOGO_Z + 35]} intensity={200} angle={Math.PI / 6} penumbra={0.5} decay={2.0} />
-      <spotLight position={[-25, HALLWAY_HEIGHT / 2 + 20, LOGO_Z + 30]} intensity={120} angle={Math.PI / 6} penumbra={0.5} decay={2.0} />
-      <directionalLight position={[0, HALLWAY_HEIGHT / 2 + 35, LOGO_Z + 15]} intensity={1.5} />
-      <directionalLight position={[-20, HALLWAY_HEIGHT / 2 + 8, LOGO_Z - 25]} intensity={2} color="#9955ff" />
-      <directionalLight position={[20, HALLWAY_HEIGHT / 2 - 8, LOGO_Z - 20]} intensity={1.5} color="#5555ff" />
-      <pointLight position={[0, HALLWAY_HEIGHT / 2, LOGO_Z + 8]} intensity={80} distance={20} />
-      <pointLight position={[8, HALLWAY_HEIGHT / 2, LOGO_Z + 3]} intensity={50} distance={15} color="#ccccff" />
-      <pointLight position={[-8, HALLWAY_HEIGHT / 2, LOGO_Z + 3]} intensity={50} distance={15} color="#ccccff" />
+      <pointLight color="#7F00FF" intensity={1.5} distance={4.5} position={[0, 2.7, 0]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={1.125} position={[12.4, 2.25, 0]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={11.25} position={[-12.4, 2.25, 0]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={22.5} position={[0, 2.25, 12.4]} />
     </>
   )
 }
 
-function SceneContent({ onRefs }: { onRefs?: (r: LogoRefs) => void }) {
-  const envMap = useEnvMap()
+function SceneContent({ onRefs: _onRefs }: { onRefs?: (r: LogoRefs) => void }) {
+  useEnvMap()
   return (
     <>
-      <Logo3D envMap={envMap} onRefs={onRefs} />
       <StarField />
       <LogoLighting />
     </>
@@ -693,10 +691,6 @@ export function Hallway({ scrollProgress }: Props) {
         style={{ width: '100%', height: '100%' }}
       >
         <color attach="background" args={['#000000']} />
-        <ambientLight intensity={0.3} />
-        <directionalLight position={[0, 4, 8]} intensity={0.4} />
-        <pointLight position={[0, 3.5, HALLWAY_LENGTH * 0.7]} intensity={0.3} distance={HALLWAY_LENGTH} />
-        <pointLight position={[0, 3, 6]} intensity={0.5} distance={8} />
 
         <CameraRig scrollProgress={scrollProgress} />
         <HallwayGeometry />
