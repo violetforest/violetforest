@@ -537,16 +537,31 @@ function StarField() {
   return <group ref={groupRef} position={[0, HALLWAY_HEIGHT / 2, LOGO_Z]} />
 }
 
-/** Lipstick-hallway lighting (1 purple + 3 hot-pink point lights), scaled
- * down to fit the classic hallway (factor 0.0225 = 4.5 / 200). */
+/** Lipstick-hallway lighting (1 purple + 3 hot-pink point lights),
+ * positioned inside the classic tunnel. */
 function LogoLighting() {
+  const cz = HALLWAY_LENGTH / 2
   return (
     <>
-      <pointLight color="#7F00FF" intensity={1.5} distance={4.5} position={[0, 2.7, 0]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={1.125} position={[12.4, 2.25, 0]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={11.25} position={[-12.4, 2.25, 0]} />
-      <pointLight color="#FF1493" intensity={0.5} distance={22.5} position={[0, 2.25, 12.4]} />
+      <pointLight color="#7F00FF" intensity={1.5} distance={4.5} position={[0, HALLWAY_HEIGHT * 0.6, cz]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={1.125} position={[HALLWAY_WIDTH / 2 * 0.9, HALLWAY_HEIGHT / 2, 3]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={11.25} position={[-HALLWAY_WIDTH / 2 * 0.9, HALLWAY_HEIGHT / 2, cz]} />
+      <pointLight color="#FF1493" intensity={0.5} distance={22.5} position={[0, HALLWAY_HEIGHT / 2, HALLWAY_LENGTH]} />
     </>
+  )
+}
+
+/** Lipstick grid skybox: inverted box with grid.jpeg on every face. */
+function SkyBox() {
+  const texture = useMemo(() => {
+    const base = import.meta.env.BASE_URL || '/'
+    return new THREE.TextureLoader().load(`${base}lipstick-hallway/cubeTexture/grid.jpeg`)
+  }, [])
+  return (
+    <mesh scale={[-1, 1, 1]} renderOrder={-1}>
+      <boxGeometry args={[1000, 1000, 1000]} />
+      <meshBasicMaterial map={texture} depthWrite={false} />
+    </mesh>
   )
 }
 
@@ -554,6 +569,7 @@ function SceneContent({ onRefs: _onRefs }: { onRefs?: (r: LogoRefs) => void }) {
   useEnvMap()
   return (
     <>
+      <SkyBox />
       <StarField />
       <LogoLighting />
     </>
