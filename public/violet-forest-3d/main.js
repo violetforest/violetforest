@@ -429,31 +429,10 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ============ CLICK LOGO → RANDOM NET ART SITE ============
-
-const NET_ART_ROUTES = [
-    '/lipstick',
-    '/webcore',
-    '/scroll-spiral',
-    '/tones',
-    '/listening',
-];
+// ============ CLICK LOGO → LISTENING ============
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-
-let lastDest = null;
-function pickDestination() {
-    if (NET_ART_ROUTES.length === 1) return NET_ART_ROUTES[0];
-    // Pick a different route than last time so consecutive clicks always go
-    // somewhere new.
-    let dest;
-    do {
-        dest = NET_ART_ROUTES[Math.floor(Math.random() * NET_ART_ROUTES.length)];
-    } while (dest === lastDest);
-    lastDest = dest;
-    return dest;
-}
 
 renderer.domElement.addEventListener('click', (event) => {
     if (!window.logoGroup) return;
@@ -462,7 +441,7 @@ renderer.domElement.addEventListener('click', (event) => {
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(window.logoGroup.children, true);
     if (intersects.length > 0) {
-        const dest = pickDestination();
+        const dest = '/listening';
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'navigate', to: dest }, '*');
         } else {
