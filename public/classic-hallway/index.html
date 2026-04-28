@@ -34,18 +34,8 @@
     var NEAR = 1;
     var FAR = 10000;
 
-    var camera, scene, renderer;
+    var camera, scene, renderer, cameraControls;
     var clock = new THREE.Clock();
-
-    // Camera intro: hold on the mirror for STATIONARY_MS, then sweep the
-    // look direction 90° (around Y) over TURN_MS. After that the camera
-    // stays put.
-    var STATIONARY_MS = 3000;
-    var TURN_MS = 4000;
-    var introStart = 0;
-    var startLookAt = new THREE.Vector3(0, 100, 0);   // toward the vertical mirror at z=-85
-    var endLookAt = new THREE.Vector3(1000, 100, 600); // 90° clockwise from start
-    var currentLookAt = new THREE.Vector3();
 
     init();
     animate();
@@ -71,12 +61,20 @@
       });
       scene.add(new THREE.Mesh(cube, gridMaterial));
 
-      // camera — fixed in place, look direction driven by the intro sweep
+      // camera
       camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
       camera.position.set(0, 100, 600);
-      currentLookAt.copy(startLookAt);
-      camera.lookAt(currentLookAt);
-      introStart = performance.now();
+
+      cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+      cameraControls.target.set(0, 100, 0);
+      cameraControls.maxDistance = 250;
+      cameraControls.minDistance = 10;
+      // auto-rotate gives the embed life without forcing the visitor to drag
+      cameraControls.autoRotate = true;
+      cameraControls.autoRotateSpeed = 0.4;
+      cameraControls.enableDamping = true;
+      cameraControls.dampingFactor = 0.08;
+      cameraControls.update();
 
       // mirrors
       var groundMirror = new THREE.Mirror(window.innerWidth, window.innerHeight / 2, {
@@ -168,20 +166,7 @@
 
     function animate() {
       requestAnimationFrame(animate);
-
-      var elapsed = performance.now() - introStart;
-      if (elapsed <= STATIONARY_MS) {
-        currentLookAt.copy(startLookAt);
-      } else if (elapsed <= STATIONARY_MS + TURN_MS) {
-        var t = (elapsed - STATIONARY_MS) / TURN_MS;
-        // easeInOutQuad
-        var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        currentLookAt.lerpVectors(startLookAt, endLookAt, e);
-      } else {
-        currentLookAt.copy(endLookAt);
-      }
-      camera.lookAt(currentLookAt);
-
+      cameraControls.update();
       renderer.render(scene, camera);
     }
   </script>
