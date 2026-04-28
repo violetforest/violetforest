@@ -642,7 +642,7 @@ function animate() {
     }
 
     if (window.liquidMat) {
-        window.liquidMat.userData.uTime.value = elapsedTime;
+        window.liquidMat.userData.uTime.value = elapsedTime * 0.5;
     }
     
     controls.update();
