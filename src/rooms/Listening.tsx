@@ -1066,7 +1066,7 @@ export function Listening() {
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'clamp(0.25rem, 1vw, 0.5rem)', pointerEvents: 'auto' }}>
             <Link
-              to="/thinking"
+              to="/classic"
               style={{
                 fontFamily: '"VT323", "Menlo", ui-monospace, monospace',
                 fontSize: 'clamp(1.4rem, 2.6vw, 1.6rem)',
