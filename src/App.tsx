@@ -9,6 +9,7 @@ import { Thinking } from './rooms/Thinking'
 import { Making } from './rooms/Making'
 import { DopamineHit } from './rooms/DopamineHit'
 import { LipstickHallway } from './rooms/LipstickHallway'
+import { LipstickHome } from './rooms/LipstickHome'
 import { useSpaceStore } from './store'
 import { useEffect } from 'react'
 
@@ -86,7 +87,7 @@ export default function App() {
             <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
             <Route path="/classic-hallway" element={<NetArtIframe src={`${import.meta.env.BASE_URL}classic-hallway/index.html`} title="classic-hallway" showNext={false} />} />
-            <Route path="/lipstick-2" element={<NetArtIframe src={`${import.meta.env.BASE_URL}lipstick-2/index.html`} title="lipstick-2" showNext={false} />} />
+            <Route path="/lipstick-2" element={<LipstickHome />} />
             <Route path="/lipstick-stationary" element={<NetArtIframe src={`${import.meta.env.BASE_URL}lipstick-stationary/index.html`} title="lipstick-stationary" showNext={false} />} />
             <Route path="/webcore" element={<NetArtIframe src={`${import.meta.env.BASE_URL}webcore/index.html`} title="webcore" showNext={false} />} />
             <Route path="/scroll-spiral" element={<NetArtIframe src={`${import.meta.env.BASE_URL}scroll-spiral/index.html`} title="scroll-spiral" />} />

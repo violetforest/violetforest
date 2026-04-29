@@ -112,28 +112,46 @@
 				// Scroll = dolly along the camera's forward axis
 				basePos = camera.position.clone();
 				fwd = new THREE.Vector3().subVectors( camTarget, basePos ).normalize();
-				window.addEventListener( 'wheel', function ( e ) {
-					e.preventDefault();
-					scrollDollyTarget += e.deltaY * 0.5;
-					if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
-					if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
-				}, { passive: false } );
 
-				// Touch — drag vertically to dolly
-				var touchLastY = 0;
-				window.addEventListener( 'touchstart', function ( e ) {
-					if ( e.touches[0] ) touchLastY = e.touches[0].clientY;
-				}, { passive: true } );
-				window.addEventListener( 'touchmove', function ( e ) {
-					if ( ! e.touches[0] ) return;
-					e.preventDefault();
-					var y = e.touches[0].clientY;
-					var dy = touchLastY - y;
-					touchLastY = y;
-					scrollDollyTarget += dy * 1.2;
-					if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
-					if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
-				}, { passive: false } );
+				// Driven mode = parent page sends scroll progress via postMessage.
+				// Standalone mode = wheel/touch listeners drive the camera directly.
+				var DRIVEN = /[?&]driven=1/.test( window.location.search );
+
+				if ( DRIVEN ) {
+					window.addEventListener( 'message', function ( e ) {
+						if ( e.data && e.data.type === 'lipstick2-progress' ) {
+							var v = +e.data.value;
+							if ( v < 0 ) v = 0;
+							if ( v > 1 ) v = 1;
+							// progress 0 → SCROLL_MIN-ish (start back), 1 → SCROLL_MAX (end forward)
+							scrollDollyTarget = v * SCROLL_MAX;
+						}
+					} );
+					// notify parent we're ready
+					try { window.parent.postMessage( { type: 'lipstick2-ready' }, '*' ); } catch ( e ) {}
+				} else {
+					window.addEventListener( 'wheel', function ( e ) {
+						e.preventDefault();
+						scrollDollyTarget += e.deltaY * 0.5;
+						if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
+						if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
+					}, { passive: false } );
+
+					var touchLastY = 0;
+					window.addEventListener( 'touchstart', function ( e ) {
+						if ( e.touches[0] ) touchLastY = e.touches[0].clientY;
+					}, { passive: true } );
+					window.addEventListener( 'touchmove', function ( e ) {
+						if ( ! e.touches[0] ) return;
+						e.preventDefault();
+						var y = e.touches[0].clientY;
+						var dy = touchLastY - y;
+						touchLastY = y;
+						scrollDollyTarget += dy * 1.2;
+						if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
+						if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
+					}, { passive: false } );
+				}
 
 				// model
 			  var texture = new THREE.Texture();

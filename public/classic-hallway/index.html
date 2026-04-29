@@ -60,6 +60,9 @@
 				FAR = 10000;
 
 			var camera, scene, renderer, models = [];
+			var camTarget = new THREE.Vector3( 0, 100, 0 );
+			var scrollDolly = 0, scrollDollyTarget = 0, basePos, fwd;
+			var SCROLL_MIN = -600, SCROLL_MAX = 550;
 
 			var clock = new THREE.Clock();
     	var shader = THREE.FresnelShader;
@@ -96,7 +99,32 @@
 				// camera
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 				camera.position.set( 600, 100, 0 );
-				camera.lookAt( 0, 100, 0 );
+				camera.lookAt( camTarget );
+
+				// Scroll = dolly along the camera's forward axis
+				basePos = camera.position.clone();
+				fwd = new THREE.Vector3().subVectors( camTarget, basePos ).normalize();
+				window.addEventListener( 'wheel', function ( e ) {
+					e.preventDefault();
+					scrollDollyTarget += e.deltaY * 0.5;
+					if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
+					if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
+				}, { passive: false } );
+
+				var touchLastY = 0;
+				window.addEventListener( 'touchstart', function ( e ) {
+					if ( e.touches[0] ) touchLastY = e.touches[0].clientY;
+				}, { passive: true } );
+				window.addEventListener( 'touchmove', function ( e ) {
+					if ( ! e.touches[0] ) return;
+					e.preventDefault();
+					var y = e.touches[0].clientY;
+					var dy = touchLastY - y;
+					touchLastY = y;
+					scrollDollyTarget += dy * 1.2;
+					if ( scrollDollyTarget < SCROLL_MIN ) scrollDollyTarget = SCROLL_MIN;
+					if ( scrollDollyTarget > SCROLL_MAX ) scrollDollyTarget = SCROLL_MAX;
+				}, { passive: false } );
 
 				// model
 			  var texture = new THREE.Texture();
@@ -399,6 +427,16 @@
 					}
           models[i].position.x = 50 * Math.sin( timer + i );
 				}
+
+				// Smooth dolly along forward axis
+				if ( basePos && fwd ) {
+					scrollDolly += ( scrollDollyTarget - scrollDolly ) * 0.08;
+					camera.position.x = basePos.x + fwd.x * scrollDolly;
+					camera.position.y = basePos.y + fwd.y * scrollDolly;
+					camera.position.z = basePos.z + fwd.z * scrollDolly;
+					camera.lookAt( camTarget );
+				}
+
 				renderer.render(scene, camera);
 			}
 
