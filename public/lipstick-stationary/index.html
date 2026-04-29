@@ -12,12 +12,6 @@
 		<div id="container"></div>
 		</div>
 
-		<div id="cam-panel" style="position:fixed;top:1rem;left:1rem;z-index:100;background:rgba(0,0,0,0.7);color:#fff;padding:10px 12px;border-radius:6px;font-family:monospace;font-size:11px;max-width:230px;">
-			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;cursor:pointer;" onclick="document.getElementById('cam-rows').style.display = document.getElementById('cam-rows').style.display === 'none' ? 'block' : 'none';">
-				<strong>camera</strong><span style="opacity:.6;">⇅</span>
-			</div>
-			<div id="cam-rows"></div>
-		</div>
 
 		<script id="fragmentShader" type="x-shader/x-vertex">
 			uniform vec3 glowColor;
@@ -67,7 +61,6 @@
 				FAR = 10000;
 
 			var camera, scene, renderer, models = [];
-			var camTarget = new THREE.Vector3( 0, 100, 0 );
 
 			var clock = new THREE.Clock();
     	var shader = THREE.FresnelShader;
@@ -101,11 +94,11 @@
 				cubeBackgroundMesh = new THREE.Mesh( cube, gridMaterial );
 				scene.add( cubeBackgroundMesh );
 
-				// Stationary camera — no OrbitControls. Position + lookAt
-				// frozen, sliders below let you nudge values live.
+				// Stationary camera — fixed at (295, 100, 0) looking at (0, 100, 0).
+				// No OrbitControls; user can't pan/zoom/rotate with the mouse.
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 				camera.position.set( 295, 100, 0 );
-				camera.lookAt( camTarget );
+				camera.lookAt( 0, 100, 0 );
 
 				// model
 			  var texture = new THREE.Texture();
@@ -411,53 +404,6 @@
 				renderer.render(scene, camera);
 			}
 
-			// ============ CAMERA SETTINGS PANEL ============
-			(function buildCamPanel() {
-				var rowsEl = document.getElementById('cam-rows');
-				if ( ! rowsEl ) return;
-
-				function row( label, min, max, step, get, set ) {
-					var div = document.createElement('div');
-					div.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;';
-					var lbl = document.createElement('label');
-					lbl.textContent = label;
-					lbl.style.cssText = 'flex:0 0 70px;opacity:.75;';
-					var slider = document.createElement('input');
-					slider.type = 'range';
-					slider.min = String(min);
-					slider.max = String(max);
-					slider.step = String(step);
-					slider.value = String(get());
-					slider.style.cssText = 'flex:1;min-width:80px;';
-					var val = document.createElement('span');
-					val.style.cssText = 'flex:0 0 38px;text-align:right;opacity:.65;';
-					val.textContent = (+slider.value).toFixed(step >= 1 ? 0 : 2);
-					slider.addEventListener('input', function () {
-						var v = parseFloat(slider.value);
-						set( v );
-						val.textContent = v.toFixed(step >= 1 ? 0 : 2);
-						camera.lookAt( camTarget );
-					});
-					div.appendChild(lbl);
-					div.appendChild(slider);
-					div.appendChild(val);
-					rowsEl.appendChild(div);
-					return slider;
-				}
-
-				row('pos x',     -800, 800, 1,   function () { return camera.position.x; }, function ( v ) { camera.position.x = v; });
-				row('pos y',     -400, 400, 1,   function () { return camera.position.y; }, function ( v ) { camera.position.y = v; });
-				row('pos z',     -800, 800, 1,   function () { return camera.position.z; }, function ( v ) { camera.position.z = v; });
-				row('target x',  -300, 300, 1,   function () { return camTarget.x; }, function ( v ) { camTarget.x = v; });
-				row('target y',  -100, 400, 1,   function () { return camTarget.y; }, function ( v ) { camTarget.y = v; });
-				row('target z',  -300, 300, 1,   function () { return camTarget.z; }, function ( v ) { camTarget.z = v; });
-				row('fov',          5, 120, 1,   function () { return camera.fov; }, function ( v ) { camera.fov = v; camera.updateProjectionMatrix(); });
-				row('near',      0.01, 100, 0.1, function () { return camera.near; }, function ( v ) { camera.near = v; camera.updateProjectionMatrix(); });
-				row('far',        500, 20000, 100, function () { return camera.far; }, function ( v ) { camera.far = v; camera.updateProjectionMatrix(); });
-				row('up x',        -1,   1, 0.01, function () { return camera.up.x; }, function ( v ) { camera.up.x = v; });
-				row('up y',        -1,   1, 0.01, function () { return camera.up.y; }, function ( v ) { camera.up.y = v; });
-				row('up z',        -1,   1, 0.01, function () { return camera.up.z; }, function ( v ) { camera.up.z = v; });
-			})();
 		</script>
 	</body>
 </html>
