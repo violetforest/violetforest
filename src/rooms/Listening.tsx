@@ -804,6 +804,175 @@ function Scene({
   )
 }
 
+// ── Loading state ────────────────────────────────────────────
+const LOADING_PHRASES = [
+  'tuning in',
+  'warming up the speakers',
+  'fetching favourites',
+  'dusting off the records',
+]
+
+function ListeningLoader() {
+  const [phraseIndex, setPhraseIndex] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length), 1800)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div
+      style={{
+        position: 'absolute', inset: 0, zIndex: 3,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: '1.5rem', pointerEvents: 'none',
+      }}
+    >
+      <style>{`
+        @keyframes listening-spin { to { transform: rotate(360deg); } }
+        @keyframes listening-twinkle {
+          0%, 100% { opacity: 0.3; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.1); }
+        }
+        @keyframes listening-pulse {
+          0%, 100% { opacity: 0.45; }
+          50% { opacity: 0.8; }
+        }
+      `}</style>
+
+      <div style={{ position: 'relative', width: '240px', height: '240px' }}>
+        {/* Twinkling stars around the disc */}
+        {[
+          { top: '-8px', left: '50%', delay: '0s' },
+          { top: '50%', right: '-12px', delay: '0.4s' },
+          { bottom: '-8px', left: '50%', delay: '0.8s' },
+          { top: '50%', left: '-12px', delay: '1.2s' },
+          { top: '8%', right: '8%', delay: '0.6s' },
+          { bottom: '8%', left: '8%', delay: '1.4s' },
+        ].map((s, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute', ...s,
+              fontSize: '1.4rem', color: '#d8a8d0',
+              animation: `listening-twinkle 1.8s ease-in-out infinite`,
+              animationDelay: s.delay,
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
+            ✦
+          </span>
+        ))}
+
+        {/* Disc wrapper (fixed — holds the reflection highlight) */}
+        <div
+          style={{
+            position: 'absolute', inset: '24px',
+            borderRadius: '50%',
+            boxShadow: '0 4px 24px rgba(200, 160, 220, 0.35)',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Spinning iridescent surface */}
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              borderRadius: '50%',
+              background: `
+                conic-gradient(from 0deg,
+                  #f8c8d8, #e8c0e8, #c8c8f0, #b8d8f0, #c8e8d8,
+                  #f0e8c0, #f8c8d8, #d8b8e8, #b8d0f0, #f0c8e0, #f8c8d8)
+              `,
+              animation: 'listening-spin 1.2s linear infinite',
+            }}
+          />
+
+          {/* Concentric ring sheen (also spins) */}
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              borderRadius: '50%',
+              background: `
+                repeating-radial-gradient(circle at 50% 50%,
+                  rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px,
+                  transparent 1px, transparent 4px)
+              `,
+              animation: 'listening-spin 1.2s linear infinite',
+              mixBlendMode: 'overlay',
+            }}
+          />
+
+          {/* Fixed glossy highlight — gives the reflection illusion */}
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              borderRadius: '50%',
+              background: `
+                radial-gradient(ellipse 60% 45% at 32% 28%, rgba(255,255,255,0.7), rgba(255,255,255,0) 60%),
+                radial-gradient(ellipse 40% 30% at 70% 75%, rgba(255,255,255,0.35), rgba(255,255,255,0) 65%),
+                linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 100%)
+              `,
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* Inner rim shadow */}
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              borderRadius: '50%',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.6), inset 0 -8px 20px rgba(120, 80, 140, 0.15), inset 0 8px 20px rgba(255,255,255,0.25)',
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* Center hub */}
+          <div
+            style={{
+              position: 'absolute', top: '50%', left: '50%',
+              width: '28%', height: '28%',
+              transform: 'translate(-50%, -50%)',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle at 35% 30%, #ffffff, #f0eaf5 40%, #d8c8e0 100%)',
+              boxShadow: 'inset 0 0 0 2px rgba(180, 140, 200, 0.4), 0 0 4px rgba(0,0,0,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: '20%', height: '20%', borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 30%, #c8b8e8, #8870b0)',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <p style={{ fontSize: '14px', opacity: 0.4, letterSpacing: '0.2em', pointerEvents: 'none' }}>
+        ｡ₓˑ༺ʚ♡ɞ༻ˑₓ｡
+      </p>
+
+      <div style={{ height: '1.4em', overflow: 'hidden' }}>
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={phraseIndex}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 0.55, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            style={{
+              fontStyle: 'italic',
+              fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+              animation: 'listening-pulse 2.4s ease-in-out infinite',
+            }}
+          >
+            {LOADING_PHRASES[phraseIndex]}…
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
 // ── Main ─────────────────────────────────────────────────────
 export function Listening() {
   const [tracks, setTracks] = useState<Track[]>([])
@@ -836,6 +1005,14 @@ export function Listening() {
   }, [])
 
   useEffect(() => {
+    const MIN_LOADING_MS = 2200
+    const start = performance.now()
+    const finish = (fn: () => void) => {
+      const elapsed = performance.now() - start
+      const wait = Math.max(0, MIN_LOADING_MS - elapsed)
+      setTimeout(fn, wait)
+    }
+
     fetch(EDGE_FN_URL, {
       headers: {
         apikey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_wdc8NjEgJqfmH52FCRnWsw_qBVYTpbC',
@@ -844,19 +1021,21 @@ export function Listening() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          // SoundCloud likes return most-recent first; reverse so the
-          // most-recent track lands at the visual front (relIndex -1).
-          const ordered = [...data].reverse()
-          setTracks(ordered)
-          const frontIdx = (ordered.length - 1) % ordered.length
-          setActiveIndex(frontIdx)
-          if (ordered[frontIdx]) setNowPlaying(ordered[frontIdx].permalink_url)
-        }
-        setLoading(false)
-        setTimeout(() => setLoaded(true), 100)
+        finish(() => {
+          if (Array.isArray(data)) {
+            // SoundCloud likes return most-recent first; reverse so the
+            // most-recent track lands at the visual front (relIndex -1).
+            const ordered = [...data].reverse()
+            setTracks(ordered)
+            const frontIdx = (ordered.length - 1) % ordered.length
+            setActiveIndex(frontIdx)
+            if (ordered[frontIdx]) setNowPlaying(ordered[frontIdx].permalink_url)
+          }
+          setLoading(false)
+          setTimeout(() => setLoaded(true), 100)
+        })
       })
-      .catch(() => setLoading(false))
+      .catch(() => finish(() => setLoading(false)))
   }, [])
 
   useEffect(() => {
@@ -992,11 +1171,7 @@ export function Listening() {
           .listening-controls-wrapper { display: none !important; }
         }
       `}</style>
-      {loading && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
-          <p style={{ opacity: 0.4, fontStyle: 'italic' }}>loading...</p>
-        </div>
-      )}
+      {loading && <ListeningLoader />}
 
       <div style={{ position: 'absolute', inset: 0 }}>
         <Canvas
@@ -1063,7 +1238,7 @@ export function Listening() {
               <iframe
                 ref={iframeRef}
                 width="100%" height="80" scrolling="no" frameBorder="no" allow="autoplay"
-                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
+                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
                 style={{ borderRadius: '8px', opacity: 0.9 }}
               />
             </div>
