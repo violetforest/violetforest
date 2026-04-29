@@ -11,38 +11,33 @@
   50%, 100% { opacity: 0; }
 }
 
+/* Match the loading text on the homepage:
+   color #8844ff, monospace, 14px, on a black background. */
 .letter-page,
 .letter-page * {
-  font-family: 'VT323', 'Menlo', ui-monospace, monospace !important;
-  letter-spacing: 1px !important;
+  font-family: monospace !important;
+  font-size: 14px !important;
+  color: #8844ff !important;
+  letter-spacing: normal !important;
   font-style: normal !important;
-}
-
-.letter-page,
-.letter-page a,
-.letter-page p,
-.letter-page span,
-.letter-page label,
-.letter-page button,
-.letter-page input,
-.letter-page textarea {
-  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: normal !important;
+  line-height: 1.5 !important;
 }
 
 .letter-page input,
 .letter-page textarea {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: transparent !important;
+  border: 1px solid rgba(136, 68, 255, 0.4) !important;
 }
 
 .letter-page input::placeholder,
 .letter-page textarea::placeholder {
-  color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(136, 68, 255, 0.5) !important;
 }
 
 .letter-page button {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border: 1px solid rgba(136, 68, 255, 0.5) !important;
 }
 
 html, body, #root {

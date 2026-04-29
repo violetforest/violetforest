@@ -45,6 +45,7 @@
 		</script>
 		<script src="/cara/build/three.js"></script>
 		<script src="/cara/js/Mirror.js"></script>
+		<script src="/cara/js/controls/OrbitControls.js"></script>
 		<script src="/cara/js/shaders/FresnelShader.js"></script>
 		<script src="/cara/js/loaders/OBJLoader.js"></script>
 
@@ -93,10 +94,16 @@
 				cubeBackgroundMesh = new THREE.Mesh( cube, gridMaterial );
 				scene.add( cubeBackgroundMesh );
 
-				// camera
+				// camera — orbit 90° clockwise around the scene (viewed from above)
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 				camera.position.set( 600, 100, 0 );
 				camera.lookAt( 0, 100, 0 );
+
+				cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+				cameraControls.target.set(0, 100, 0);
+				cameraControls.maxDistance = 250;
+				cameraControls.minDistance = 10;
+				cameraControls.update();
 
 				// model
 			  var texture = new THREE.Texture();
