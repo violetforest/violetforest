@@ -1584,7 +1584,7 @@ const chromeMat = _isMobileDevice
 // --- Scatter bobbing chrome spheres ---
 const bobbers = [];
 function addSphere(x, z, r) {
-  r *= 8;
+  r *= 16;
   const padding = 1.5;
   for (let attempt = 0; attempt < 12; attempt++) {
     let overlap = false;
@@ -3195,7 +3195,7 @@ const POPUP_NORMAL = [
   { title: 'System', icon: 'info', msg: 'don\'t text them back.', btns: ['I won\'t', 'I will'] },
   { title: 'Reminder', icon: 'info', msg: 'you are loved more than you know.' },
   { title: 'Alert', icon: 'warn', msg: 'heart cache full. clear old memories?', btns: ['no', 'never'] },
-  { title: 'Error', icon: 'error', msg: 'your crush has logged off.' },
+  { title: 'Error', icon: 'error', msg: 'your bestie has logged off.' },
   { title: 'Notification', icon: 'info', msg: '☆ a wish has been deposited in your inbox ☆' },
 ];
 
@@ -3417,8 +3417,8 @@ function showNotepadPopup() {
 function scheduleNextNotepad() {
   // No-op — notepad popups don't recur, just show once on load (see below)
 }
-// Spawn ONE notepad popup on load (no recurring schedule)
-setTimeout(showNotepadPopup, 5500);
+// Notepad popup disabled.
+// setTimeout(showNotepadPopup, 5500);
 
 // --- Winner popup ---
 function showWinnerPopup() {
@@ -3454,9 +3454,9 @@ const POLL_QUESTIONS = [
     options: ["Belle", "Ariel", "Cinderella", "Jasmine"]
   },
   {
-    title: "💕 ARE YOU REALLY IN LOVE? 💕",
-    q: "Does your crush like you back? Answer 1 question to find out!",
-    options: ["They smile at me", "They ignore me", "It's complicated", "I'm too scared to look"]
+    title: "💕 WHAT'S YOUR VIBE? 💕",
+    q: "Pick your aesthetic — answer 1 question to find out!",
+    options: ["Pink sparkles", "Cyber chrome", "Sugar pastel", "Glitter stars"]
   },
   {
     title: "🧠 IQ TEST — ARE YOU A GENIUS?",
@@ -3572,45 +3572,45 @@ const CHAT_PERSONAS = [
     name: "xX_dArKaNgEl_Xx",
     greet: "~*~ hEyYy ~*~",
     responses: {
-      default: ["wHaTcHa DoInG ?", "lOl SaMe", "~*~ bRb pHoNe ☎ ~*~", "u WaNnA sIgN mY gUeStBoOk", "u In My ToP 8 ??"],
+      default: ["wHaTcHa DoInG ?", "iM cOdInG mY hOmEpAgE LaYoUt RnNn", "ThE cSs Iz BrEaKiNg In My BrOwSeR uGh", "~*~ bRb pHoNe ☎ ~*~", "u WaNnA sIgN mY gUeStBoOk", "u In My ToP 8 ??", "i HiD tHe MaInStReAm ToP w/ A cOnTaInEr DiV ;)"],
       hi: ["~*~ hIiI ~*~", "hEyY :)"],
-      default_mid: ["mY pAgE hAz ThE bEsT gLiTtEr", "wHaTs Ur ScReEn NaMe ?", "iM lIsTeNiNg To MuSiC rN"],
+      default_mid: ["mY pAgE hAz ThE bEsT gLiTtEr", "wHaTs Ur ScReEn NaMe ?", "iM mAkInG a NeW bLiNkIe In MS pAiNt 💕", "i ToTaLlY sToLe ThIs ProFiLe CoDe FrOm A tUtOrIaL sItE"],
     }
   },
   {
     name: "sk8rboi2002",
     greet: "sUp",
     responses: {
-      default: ["tHaTs WaCk", "lOl No WaY", "u LyInG", "nVm", "g2g BrB"],
+      default: ["tHaTs WaCk", "lOl No WaY", "u LyInG", "nVm", "g2g BrB", "fInAlLy GoT mY bLoG AuToPlAy WoRkInG", "mY pRoFiLe SoNg Iz NuMb RoCk DuH"],
       hi: ["yO wSuP", "hEyYyY"],
-      default_mid: ["i JuSt BuRnEd A cD", "wAnNa SeE mY bAnDs DeMo", "bRb AfK"],
+      default_mid: ["i JuSt BuRnEd A cD", "wAnNa SeE mY bAnDs DeMo", "iM cOdInG a HiT cOuNtEr On My SiTe", "bRb AfK"],
     }
   },
   {
     name: "~*PiXiEdUsT*~",
     greet: "✨ hIiIiI ✨",
     responses: {
-      default: ["✨💖✨💖✨", "u LiKe My GlItTeR gIfS ??", "mY bG mUsIc Iz A .mIdI fIlE", "AdD mE tO uR tOp FrIeNdS !!"],
+      default: ["✨💖✨💖✨", "u LiKe My GlItTeR gIfS ??", "mY bG mUsIc Iz A .mIdI fIlE", "iM mAkInG a BlInKiE iN pHoToShOp 💖", "AdD mE tO uR tOp FrIeNdS !!", "hElP mE pIcK a PrOfIlE SoNg Pls"],
       hi: ["💖✨ hIiIi ✨💖", "oH hAi :3"],
-      default_mid: ["i CoLlEcT mY tInY pEtS", "mY mY pIxEl PeTs R sTaRvInG", "i LoVe U 💕"],
+      default_mid: ["i CoLlEcT mY tInY pEtS", "I jOiNeD a CuTeNeSs WeBrInG ✨", "mY mY pIxEl PeTs R sTaRvInG", "i LoVe U 💕"],
     }
   },
   {
     name: "xX_cYbErAnGeL_Xx",
     greet: "♡ hIiI bAbE ♡",
     responses: {
-      default: ["i JuSt PaInTeD mY nAiLs PiNk 💅", "uR sO pReTtY oMg", "lIsTeNiNg To My GiRl PoP qUeEn rN ♡", "wAnNa SwAp JoUrNaL pAsSwOrDs ??", "wHaTs Ur AsL"],
+      default: ["i JuSt PaInTeD mY nAiLs PiNk 💅", "uR sO pReTtY oMg", "lIsTeNiNg To My GiRl PoP qUeEn rN ♡", "wAnNa SwAp JoUrNaL pAsSwOrDs ??", "wHaTs Ur AsL", "I cAnT gEt My PrOfIlE DiV oVeRlAy To StIcK uGh 😩"],
       hi: ["♡ hEyYy GiRlIeE ♡", "oMg HiIi"],
-      default_mid: ["dId I tElL u AbT tHe NeW gUy 👀", "mY rOoM iZ aLl PiNk NoW ✨", "tElL mE uR cRuSh I wOnT tElL 🤞"],
+      default_mid: ["mY rOoM iZ aLl PiNk NoW ✨", "iM mAkInG a HeArT bLiNkIe FoR uS 💞", "i FiNiShEd My PiNk FuR sCrUnChIe CoLlEcTiOn 🎀"],
     }
   },
   {
     name: "~*aNgEl_GiRl*~",
     greet: "oMg HiIi !! ✿",
     responses: {
-      default: ["mY kItTy WaLkEd On My KeYbOaRd LoL", "uGh My DiAl-Up Is SoOoO sLoW", "U tHiNk MpS r IlLeGaL ?", "hAvE u SeEn ThIs GiF yEt"],
+      default: ["mY kItTy WaLkEd On My KeYbOaRd LoL", "uGh My DiAl-Up Is SoOoO sLoW", "U tHiNk MpS r IlLeGaL ?", "hAvE u SeEn ThIs GiF yEt", "iM dEsIgNiNg My FaNsIte ToNiGhT ✨"],
       hi: ["HiIi !! ✿", "oH hEy"],
-      default_mid: ["hAvE u HeArD oF tHe NeW eMo BaNd", "mY fAv CoLoR iZ pInK wHaTs UrS", "iM dOwNlOaDiNg MuSiC rN"],
+      default_mid: ["hAvE u HeArD oF tHe NeW eMo BaNd", "mY fAv CoLoR iZ pInK wHaTs UrS", "I mAdE a CuStOm CuRsOr W/ A wAnD ✿", "iM dOwNlOaDiNg MuSiC rN"],
     }
   },
   {
@@ -3626,45 +3626,45 @@ const CHAT_PERSONAS = [
     name: "GLiTtErGiRl_07",
     greet: "*~* hEyYy GuRlIe *~*",
     responses: {
-      default: ["i PuT gLiTtEr On EvErYtHiNg ✨", "mY rOoM iZ sO pInK", "I jUsT mAdE a NeW gEoCiTiEs PaGe", "u ShOuLd ToTaLlY sIgN mY gUeStBoOk"],
+      default: ["i PuT gLiTtEr On EvErYtHiNg ✨", "mY rOoM iZ sO pInK", "I jUsT mAdE a NeW hOmEpAgE", "u ShOuLd ToTaLlY sIgN mY gUeStBoOk", "iM mAkInG a SpArKlY bLiNkIe FoR mY tOp FrIeNdS"],
       hi: ["*~* hI bBy *~*", "OmGgGg HiIiI"],
-      default_mid: ["i GoT fRuItY lIp GlOsS 💄", "mY hAiR iZ iN sPaCe BuNs ToDaY", "wAtChInG My GiRl GrOuP MoViE aGaIn"],
+      default_mid: ["i GoT fRuItY lIp GlOsS 💄", "mY hAiR iZ iN sPaCe BuNs ToDaY", "tEaCh Me HoW tO eMbEd MidI iN mY pAgE PlS 🙏", "wAtChInG My GiRl GrOuP MoViE aGaIn"],
     }
   },
   {
     name: "BaByGiRl_xOxO",
     greet: "hii cuti pi ♡♡♡",
     responses: {
-      default: ["i HaVe A cRuSh PlS hElP", "wE pAsSeD nOtEs In ClAsS aGaIn", "uR mY bEsTeSt FrIeNd 4 lYf", "wAnNa Be My MaTcHiNg AvI tWiNs ??"],
+      default: ["wE pAsSeD nOtEs In ClAsS aGaIn", "uR mY bEsTeSt FrIeNd 4 lYf", "wAnNa Be My MaTcHiNg AvI tWiNs ??", "I mAdE u In ThE dOlLz MaKeR cAn I sEnD ?? 💌", "iM dEcOrAtInG mY bInDeR w/ StIcKeRs RnNn"],
       hi: ["♡ hI bAbY ♡", "hElLOoO!!"],
-      default_mid: ["i WrOtE uR nAmE aLl OvEr My JoUrNaL ✨", "wEaRiNg HeArT eArRiNgS tDy", "i StIlL hAvEnT gOt My BeLlY pIeRcInG 😭"],
+      default_mid: ["i WrOtE uR nAmE aLl OvEr My JoUrNaL ✨", "wEaRiNg HeArT eArRiNgS tDy", "iM cOdInG a MaTcHiNg LaYoUt FoR uS 💕", "i StIlL hAvEnT gOt My BeLlY pIeRcInG 😭"],
     }
   },
   {
     name: "~*FaIrYqUeEn*~",
     greet: "🧚‍♀️ hElLo lItTlE oNe 🧚‍♀️",
     responses: {
-      default: ["i ReAd My HoRoScOpE eVeRy DaY ♓", "I hAvE 12 cRyStAlS oN mY dEsK", "do U bElIeVe In FaIrIeS ??", "iM mAkInG fRiEnDsHiP bRaCeLeTs"],
+      default: ["i ReAd My HoRoScOpE eVeRy DaY ♓", "I hAvE 12 cRyStAlS oN mY dEsK", "do U bElIeVe In FaIrIeS ??", "iM mAkInG fRiEnDsHiP bRaCeLeTs", "i CoDeD a TwInKlInG sTaR cUrSoR fOr My PaGe ✨"],
       hi: ["✨ bLeSsEd Be ✨", "hI sWeEt ThInG"],
-      default_mid: ["mY tArOt CaRdS sAiD u WeRe CoMiNg", "iM wEaRiNg PiXiE wInGs 2dAy", "ButTeRfLy ClIp MiSsInG :("],
+      default_mid: ["mY tArOt CaRdS sAiD u WeRe CoMiNg", "iM wEaRiNg PiXiE wInGs 2dAy", "iM mAkInG a FaIrY-sIgIl BlInKiE 🧚‍♀️", "ButTeRfLy ClIp MiSsInG :("],
     }
   },
   {
     name: "ChErRyBoMb_xX",
     greet: "yO yO ♡",
     responses: {
-      default: ["i KiSsEd HiM oN tHe RoOfToP 💋", "mY sCrUnChIe ToOk My HaIr OuT", "i CaNt FiNd My rHiNeStOnE tRaCkSuIt", "I bEdAzZlEd My PhOnE oMg"],
+      default: ["mY sCrUnChIe ToOk My HaIr OuT", "i CaNt FiNd My rHiNeStOnE tRaCkSuIt", "I bEdAzZlEd My PhOnE oMg", "iM rEbRaNdInG mY pAgE ALl ChErRy ReD 🍒", "JuSt PaInTeD mY nAiLs ChErRy ReD 🍒"],
       hi: ["yOoOO HiI", "wHaT uP gOrG"],
-      default_mid: ["iM lIsTeNiNg To My FaV pOp PuNk on RePeAt", "i WaNt ThE sLiM fLiP pHoNe SoOo BaD 📱", "i WaS oN mY bLoG ALL nIgHt OoPs"],
+      default_mid: ["iM lIsTeNiNg To My FaV pOp PuNk on RePeAt", "i WaNt ThE sLiM fLiP pHoNe SoOo BaD 📱", "i WrOtE 6 ParAgRaPhS oN mY bLoG LaSt NiGhT", "i WaS oN mY bLoG ALL nIgHt OoPs"],
     }
   },
   {
     name: "luV_LeXi_06",
     greet: "hEyYyY!! ☆",
     responses: {
-      default: ["i StAyEd Up Til 4aM oN aIm 💖", "wHy Wn'T hE iM bAcK 😭", "wRoTe A pOeM aBoUt HiM oN mY JoUrNaL", "wAnNa MaRaThOn MoViEs FrI ??"],
+      default: ["i StAyEd Up Til 4aM oN cHaT 💖", "wRoTe A pOeM aBoUt PiNk SkIeS oN mY JoUrNaL", "wAnNa MaRaThOn MoViEs FrI ??", "I cHaNgEd My AwAy MsG 2 a PoP LyRiC AgAiN 🥺", "iM rEdEcOrAtInG mY rOoM aLl PiNk 💕"],
       hi: ["☆ hIiI ☆", "hEyYy"],
-      default_mid: ["pUt Me On Ur ToP fRiEnDs PlS", "lEt Me PaInT uR nAiLs SoMeTiMe ✨", "wAtChInG My FaV cOmEdY FoR tHe 100tH tImE"],
+      default_mid: ["pUt Me On Ur ToP fRiEnDs PlS", "lEt Me PaInT uR nAiLs SoMeTiMe ✨", "I mAdE u A bLiNkIe ThAt SaYz BeStIeS 4 lYf 💖", "wAtChInG My FaV cOmEdY FoR tHe 100tH tImE"],
     }
   },
   {
@@ -3673,7 +3673,7 @@ const CHAT_PERSONAS = [
     responses: {
       default: ["i ToTaLlY uPdAtEd My ToP 8", "u GoT bUmPeD oFf SoRrY nOt SoRrY 🙄", "mY gUeStBoOk HaS 200 sIgNaTuReS oMg", "I oNlY tAlK tO cUtIeS"],
       hi: ["hIiI ;)", "hEy BaByY"],
-      default_mid: ["i'M sO oVeR hIm AlReAdY", "lOl Ok WhAtEvA", "mY pRoFiLe SoNg Iz My ToP rApPeR"],
+      default_mid: ["i'M sO oVeR tHaT pArTy AlReAdY", "lOl Ok WhAtEvA", "mY pRoFiLe SoNg Iz My ToP rApPeR"],
     }
   },
   {
@@ -3682,14 +3682,14 @@ const CHAT_PERSONAS = [
     responses: {
       default: ["i NaMeD aLl My PlUsHiEs ToDaY", "mY sHeLf HaS 47 sTuFfIeS", "wEnT tO tHe MaLl AnD bOuGhT eVeRyThInG ✨", "i HaVe MaTcHiNg PjS w/ My BeStIe"],
       hi: ["🐰💕 hElLo 💕🐰", "hEy CuTiE pIe"],
-      default_mid: ["jUsT pIcKeD mY nEw NeOpEt 🐾", "i BoUgHt PiNk RoLlEr SkAtEs", "lEtS dO oUr PaGeS tOgEtHeR"],
+      default_mid: ["jUsT pIcKeD mY nEw PiXeL pEt 🐾", "i BoUgHt PiNk RoLlEr SkAtEs", "lEtS dO oUr PaGeS tOgEtHeR"],
     }
   },
   {
-    name: "AiM_aDdIcT_99",
+    name: "MsG_aDdIcT_99",
     greet: "uR oNlInE :3",
     responses: {
-      default: ["mY aWaY mSg Iz A pOp LyRiC <3", "iVe BeEn OnLiNe AlL dAy 💻", "u WaNnA tRaDe ScReEnNaMeS w/ uR cRuSh ?", "iM sO bOrEd RiGhT nOw 😴"],
+      default: ["mY aWaY mSg Iz A pOp LyRiC <3", "iVe BeEn OnLiNe AlL dAy 💻", "u WaNnA tRaDe ScReEnNaMeS w/ uR bEsTiE ?", "iM sO bOrEd RiGhT nOw 😴"],
       hi: ["yEsSs HeYyY", "u BeAt Me To It HiIi"],
       default_mid: ["mY pRoFiLe PiC iZ gLiTtEr", "u GeT mY mEsSaGe ??", "i MaDe A nEw AwAy MsG bRb"],
     }
@@ -3778,12 +3778,38 @@ function showChatPopup() {
   // Initial greeting
   theyReply(persona.greet);
 
+  const AWAY_MESSAGES = [
+    "~*~ aWaY fRoM kEyBoArD ~*~ painting my nails 💅 brb",
+    "♡ bRb ♡ at the mall w/ my bestie ✨",
+    "💖 in the bath singing to my fav cd 💖",
+    "~*~ in class don't tell ms. peters i'm online ~*~",
+    "✨ glitter emergency, cleaning up 🧹✨",
+    "🌸 napping in a sunbeam 🌸 bbl",
+    "doing my hair !! ribbons everywhere 🎀",
+    "💌 writing my journal entry ✿ shhh",
+    "🐰 feeding my pixel pet brb 🐰",
+    "watching my fav show !! don't im me 🚫",
+  ];
+  let awayMode = false;
+
   function send() {
     const text = input.value.trim();
     if (!text) return;
     appendMsg('me', 'you', text);
     input.value = '';
     msgCount++;
+
+    // If they've gone away, every message gets the same auto-response
+    if (awayMode) {
+      const typing = appendMsg('typing', persona.name, 'auto-response...');
+      setTimeout(() => {
+        typing.remove();
+        const div = appendMsg('them', persona.name, '');
+        div.innerHTML = `<span class="who">${persona.name}:</span> <i>Auto-response: ${awayMode}</i>`;
+        body.scrollTop = body.scrollHeight;
+      }, 500 + Math.random() * 700);
+      return;
+    }
 
     // Pick a response based on content
     const lower = text.toLowerCase();
@@ -3794,6 +3820,16 @@ function showChatPopup() {
     }
     const reply = pool[Math.floor(Math.random() * pool.length)];
     theyReply(reply);
+
+    // After a couple exchanges, ~35% chance the bot sets an away message and stops replying.
+    if (msgCount >= 2 && Math.random() < 0.35) {
+      const away = AWAY_MESSAGES[Math.floor(Math.random() * AWAY_MESSAGES.length)];
+      setTimeout(() => {
+        const note = appendMsg('them', persona.name, '');
+        note.innerHTML = `<i>${persona.name} has set an away message: "${away}"</i>`;
+        awayMode = away;
+      }, 2200 + Math.random() * 1500);
+    }
   }
 
   sendBtn.addEventListener('click', send);
@@ -4259,89 +4295,109 @@ function initAudio() {
 }
 
 function playNote(freq, type, vol, start, dur, dest) {
-  const osc = audioCtx.createOscillator();
-  osc.type = type;
-  osc.frequency.value = freq;
+  if (!freq) return;
+  // Bell-like envelope: sharp attack, long exponential decay → sparkly twinkle
+  const osc = osc => osc;
+  const o = audioCtx.createOscillator();
+  o.type = type;
+  o.frequency.value = freq;
   const g = audioCtx.createGain();
-  g.gain.setValueAtTime(vol, start);
-  g.gain.setValueAtTime(vol * 0.7, start + dur * 0.6);
-  g.gain.linearRampToValueAtTime(0, start + dur);
-  osc.connect(g);
+  const tail = Math.max(dur, 0.5);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(vol, start + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + tail);
+  o.connect(g);
   g.connect(dest);
-  osc.start(start);
-  osc.stop(start + dur);
+  o.start(start);
+  o.stop(start + tail + 0.05);
+
+  // High-octave shimmer doubling for melody-y notes (sparkle)
+  if (freq > 800) {
+    const o2 = audioCtx.createOscillator();
+    o2.type = 'sine';
+    o2.frequency.value = freq * 2;
+    const g2 = audioCtx.createGain();
+    g2.gain.setValueAtTime(0.0001, start);
+    g2.gain.exponentialRampToValueAtTime(vol * 0.35, start + 0.005);
+    g2.gain.exponentialRampToValueAtTime(0.0001, start + tail * 0.7);
+    o2.connect(g2);
+    g2.connect(dest);
+    o2.start(start);
+    o2.stop(start + tail);
+  }
 }
 
-// --- Music tracks ---
+// --- Music tracks (sparkly glitter — high bell tones, sine/triangle, fast twinkles) ---
 const TRACKS = [
   {
-    name: "dream.wav",
+    // C major pentatonic lullaby — cascading sparkle dust
+    name: "kitten_dreamz.wav",
     melody: [
-      523.25, 659.25, 783.99, 880, 783.99, 659.25, 698.46, 659.25,
-      587.33, 523.25, 587.33, 659.25, 523.25, 0, 440, 493.88,
-      523.25, 783.99, 880, 783.99, 659.25, 587.33, 523.25, 440,
-      493.88, 523.25, 659.25, 783.99, 880, 1046.5, 880, 783.99,
+      1568, 1760, 2093, 2349, 2093, 1760, 2093, 1568,
+      1319, 1568, 1760, 2093, 1760, 1568, 1319, 1175,
+      1568, 1760, 2093, 1760, 1319, 1568, 1175, 1047,
+      1175, 1319, 1568, 1760, 2093, 2349, 2093, 1760,
     ],
-    bass: [130.81, 130.81, 174.61, 196, 220, 220, 174.61, 196, 130.81, 130.81, 174.61, 196, 220, 220, 196, 174.61],
-    melodyBeat: 0.3, bassBeat: 0.44,
-    melodyType: 'square', bassType: 'triangle',
-    melodyVol: 0.04, bassVol: 0.05,
-  },
-  {
-    name: "rainbow.wav",
-    // Bubbly major pentatonic
-    melody: [
-      587.33, 698.46, 880, 1046.5, 880, 698.46, 587.33, 523.25,
-      587.33, 698.46, 880, 1046.5, 1174.66, 1046.5, 880, 698.46,
-      523.25, 659.25, 783.99, 880, 1046.5, 880, 783.99, 659.25,
-      587.33, 698.46, 880, 698.46, 587.33, 523.25, 587.33, 698.46,
-    ],
-    bass: [146.83, 146.83, 195.99, 195.99, 174.61, 174.61, 130.81, 130.81, 146.83, 146.83, 195.99, 195.99, 220, 220, 195.99, 174.61],
-    melodyBeat: 0.24, bassBeat: 0.48,
-    melodyType: 'triangle', bassType: 'sine',
-    melodyVol: 0.05, bassVol: 0.06,
-  },
-  {
-    name: "404.wav",
-    // Sparse, eerie, glitchy
-    melody: [
-      0, 659.25, 0, 523.25, 0, 0, 440, 0,
-      415.3, 0, 0, 392, 0, 415.3, 0, 0,
-      0, 587.33, 0, 698.46, 0, 0, 523.25, 0,
-      0, 493.88, 415.3, 0, 440, 0, 0, 523.25,
-    ],
-    bass: [87.31, 0, 87.31, 0, 82.41, 0, 82.41, 0, 73.42, 0, 73.42, 0, 82.41, 0, 87.31, 0],
-    melodyBeat: 0.35, bassBeat: 0.7,
+    bass: [131, 131, 196, 196, 175, 175, 220, 220, 131, 131, 196, 196, 220, 220, 175, 175],
+    melodyBeat: 0.18, bassBeat: 0.36,
     melodyType: 'sine', bassType: 'triangle',
-    melodyVol: 0.04, bassVol: 0.05,
+    melodyVol: 0.05, bassVol: 0.025,
   },
   {
-    name: "bluescreen.midi",
-    // A minor — shifted up an octave, sharp & crystalline
+    // F major bouncy arpeggios — bubblegum bounce
+    name: "bubblegum_pop.wav",
     melody: [
-      1760, 1567.98, 1318.5, 1174.66, 1046.5, 987.77, 880, 830.61,
-      880, 1046.5, 1318.5, 1174.66, 1046.5, 987.77, 880, 0,
-      1318.5, 1174.66, 1046.5, 987.77, 880, 784, 830.61, 880,
-      1760, 0, 1318.5, 0, 880, 0, 1046.5, 880,
+      1397, 1760, 2093, 2794, 2093, 1760, 1397, 1760,
+      2093, 2794, 2093, 1760, 1397, 1175, 1397, 1760,
+      1175, 1397, 1760, 2093, 2349, 2093, 1760, 1397,
+      1760, 2093, 2349, 2093, 1760, 2093, 2794, 2349,
     ],
-    bass: [220, 220, 174.62, 174.62, 261.62, 261.62, 196, 196, 220, 220, 174.62, 174.62, 261.62, 261.62, 329.62, 440],
-    melodyBeat: 0.32, bassBeat: 0.64,
-    melodyType: 'sawtooth', bassType: 'triangle',
-    melodyVol: 0.03, bassVol: 0.05,
-  },
-  {
-    name: "sunset.midi",
-    // D major — shifted up an octave, airy & bright
-    melody: [
-      1174.66, 987.77, 880, 739.98, 659.26, 587.32, 659.26, 739.98,
-      880, 987.77, 1174.66, 1318.5, 1174.66, 987.77, 880, 739.98,
-      659.26, 739.98, 880, 987.77, 1174.66, 1318.5, 1479.98, 1318.5,
-      1174.66, 987.77, 880, 739.98, 659.26, 587.32, 659.26, 739.98,
-    ],
-    bass: [146.83, 146.83, 196, 196, 220, 220, 146.83, 146.83, 146.83, 146.83, 196, 196, 164.82, 164.82, 220, 220],
-    melodyBeat: 0.4, bassBeat: 0.8,
+    bass: [175, 175, 233, 233, 131, 131, 175, 175, 175, 175, 233, 233, 196, 196, 175, 175],
+    melodyBeat: 0.16, bassBeat: 0.48,
     melodyType: 'triangle', bassType: 'sine',
-    melodyVol: 0.045, bassVol: 0.05,
+    melodyVol: 0.045, bassVol: 0.025,
+  },
+  {
+    // Glitchy minor — pings, gaps, broken arpeggios
+    name: "glitter_glitch.wav",
+    melody: [
+      1760, 0, 1568, 0, 2093, 1760, 0, 1319,
+      0, 1175, 1319, 0, 1760, 0, 1568, 1175,
+      2093, 0, 1760, 0, 0, 1319, 1175, 0,
+      1568, 1319, 1175, 1047, 0, 1319, 1760, 1568,
+    ],
+    bass: [110, 0, 110, 0, 82, 0, 82, 0, 73, 0, 73, 0, 98, 0, 110, 0],
+    melodyBeat: 0.22, bassBeat: 0.7,
+    melodyType: 'sine', bassType: 'sine',
+    melodyVol: 0.05, bassVol: 0.025,
+  },
+  {
+    // A minor cascading 16ths — crystal rain
+    name: "rhinestone_rain.midi",
+    melody: [
+      1760, 2093, 2349, 2637, 2349, 2093, 1760, 1568,
+      1319, 1568, 1760, 2093, 1760, 1568, 1319, 1175,
+      2349, 2637, 2093, 2349, 1760, 2093, 1568, 1760,
+      1319, 1175, 1319, 1568, 1760, 2093, 2349, 2637,
+    ],
+    bass: [220, 220, 165, 165, 262, 262, 196, 196, 220, 220, 165, 165, 262, 262, 330, 220],
+    melodyBeat: 0.16, bassBeat: 0.64,
+    melodyType: 'sine', bassType: 'triangle',
+    melodyVol: 0.04, bassVol: 0.022,
+  },
+  {
+    // D major flowing dance — gentle rises and falls
+    name: "cottoncandy_sky.midi",
+    melody: [
+      1175, 1319, 1480, 1760, 1480, 1319, 1175, 1109,
+      1175, 1319, 1480, 1760, 1976, 1760, 1480, 1319,
+      2349, 1976, 1760, 1480, 1319, 1480, 1760, 1976,
+      2217, 1976, 1760, 1480, 1319, 1175, 1319, 1480,
+    ],
+    bass: [147, 147, 196, 196, 220, 220, 147, 147, 147, 147, 196, 196, 165, 165, 220, 220],
+    melodyBeat: 0.2, bassBeat: 0.8,
+    melodyType: 'triangle', bassType: 'sine',
+    melodyVol: 0.045, bassVol: 0.025,
   },
 ];
 
