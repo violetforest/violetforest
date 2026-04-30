@@ -84,6 +84,10 @@
     text-shadow: 0 1px 0 rgba(255,255,255,0.7);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
   }
+  @media (hover: none) and (pointer: coarse), (max-width: 1024px) {
+    #controls-hint { display: none !important; }
+    #prompt { display: none !important; }
+  }
 
   /* ── intro overlay (Aero pink) ──────────────────── */
   #intro {
@@ -302,21 +306,26 @@
   /* === About button + modal (Aero-pink, matches pink-desktop) === */
   #about-btn {
     position: fixed; top: 14px; right: 14px; z-index: 200;
-    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
-    border: 2px solid rgba(255, 110, 170, 0.95);
-    border-radius: 999px;
-    font: bold 16px "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
-    padding: 5px 20px; cursor: pointer; pointer-events: auto;
-    color: #aa3366;
-    letter-spacing: 2px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 14px rgba(255, 80, 150, 0.55);
+    background: linear-gradient(180deg, #ffe8f3, #ffc9e0);
+    border: 1px solid rgba(255, 110, 170, 0.9);
+    border-radius: 4px;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    cursor: pointer;
+    pointer-events: auto;
+    color: #4a1a36;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
   }
   #about-btn:hover {
-    background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 50%, #ffadd5 100%);
+    background: linear-gradient(180deg, #fff0f8, #ffd9ec);
   }
   #about-btn:active {
-    background: linear-gradient(180deg, #ff9fcc 0%, #ffc9e0 50%, #ffe8f3 100%);
-    box-shadow: inset 0 2px 4px rgba(180, 30, 90, 0.4);
+    background: linear-gradient(180deg, #ffc9e0, #ffe8f3);
+    box-shadow: inset 0 1px 2px rgba(180, 30, 90, 0.3);
   }
   #about-modal {
     position: fixed; inset: 0; z-index: 300;
@@ -1570,14 +1579,13 @@ if (_isMobile) {
     if (el.closest && (el.closest('#about-btn') || el.closest('#about-modal') || el.closest('#desktop-overlay') || el.closest('#exit-sit'))) return true;
     return false;
   };
+  // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
   canvas.addEventListener('touchstart', (e) => {
     if (state !== 'walking') return;
     if (isUI(e.target)) return;
     e.preventDefault();
     touchDown = true;
   }, { passive: false });
-  canvas.addEventListener('touchend', () => { touchDown = false; });
-  canvas.addEventListener('touchcancel', () => { touchDown = false; });
 }
 
 exitBtn.addEventListener('click', () => {
