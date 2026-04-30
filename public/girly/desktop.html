@@ -335,6 +335,23 @@
   .span-3 { grid-column: span 3; }
   .span-row-2 { grid-row: span 2; }
 
+  /* ===== Mobile: 2-column flow, multi-column spans collapse to full width ===== */
+  @media (max-width: 640px) {
+    .collage {
+      padding: 10px;
+      gap: 6px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .span-2, .span-3 { grid-column: span 2 !important; }
+    .span-row-2 { grid-row: auto !important; }
+    .win95-window { font-size: 12px; }
+    .win95-titlebar { padding: 6px 8px; font-size: 12px; }
+    .win95-body { padding: 8px; }
+    /* The bare desktop shell (start bar, marquees) uses absolute pixel
+       widths in places — stop those from forcing horizontal overflow. */
+    body { overflow-x: hidden; }
+  }
+
   /* ===== PIXEL ART FIRE ===== */
   .fire-container {
     display: flex;

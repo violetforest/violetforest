@@ -1133,7 +1133,7 @@ renderer.domElement.style.transform = 'translateZ(0)'; // force own compositor l
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
 const _isMobileSpawn = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 const _spawnZ = _isMobileSpawn ? -380 : -280;
 camera.position.set(0, 8, _spawnZ);

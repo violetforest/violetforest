@@ -29,9 +29,9 @@ export function NetArtIframe({
       style={{
         position: 'fixed',
         inset: 0,
-        // Gradient backdrop so the route fade reads as the lipstick gradient
-        // rather than a black or off-white flash before the iframe paints.
-        background: 'linear-gradient(30deg, #6a00ef, #ff4aab, #000fff)',
+        // Pink-tint frosted vibe matching the bedroom info-modal backdrop.
+        background:
+          'radial-gradient(ellipse at 50% 45%, #ff7eb3 0%, #c84a85 60%, #6a1f4a 100%)',
       }}
     >
       <iframe
