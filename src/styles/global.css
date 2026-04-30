@@ -44,7 +44,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #f0eaf5;
+  background: linear-gradient(30deg, #6a00ef, #ff4aab, #000fff);
   color: #1a1a1a;
   font-family: Georgia, 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
