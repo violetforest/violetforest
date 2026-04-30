@@ -8,11 +8,17 @@ export function NetArtIframe({
   title,
   showNext = true,
   info,
+  infoLabel,
+  infoPosition,
+  infoRainbow,
 }: {
   src: string
   title: string
   showNext?: boolean
   info?: ReactNode
+  infoLabel?: string
+  infoPosition?: 'top-right' | 'bottom-right'
+  infoRainbow?: boolean
 }) {
   return (
     <motion.div
@@ -34,7 +40,11 @@ export function NetArtIframe({
           background: '#000',
         }}
       />
-      {info && <NetArtInfo>{info}</NetArtInfo>}
+      {info && (
+        <NetArtInfo label={infoLabel} position={infoPosition} rainbow={infoRainbow}>
+          {info}
+        </NetArtInfo>
+      )}
       {showNext && <NextRandomLink />}
     </motion.div>
   )

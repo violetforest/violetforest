@@ -706,15 +706,26 @@
 </head>
 <body>
 <script>
-  // Click anywhere on the pink desktop → navigate to the next route (webcore.html).
-  // If we're inside the bedroom iframe, navigate the bedroom (parent) page so the user
-  // exits the monitor view; otherwise navigate this page directly.
+  // Click anywhere on the pink desktop → navigate the bedroom (parent) page to webcore.html.
+  // Only fires while the player is actually sitting at the monitor — clicks on the live
+  // CSS3D screen (when walking around) shouldn't trigger a route change.
   document.addEventListener('click', () => {
-    const target = (window.parent && window.parent !== window) ? window.parent : window;
-    try {
-      target.location.href = 'webcore.html';
-    } catch (e) {
-      // Cross-origin fallback (shouldn't happen — both are served from the same origin)
+    const inIframe = window.parent && window.parent !== window;
+    if (inIframe) {
+      // Defensive guard: only navigate when the bedroom is in the 'sitting' state.
+      let sitting = false;
+      try { sitting = window.parent.bedroomState === 'sitting'; } catch (e) {}
+      if (!sitting) return;
+      // Use the parent's gradient route-fader if available
+      try {
+        if (typeof window.parent.fadeToRoute === 'function') {
+          window.parent.fadeToRoute('webcore.html');
+          return;
+        }
+        window.parent.location.href = 'webcore.html';
+      } catch (e) { window.location.href = 'webcore.html'; }
+    } else {
+      // Standalone (opened directly outside the bedroom iframe) — allow direct nav.
       window.location.href = 'webcore.html';
     }
   });
@@ -1226,10 +1237,7 @@
 
 <!-- TASKBAR -->
 <div class="taskbar">
-  <button class="start-btn">
-    <div class="start-logo"><div></div><div></div><div></div><div></div></div>
-    Start
-  </button>
+  <button class="start-btn">Start</button>
   <div class="taskbar-divider"></div>
   <div class="taskbar-item">🌐 Netscape Nav...</div>
   <div class="taskbar-item">📁 My Computer</div>

@@ -469,6 +469,12 @@
 
 			// ============ CAMERA SETTINGS PANEL ============
 			(function buildCamPanel() {
+				// Hide panel entirely when the page is driven by a parent (public-facing).
+				if ( /[?&]driven=1/.test( window.location.search ) ) {
+					var p = document.getElementById('cam-panel');
+					if ( p ) p.style.display = 'none';
+					return;
+				}
 				var rowsEl = document.getElementById('cam-rows');
 				if ( ! rowsEl ) return;
 

@@ -78,13 +78,30 @@
     #fader.on { opacity: 1; }
 
     #about-btn {
-      position: fixed; bottom: 14px; left: 14px; z-index: 20;
-      background: rgba(0,0,0,0.4); color: rgba(255,255,255,0.5);
+      position: fixed; top: 14px; right: 14px; z-index: 20;
+      background: rgba(0,0,0,0.4);
       border: 1px solid rgba(255,255,255,0.2);
-      font: 11px monospace; padding: 4px 10px; cursor: pointer;
-      pointer-events: auto; letter-spacing: 1px;
+      font: 22px monospace; padding: 8px 20px; cursor: pointer;
+      pointer-events: auto; letter-spacing: 2px;
     }
-    #about-btn:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+    #about-btn:hover { border-color: rgba(255,255,255,0.5); }
+    @keyframes about-blink {
+       0%   { color: #ff5577; }
+      16%   { color: #ff9944; }
+      33%   { color: #ffdd55; }
+      50%   { color: #66cc66; }
+      66%   { color: #5588ff; }
+      83%   { color: #aa66ff; }
+     100%   { color: #ff5577; }
+    }
+    #about-btn span {
+      animation: about-blink 1.2s steps(6) infinite;
+    }
+    #about-btn span:nth-child(1) { animation-delay: 0s; }
+    #about-btn span:nth-child(2) { animation-delay: -0.2s; }
+    #about-btn span:nth-child(3) { animation-delay: -0.4s; }
+    #about-btn span:nth-child(4) { animation-delay: -0.6s; }
+    #about-btn span:nth-child(5) { animation-delay: -0.8s; }
     #about-modal {
       position: fixed; inset: 0; z-index: 30;
       display: none; align-items: center; justify-content: center;
@@ -283,7 +300,7 @@
     <label>Enter Scale <input type="range" id="s-escale" min="0.05" max="2" step="0.01" value="0.7"><span class="val" id="v-escale">0.7</span></label>
     <button id="btn-copy-enter" style="width:100%;margin-top:6px;background:#0a0;color:#000;border:1px solid #0f0;font:12px monospace;padding:4px;cursor:pointer;">Copy JSON</button>
   </div>
-  <button id="about-btn">about</button>
+  <button id="about-btn"><span>a</span><span>b</span><span>o</span><span>u</span><span>t</span></button>
   <div id="about-modal">
     <div class="about-wrap">
       <div class="about-titlebar">

@@ -60,15 +60,18 @@
 
   #controls-hint {
     position: absolute;
-    left: 14px;
-    bottom: 14px;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    text-align: center;
     font-family: "Segoe UI", Tahoma, sans-serif;
     font-size: 11px;
     color: #fff;
     text-shadow: 0 1px 4px rgba(180, 40, 100, 0.85);
     letter-spacing: 0.5px;
     line-height: 1.8;
-    opacity: 0.85;
+    opacity: 0.95;
+    white-space: nowrap;
   }
   #controls-hint b {
     color: #4a1a36;
@@ -280,21 +283,190 @@
 </style>
 </head>
 <body>
+<style id="random-cursor"></style>
+<script>
+  // Pick a random cursor from gifs/cursors/ on load (default + a different pointer)
+  (() => {
+    const C = ["tumblr_06a2aeded2e365c91f54c8d04df87b12_1abf8d91_100.webp","tumblr_0c9bf7afb3ecfb776e9449c7fd2e95d5_bbdf3d58_100.webp","tumblr_0ef8bcf9e6e81665cd946520b2fdc4b3_0bf673ec_100.webp","tumblr_179de0f393cc90fb96e05f29236fcc82_5eb494cf_75.webp","tumblr_3883a365395d756be66e4c7a3665e404_d9d25615_250.webp","tumblr_38e2c9cf3e04d09348ef0af9948d4620_d1e9f925_75.webp","tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp","tumblr_4ed11c604ba4a66a11109b0b59dadc68_2839eb3a_100.webp","tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp","tumblr_6b69b1fac2766724812bf14b565deba5_9a15d3df_100.webp","tumblr_734f0fa22c07ecb4fc675c59251a6298_af39f2e5_75.webp","tumblr_7433e1047b83424374a7a3536e7138f6_9f2e786a_75.webp","tumblr_7f53982f5c6d7ead8263d5a4307668aa_d9f5e87b_100.webp","tumblr_8878c078d226b0742dc4f2e88d01e2d9_d25e45c1_100.webp","tumblr_9c21d6e382dd3c44abe5df9a906b5830_60ac9645_100.webp","tumblr_a31c3e32fa82bc567a16641f56d8e45d_1a24ad3a_100.webp","tumblr_b4ef741d1109054a36962e8fc536430c_54b08306_75.webp","tumblr_ce73fa30e4f8988bfcfc8bb21ba6ab80_4b87e70c_75.webp","tumblr_cf8eed39de6be94045a13563c75972a9_f75f971c_75.webp","tumblr_d4b362546e21896ecfc5892ad2a5f0b9_3bb2c843_75.webp","tumblr_df64edb6e6140ef82fb2ad795987f063_9a81b4bf_75.webp"];
+    const def = C[(Math.random() * C.length) | 0];
+    let ptr = C[(Math.random() * C.length) | 0]; if (ptr === def) ptr = C[(C.indexOf(def) + 1) % C.length];
+    document.getElementById('random-cursor').textContent =
+      'html,body{cursor:url("gifs/cursors/' + def + '") 4 4,auto;}' +
+      'a,button,[role="button"],label,summary,select,input[type="button"],input[type="submit"],input[type="checkbox"],input[type="radio"],#prompt,#exit-sit{cursor:url("gifs/cursors/' + ptr + '") 4 4,pointer !important;}';
+  })();
+</script>
 <style>
   /* Static cursors (no rotation) — sparkle trail handled in JS below */
-  html, body { cursor: url("gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp") 4 4, auto; }
-  a, button, [role="button"], label, summary, select,
-  input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"],
-  #prompt, #exit-sit {
-    cursor: url("gifs/cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp") 4 4, pointer !important;
+  /* Cursor URLs are injected at runtime by the random-cursor script after <body> */
+
+  /* === About button + modal (Aero-pink, matches pink-desktop) === */
+  #about-btn {
+    position: fixed; top: 14px; right: 14px; z-index: 200;
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+    border: 2px solid rgba(255, 110, 170, 0.95);
+    border-radius: 999px;
+    font: bold 16px "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+    padding: 5px 20px; cursor: pointer; pointer-events: auto;
+    color: #aa3366;
+    letter-spacing: 2px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 14px rgba(255, 80, 150, 0.55);
+  }
+  #about-btn:hover {
+    background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 50%, #ffadd5 100%);
+  }
+  #about-btn:active {
+    background: linear-gradient(180deg, #ff9fcc 0%, #ffc9e0 50%, #ffe8f3 100%);
+    box-shadow: inset 0 2px 4px rgba(180, 30, 90, 0.4);
+  }
+  #about-modal {
+    position: fixed; inset: 0; z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(255, 80, 150, 0.30);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    pointer-events: auto;
+  }
+  #about-modal.open { display: flex; }
+  #about-modal .about-wrap {
+    position: relative;
+    max-width: 480px; width: 86%;
+    border: 2px solid rgba(255, 110, 170, 0.95);
+    border-radius: 12px;
+    background: rgba(255, 240, 248, 0.95);
+    box-shadow: 0 14px 32px rgba(255, 80, 150, 0.55), 0 6px 20px rgba(0,0,0,0.25);
+    overflow: hidden;
+    color: #4a1830;
+  }
+  #about-modal .about-titlebar {
+    padding: 8px 14px;
+    font: bold 13px "Segoe UI", "Tahoma", sans-serif;
+    color: #5a1d3d;
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 40%, #ff9fcc 100%);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    border-bottom: 1px solid rgba(255, 110, 170, 0.55);
+    position: relative;
+  }
+  #about-modal .about-titlebar::after {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
+    pointer-events: none;
+  }
+  #about-modal .about-wrap { max-height: 82vh; display: flex; flex-direction: column; }
+  #about-modal .about-inner {
+    padding: 18px 22px; font: 12px/1.6 "Segoe UI", "Tahoma", sans-serif;
+    overflow-y: auto;
+    color: #4a1830;
+  }
+  #about-modal .about-inner h2 {
+    font: bold 22px/1.1 "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+    color: #cc3388; margin: 0 0 6px 0;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  }
+  #about-modal .about-inner .meta {
+    font: 11px/1.6 "Segoe UI", "Tahoma", sans-serif;
+    color: #6a2244;
+    margin: 4px 0 14px 0;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #ff9fcc;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 0 rgba(255,200,225,0.5);
+  }
+  #about-modal .about-inner p { margin: 0 0 10px 0; }
+  #about-modal .about-inner em, #about-modal .about-inner i { font-style: italic; color: #cc3388; }
+  #about-modal .about-inner a { color: #cc3388; text-decoration: underline; }
+  #about-modal .about-inner a:visited { color: #884466; }
+  #about-modal .about-inner a:hover { color: #ff3388; }
+  #about-modal .about-inner .related {
+    margin-top: 14px; padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #ff9fcc;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 0 rgba(255,200,225,0.5);
+  }
+  #about-modal .about-inner .related-title {
+    font: bold 12px/1.4 "Comic Sans MS", "Segoe UI", sans-serif;
+    color: #cc3388; margin-bottom: 8px;
+  }
+  #about-modal .about-inner .related-list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 4px 6px;
+  }
+  #about-modal .about-inner .related-list li {
+    font: 10px/1.4 "Segoe UI", "Tahoma", sans-serif;
+    color: #6a2244;
+    background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 100%);
+    border: 1px solid #ff9fcc;
+    border-radius: 10px;
+    padding: 2px 9px;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  #about-modal .about-inner .credit {
+    margin-top: 14px; padding: 10px 12px;
+    background: #fffaf2;
+    border: 1px solid #ffcc99;
+    border-radius: 6px;
+    font: 11px/1.55 "Segoe UI", "Tahoma", sans-serif;
+    color: #6a2244;
+  }
+  #about-modal .close-about {
+    position: absolute; top: 6px; right: 8px;
+    width: 30px; height: 22px; padding: 0;
+    background: linear-gradient(180deg, #ff9999 0%, #dd3333 50%, #aa1111 100%);
+    border: 1px solid #7a0000; border-radius: 3px 6px 6px 3px;
+    color: #fff;
+    font: bold 14px/20px "Segoe UI", "Tahoma", sans-serif;
+    cursor: pointer; z-index: 2;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+  }
+  #about-modal .close-about:hover {
+    background: linear-gradient(180deg, #ffb3b3 0%, #ee5555 50%, #cc2222 100%);
   }
 </style>
+
+<button id="about-btn">about</button>
+<div id="about-modal">
+  <div class="about-wrap">
+    <div class="about-titlebar">About — angel.html</div>
+    <button class="close-about">×</button>
+    <div class="about-inner">
+      <h2>angel.html</h2>
+      <div class="meta">by Violet Forest<br>2026<br>Browser, Three.js</div>
+      <p>Webcore is an internet aesthetic that grew up mostly on Tumblr in the late 2010s and early 2020s. Specific communities and archives there pulled early-web gifs and assets from the Internet Archive Wayback Machine, GeoCities, Angelfire, and Xanga, and started mashing them into dreamy, surreal compositions. Tumblr's reblog culture let the aesthetic spread fast through moodboards and themed blogs.</p>
+      <p>Webcore uses the visual and auditory language of the early internet (approximately 1995&ndash;2005) to evoke a sense of nostalgia&mdash;pixelated graphics, dated user interfaces, and the sounds of obsolete technology such as system notifications and dial-up modems. The aesthetic is predicated on the appropriation of obsolete internet artifacts&mdash;early-era animated GIFs, high-contrast browser windows, system-level error dialogues&mdash;placed into abstract voids or dreamlike contexts. Although it draws from historical sources, Webcore functions as a surrealist deconstruction of digital nostalgia.</p>
+      <p>Webcore developed as a reaction to the highly curated, centralized, and corporate nature of the modern internet. Its ethos is a nostalgic yearning for the perceived freedom and amateur creativity of the early web, before it was dominated by a few large social media platforms and algorithmic content feeds. The aesthetic romanticizes the period&rsquo;s utopian vision of the internet as a decentralized space for individual expression.</p>
+      <p>The visual style celebrates the rough-around-the-edges quality of early web design&mdash;clunky animations, low-resolution pixel art, glitter graphics, and the sharp-edged windows of dated operating systems. It embraces what was once considered poor design as a form of authentic, unfiltered creativity.</p>
+      <p style="font-size:10px;color:#884466;">Source: <a href="https://aesthetics.fandom.com/wiki/Webcore" target="_blank">Aesthetics Wiki &mdash; Webcore</a></p>
+      <div class="related">
+        <div class="related-title">Related aesthetics</div>
+        <ul class="related-list">
+          <li>2010s Meme Maximalism</li>
+          <li>Cybercore</li>
+          <li>Demoscene</li>
+          <li>Dreamcore</li>
+          <li>Frutiger Aero</li>
+          <li>Glitch Art</li>
+          <li>Glitchcore</li>
+          <li>Old Web</li>
+          <li>Silicon Dreams</li>
+          <li>TechnoNeko2000</li>
+          <li>Vaporwave</li>
+          <li>Weirdcore</li>
+          <li>Xpiritualism</li>
+          <li>Y2K Futurism</li>
+          <li>Yabujincore</li>
+        </ul>
+      </div>
+      <div class="credit">GIF collection sourced from <a href="https://oldwww.tumblr.com/" target="_blank">oldwww.tumblr.com</a>, a Tumblr dedicated to preserving early internet graphics and culture.</div>
+    </div>
+  </div>
+</div>
 
 <div id="hud">
   <div id="crosshair"></div>
   <div id="prompt">press E to sit</div>
   <div id="controls-hint">
-    <b>MOUSE</b> look &nbsp; <b>E</b> sit &nbsp; <b>ESC</b> stand / release
+    <b>W</b><b>A</b><b>S</b><b>D</b> walk &nbsp; <b>SHIFT</b> run &nbsp; <b>MOUSE</b> look &nbsp; <b>E</b> sit &nbsp; <b>ESC</b> stand / release
   </div>
 </div>
 
@@ -1293,6 +1465,45 @@ const iframe = document.getElementById('desktop-iframe');
 const exitBtn = document.getElementById('exit-sit');
 
 let state = 'walking'; // 'walking' | 'transitioning' | 'sitting'
+// Expose state so the desktop iframe can check whether the player is sitting
+// before allowing a click to navigate to the next route.
+function setState(s) { state = s; window.bedroomState = s; }
+window.bedroomState = state;
+
+// --- Route-change fader (lipstick gradient) -------------------
+(() => {
+  const fader = document.createElement('div');
+  fader.id = 'route-fader';
+  fader.style.cssText = `
+    position: fixed; inset: 0; z-index: 999999;
+    background: linear-gradient(30deg, #6a00ef, #ff4aab, #000fff);
+    background-size: 300% 300%;
+    animation: routeFadeGradient 30s ease infinite;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.0s ease;
+  `;
+  const sty = document.createElement('style');
+  sty.textContent = `
+    @keyframes routeFadeGradient {
+      0%   { background-position: 48% 0%; }
+      100% { background-position: 53% 100%; }
+    }
+    #route-fader.on { opacity: 1; pointer-events: auto; }
+  `;
+  document.head.appendChild(sty);
+  document.body.appendChild(fader);
+
+  // Expose: fade in over ~1s, then navigate to the given URL.
+  window.fadeToRoute = (url) => {
+    fader.classList.add('on');
+    setTimeout(() => { window.location.href = url; }, 1050);
+  };
+
+  // On bfcache restore, hide the fader so it doesn't linger.
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) fader.classList.remove('on');
+  });
+})();
 let currentInteraction = null;
 let tween = null;
 let standingPose = null;
@@ -1313,11 +1524,13 @@ function attemptLock() {
   }
 }
 
-// Click the canvas (or anywhere outside the desktop overlay) to engage pointer lock.
+// Click the canvas (desktop only) to engage pointer lock for mouse-look.
+// Mobile uses tap-to-walk instead — see the touchstart handler below.
 document.addEventListener('click', (e) => {
   if (state !== 'walking') return;
   if (controls.isLocked) return;
-  if (overlayEl && overlayEl.contains(e.target)) return; // ignore clicks on monitor UI
+  if (overlayEl && overlayEl.contains(e.target)) return;
+  if (typeof _isMobile !== 'undefined' && _isMobile) return;
   attemptLock();
 });
 
@@ -1344,8 +1557,47 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => { keys[e.code] = false; });
 
+// --- Mobile: tap-and-hold the canvas to walk forward toward the chair ---
+const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+let touchDown = false;
+if (_isMobile) {
+  // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
+  const hint = document.getElementById('controls-hint');
+  if (hint) hint.style.display = 'none';
+  const canvas = renderer.domElement;
+  const isUI = (el) => {
+    if (!el) return false;
+    if (el.closest && (el.closest('#about-btn') || el.closest('#about-modal') || el.closest('#desktop-overlay') || el.closest('#exit-sit'))) return true;
+    return false;
+  };
+  canvas.addEventListener('touchstart', (e) => {
+    if (state !== 'walking') return;
+    if (isUI(e.target)) return;
+    e.preventDefault();
+    touchDown = true;
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => { touchDown = false; });
+  canvas.addEventListener('touchcancel', () => { touchDown = false; });
+}
+
 exitBtn.addEventListener('click', () => {
   if (state === 'sitting') standUp();
+});
+
+// About modal
+const aboutBtn = document.getElementById('about-btn');
+const aboutModal = document.getElementById('about-modal');
+const aboutClose = aboutModal.querySelector('.close-about');
+aboutBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  aboutModal.classList.add('open');
+});
+aboutClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  aboutModal.classList.remove('open');
+});
+aboutModal.addEventListener('click', (e) => {
+  if (e.target === aboutModal) aboutModal.classList.remove('open');
 });
 
 function clampToRoom(p) {
@@ -1388,7 +1640,7 @@ function checkInteraction() {
 // ═══════════════════════════════════════════════════════════════
 function sitDown() {
   if (state !== 'walking') return;
-  state = 'transitioning';
+  setState('transitioning');
   controls.unlock();
   // remember where we were
   standingPose = {
@@ -1401,7 +1653,7 @@ function sitDown() {
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
   startTween(sitPos, lookTarget, 900, () => {
-    state = 'sitting';
+    setState('sitting');
     // show overlay
     overlayEl.classList.add('active');
     // small delay for pretty transition
@@ -1425,7 +1677,7 @@ function sitDown() {
 
 function standUp() {
   if (state !== 'sitting') return;
-  state = 'transitioning';
+  setState('transitioning');
   overlayEl.classList.remove('visible');
   setTimeout(() => overlayEl.classList.remove('active'), 450);
 
@@ -1434,7 +1686,7 @@ function standUp() {
   const lookTarget = new THREE.Vector3(0, 1.5, -4.5);
 
   startTween(standPos, lookTarget, 800, () => {
-    state = 'walking';
+    setState('walking');
     hudEl.style.opacity = '1';
     // monitor stays on — no dimming
     // attemptLock will retry on failure and fall back to the intro panel
@@ -1484,13 +1736,37 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(0.05, clock.getDelta());
 
-  // forward-only movement (W or ArrowUp)
+  // WASD / arrow-key walking (desktop, requires pointer lock); SHIFT to run
   if (state === 'walking' && controls.isLocked) {
+    velocity.x -= velocity.x * 12 * dt;
     velocity.z -= velocity.z * 12 * dt;
-    const speed = 22;
-    if (keys.KeyW || keys.ArrowUp) velocity.z -= speed * dt;
+    const running = keys.ShiftLeft || keys.ShiftRight;
+    const speed = running ? 44 : 22;
+    if (keys.KeyW || keys.ArrowUp)    velocity.z -= speed * dt;
+    if (keys.KeyS || keys.ArrowDown)  velocity.z += speed * dt;
+    if (keys.KeyA || keys.ArrowLeft)  velocity.x -= speed * dt;
+    if (keys.KeyD || keys.ArrowRight) velocity.x += speed * dt;
+    controls.moveRight(-velocity.x * dt);
     controls.moveForward(-velocity.z * dt);
     clampToRoom(camera.position);
+  }
+
+  // Mobile: tap-to-walk forward toward the chair, auto-sit when close.
+  if (_isMobile && touchDown && state === 'walking' && !controls.isLocked) {
+    // Walk straight toward the chair (chairGroup at z = -2.9, x = 0).
+    const dx = chairGroup.position.x - camera.position.x;
+    const dz = chairGroup.position.z - camera.position.z;
+    const len = Math.hypot(dx, dz) || 1;
+    const speed = 2.0;
+    camera.position.x += (dx / len) * speed * dt;
+    camera.position.z += (dz / len) * speed * dt;
+    clampToRoom(camera.position);
+    // Auto-sit once close enough — same trigger as the E-key
+    checkInteraction();
+    if (currentInteraction === 'sit') {
+      touchDown = false;
+      sitDown();
+    }
   }
 
   updateTween();

@@ -197,6 +197,75 @@
     75% { transform: rotate(1.5deg); }
   }
 
+  /* --- Notepad popup (sweet handwritten notes) --- */
+  .notepad-popup .np-menu {
+    background: rgba(255, 240, 248, 0.92);
+    color: #5a1d3d;
+    font: 11px "Segoe UI", "Tahoma", sans-serif;
+    padding: 4px 10px;
+    border-bottom: 1px solid rgba(255, 110, 170, 0.55);
+  }
+  .notepad-popup .np-paper {
+    background: #fff;
+    color: #2a1422;
+    font: 14px/1.55 "Courier New", "Courier", monospace;
+    padding: 14px 14px 18px 14px;
+    min-height: 110px;
+    max-height: 220px;
+    /* Always show both scrollbars (like classic Win Notepad) */
+    overflow: scroll;
+    border: 2px solid rgba(255, 110, 170, 0.95);
+    border-top: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  /* Force the horizontal scrollbar to have something to scroll —
+     a thin invisible spacer wider than the visible area. */
+  .notepad-popup .np-paper::after {
+    content: "";
+    display: block;
+    width: 600px;
+    height: 1px;
+    pointer-events: none;
+  }
+  .notepad-popup .np-paper::-webkit-scrollbar { width: 14px; height: 14px; }
+  .notepad-popup .np-paper::-webkit-scrollbar-track {
+    background: #ffe0ee; border-left: 1px solid #ff9fcc;
+  }
+  .notepad-popup .np-paper::-webkit-scrollbar-track:horizontal {
+    border-left: none; border-top: 1px solid #ff9fcc;
+  }
+  .notepad-popup .np-paper::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffc9e0 0%, #ff8bbc 50%, #ee5599 100%);
+    border: 1px solid #cc3388; border-radius: 4px;
+  }
+  .notepad-popup .np-paper::-webkit-scrollbar-thumb:horizontal {
+    background: linear-gradient(90deg, #ffc9e0 0%, #ff8bbc 50%, #ee5599 100%);
+  }
+  .notepad-popup .np-paper::-webkit-scrollbar-corner {
+    background: #ffe0ee;
+    border-left: 1px solid #ff9fcc;
+    border-top: 1px solid #ff9fcc;
+  }
+
+  /* --- Sparkle/glitter popup with scrollbar — overflow forces it visible --- */
+  .sparkle-popup .body {
+    overflow-y: scroll !important;
+    max-height: 150px;
+  }
+  .sparkle-popup .body::after {
+    /* invisible spacer so the scrollbar always has content to scroll */
+    content: ""; display: block; height: 280px;
+  }
+  .sparkle-popup .body::-webkit-scrollbar { width: 14px; }
+  .sparkle-popup .body::-webkit-scrollbar-track {
+    background: #ffe0ee; border-left: 1px solid #ff9fcc;
+  }
+  .sparkle-popup .body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffc9e0 0%, #ff8bbc 50%, #ee5599 100%);
+    border: 1px solid #cc3388; border-radius: 4px;
+  }
+
   /* --- Winner popup --- */
   .winner-popup {
     position: fixed; z-index: 20500;
@@ -332,56 +401,44 @@
     touch-action: manipulation;
     text-shadow: 0 1px 0 rgba(0,0,0,0.3);
   }
+  /* Chat body — AOL IM transcript style (matches desktop.html away_msg.txt + buddy list) */
   .chat-popup .chat-body {
-    padding: 12px; max-height: 220px; overflow-y: auto;
-    background:
-      radial-gradient(circle at 20% 30%, rgba(255,180,210,0.18) 0, transparent 30%),
-      radial-gradient(circle at 80% 70%, rgba(255,180,210,0.18) 0, transparent 30%),
-      #fff5fa;
-    font-size: 13px; line-height: 1.5;
-    color: #4a1830;
-    font-family: "Comic Sans MS", "Chalkboard SE", "Segoe UI", cursive, sans-serif;
-    display: flex; flex-direction: column;
-  }
-  /* Chat bubbles — MSN/AIM y2k style */
-  .chat-popup .chat-msg {
-    margin: 6px 0;
-    max-width: 80%;
-    padding: 6px 12px;
-    border-radius: 14px;
-    box-shadow: 0 1px 3px rgba(255, 80, 150, 0.25), inset 0 1px 0 rgba(255,255,255,0.7);
+    padding: 8px 10px; max-height: 220px; overflow-y: auto;
+    background: #fff5fa;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 13px;
     line-height: 1.4;
+    color: #3a0a24;
+  }
+  /* Each line is a flat AIM-style transcript line. No bubbles. */
+  .chat-popup .chat-msg {
+    margin: 2px 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
     word-wrap: break-word;
-    position: relative;
+    max-width: none;
   }
   .chat-popup .chat-msg .who {
-    display: block;
+    display: inline;
     font-weight: bold;
-    font-size: 11px;
-    margin-bottom: 1px;
-    letter-spacing: 0.2px;
+    font-size: 13px;
+    margin-right: 4px;
+    letter-spacing: 0;
   }
-  .chat-popup .chat-msg.them {
-    background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 100%);
-    border: 1px solid #ff9fcc;
-    border-bottom-left-radius: 4px;
-    margin-right: auto;
-  }
-  .chat-popup .chat-msg.them .who { color: #cc3388; }
-  .chat-popup .chat-msg.me {
-    background: linear-gradient(180deg, #ffc9e0 0%, #ff9fcc 100%);
-    border: 1px solid #ee5599;
-    border-bottom-right-radius: 4px;
-    margin-left: auto;
-    color: #5a1d3d;
-  }
-  .chat-popup .chat-msg.me .who { color: #fff; text-shadow: 0 1px 0 rgba(150, 30, 80, 0.4); }
+  .chat-popup .chat-msg .who::after { content: ":"; }
+  .chat-popup .chat-msg.them .who { color: #dd3388; }   /* same as desktop screenname */
+  .chat-popup .chat-msg.me        { color: #3a0a24; }
+  .chat-popup .chat-msg.me .who   { color: #4488dd; }   /* classic AIM "you" blue */
   .chat-popup .chat-msg.typing {
-    background: rgba(255, 240, 248, 0.7);
-    border: 1px dashed #ee99c4;
-    color: #c075a0; font-style: italic;
-    box-shadow: none;
+    color: #aa6688;
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 4px;
   }
+  .chat-popup .chat-msg.typing .who { display: none; }
   .chat-popup .chat-input-row {
     display: flex; gap: 4px; padding: 8px;
     background: rgba(255, 240, 248, 0.92);
@@ -882,6 +939,26 @@
 </style>
 </head>
 <body>
+<!-- Route fade-in overlay (lipstick gradient) — covers the page on load, fades out -->
+<div id="route-fader" style="position:fixed;inset:0;z-index:999999;background:linear-gradient(30deg, #6a00ef, #ff4aab, #000fff);background-size:300% 300%;animation:routeFadeGradient 30s ease infinite;opacity:1;pointer-events:none;transition:opacity 1.0s ease;"></div>
+<style>
+  @keyframes routeFadeGradient {
+    0%   { background-position: 48% 0%; }
+    100% { background-position: 53% 100%; }
+  }
+</style>
+<script>
+  // Fade the gradient overlay out once the page has settled (1 frame after load).
+  window.addEventListener('load', () => {
+    requestAnimationFrame(() => {
+      const f = document.getElementById('route-fader');
+      if (f) {
+        f.style.opacity = '0';
+        setTimeout(() => f.remove(), 1300);
+      }
+    });
+  });
+</script>
 <style>
   html, body { cursor: url("gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp") 4 4, auto; }
   a, button, [role="button"], label, summary, select,
@@ -1196,6 +1273,97 @@ const skyMat = new THREE.ShaderMaterial({
 });
 scene.add(new THREE.Mesh(skyGeo, skyMat));
 
+// --- Sparkle stars in the sky — varied sizes + per-star twinkle ---
+let _starUniforms = null;
+{
+  const STAR_COUNT = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 220 : 500;
+  const starGeo = new THREE.BufferGeometry();
+  const starPos   = new Float32Array(STAR_COUNT * 3);
+  const starSize  = new Float32Array(STAR_COUNT);     // base size per star
+  const starPhase = new Float32Array(STAR_COUNT);     // twinkle phase offset
+  const starSpeed = new Float32Array(STAR_COUNT);     // twinkle speed
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi   = Math.acos(0.05 + Math.random() * 0.92);
+    const r = 700;
+    starPos[i*3+0] = r * Math.sin(phi) * Math.cos(theta);
+    starPos[i*3+1] = r * Math.cos(phi);
+    starPos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    // Size variation: most small, some medium, a few big — exponential-ish distribution
+    const t = Math.random();
+    starSize[i]  = 4 + Math.pow(t, 3) * 28;            // ~4 .. ~32 px
+    starPhase[i] = Math.random() * Math.PI * 2;
+    starSpeed[i] = 0.8 + Math.random() * 2.4;          // 0.8 .. 3.2 Hz-ish
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  starGeo.setAttribute('aSize',    new THREE.BufferAttribute(starSize, 1));
+  starGeo.setAttribute('aPhase',   new THREE.BufferAttribute(starPhase, 1));
+  starGeo.setAttribute('aSpeed',   new THREE.BufferAttribute(starSpeed, 1));
+
+  // Sparkle texture (soft glow + 4-point cross)
+  const sparkleCanvas = document.createElement('canvas');
+  sparkleCanvas.width = sparkleCanvas.height = 64;
+  const sx = sparkleCanvas.getContext('2d');
+  const cx = 32;
+  const grad = sx.createRadialGradient(cx, cx, 0, cx, cx, 22);
+  grad.addColorStop(0,   'rgba(255,255,255,1)');
+  grad.addColorStop(0.4, 'rgba(255,255,255,0.4)');
+  grad.addColorStop(1,   'rgba(255,255,255,0)');
+  sx.fillStyle = grad;
+  sx.beginPath(); sx.arc(cx, cx, 22, 0, Math.PI*2); sx.fill();
+  sx.strokeStyle = 'rgba(255,255,255,0.9)';
+  sx.lineWidth = 1.5;
+  sx.beginPath();
+  sx.moveTo(cx, 4); sx.lineTo(cx, 60);
+  sx.moveTo(4, cx); sx.lineTo(60, cx);
+  sx.stroke();
+  const sparkleTex = new THREE.CanvasTexture(sparkleCanvas);
+  sparkleTex.colorSpace = THREE.SRGBColorSpace;
+
+  _starUniforms = {
+    uTime:    { value: 0 },
+    uMap:     { value: sparkleTex },
+    uPxRatio: { value: Math.min(window.devicePixelRatio || 1, 2) },
+  };
+
+  const starMat = new THREE.ShaderMaterial({
+    uniforms: _starUniforms,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexShader: `
+      attribute float aSize;
+      attribute float aPhase;
+      attribute float aSpeed;
+      uniform float uTime;
+      uniform float uPxRatio;
+      varying float vAlpha;
+      void main() {
+        // Twinkle: per-star sin wave between 0.15 and 1.0 — different speeds and phases
+        float tw = 0.575 + 0.425 * sin(uTime * aSpeed + aPhase);
+        vAlpha = tw;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        // size attenuation by distance, plus per-star size variation, plus twinkle
+        gl_PointSize = aSize * tw * uPxRatio * (300.0 / -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uMap;
+      varying float vAlpha;
+      void main() {
+        vec4 tex = texture2D(uMap, gl_PointCoord);
+        gl_FragColor = vec4(tex.rgb, tex.a * vAlpha);
+        if (gl_FragColor.a < 0.01) discard;
+      }
+    `,
+  });
+
+  const skyStars = new THREE.Points(starGeo, starMat);
+  skyStars.renderOrder = -1;
+  scene.add(skyStars);
+}
+
 // --- Clouds — soft cumulus sprites, slow drift ---
 const CLOUD_COUNT = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 6 : 12;
 const cloudObjects = [];
@@ -1244,7 +1412,7 @@ for (let i = 0; i < CLOUD_COUNT; i++) {
   const dist = 100 + Math.random() * CLOUD_AREA;
   sprite.position.set(
     Math.cos(angle) * dist,
-    70 + Math.random() * 80,
+    175 + Math.random() * 200,   // 2.5x higher (was 70..150)
     Math.sin(angle) * dist
   );
   const w = 120 + Math.random() * 200;   // 2x bigger than before (was 60..160)
@@ -1373,69 +1541,83 @@ const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(_isMobileDevice ? 256 :
 const cubeCamera = new THREE.CubeCamera(0.1, 1000, cubeRenderTarget);
 scene.add(cubeCamera);
 
-// --- Chrome sphere material ---
-// --- 4-pointed sparkly star texture (shared across all star sprites) ---
-const starTex = (() => {
-  const cv = document.createElement('canvas');
-  cv.width = 256; cv.height = 256;
-  const ctx = cv.getContext('2d');
-  const c = 128;
-  // outer 4-point star
-  const g = ctx.createRadialGradient(c, c, 0, c, c, 120);
-  g.addColorStop(0,    'rgba(255,255,255,1)');
-  g.addColorStop(0.08, 'rgba(255,240,250,1)');
-  g.addColorStop(0.25, 'rgba(255,200,230,0.7)');
-  g.addColorStop(0.55, 'rgba(255,150,200,0.25)');
-  g.addColorStop(1,    'rgba(255,100,180,0)');
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  for (let i = 0; i < 8; i++) {
-    const a = (i * Math.PI) / 4 - Math.PI / 2;
-    const r = i % 2 === 0 ? 120 : 6;
-    const x = c + Math.cos(a) * r, y = c + Math.sin(a) * r;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  }
-  ctx.closePath(); ctx.fill();
-  // bright core
-  const cg = ctx.createRadialGradient(c, c, 0, c, c, 24);
-  cg.addColorStop(0, 'rgba(255,255,255,1)');
-  cg.addColorStop(0.5, 'rgba(255,255,255,0.6)');
-  cg.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = cg;
-  ctx.beginPath(); ctx.arc(c, c, 24, 0, Math.PI * 2); ctx.fill();
-  const t = new THREE.CanvasTexture(cv);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
+// --- Chrome heart geometry + material ---
+// 3D inflated heart shape, normalized to a unit bounding box so the existing
+// per-instance scale (s.scale.setScalar(r)) gives sphere-equivalent sizing.
+const sphereGeo = (() => {
+  const heart = new THREE.Shape();
+  heart.moveTo(0, -0.6);
+  heart.bezierCurveTo(0.10,  0.00, 0.60, 0.10, 0.60, 0.50);
+  heart.bezierCurveTo(0.60,  0.85, 0.30, 1.00, 0,    0.65);
+  heart.bezierCurveTo(-0.30, 1.00,-0.60, 0.85,-0.60, 0.50);
+  heart.bezierCurveTo(-0.60, 0.10,-0.10, 0.00, 0,   -0.60);
+  const segs = _isMobileDevice ? 8 : 14;
+  const geo = new THREE.ExtrudeGeometry(heart, {
+    depth: 0.5,
+    bevelEnabled: true,
+    bevelThickness: 0.20,
+    bevelSize: 0.18,
+    bevelSegments: _isMobileDevice ? 3 : 5,
+    curveSegments: segs,
+  });
+  geo.center();
+  geo.computeBoundingBox();
+  const bb = geo.boundingBox;
+  const maxDim = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z);
+  geo.scale(2 / maxDim, 2 / maxDim, 2 / maxDim); // diameter ≈ 2, like SphereGeometry(1)
+  return geo;
 })();
+const chromeMat = _isMobileDevice
+  ? new THREE.MeshBasicMaterial({
+      color: 0xcccccc,
+      envMap: cubeRenderTarget.texture,
+      reflectivity: 1.0,
+    })
+  : new THREE.MeshStandardMaterial({
+      color: 0xcccccc,
+      metalness: 1.0,
+      roughness: 0.02,
+      envMap: cubeRenderTarget.texture,
+      envMapIntensity: 1.5,
+    });
 
-// --- Sky stars (replaces the chrome spheres, scattered up in the sky) ---
+// --- Scatter bobbing chrome spheres ---
 const bobbers = [];
 function addSphere(x, z, r) {
   r *= 8;
-  // Loft the star high into the sky and add some random altitude variance
-  const skyY = 90 + Math.random() * 220;
-  const mat = new THREE.SpriteMaterial({
-    map: starTex,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    color: 0xffffff,
-  });
-  const s = new THREE.Sprite(mat);
-  s.position.set(x, skyY, z);
-  const size = r * 1.6;
-  s.scale.set(size, size, 1);
+  const padding = 1.5;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    let overlap = false;
+    for (const b of bobbers) {
+      const dx = x - b.mesh.position.x;
+      const dz = z - b.mesh.position.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      const minDist = r + b.radius + padding;
+      if (dist < minDist) {
+        const push = (minDist - dist) + 0.1;
+        if (dist > 0.001) {
+          x += (dx / dist) * push;
+          z += (dz / dist) * push;
+        } else {
+          x += push;
+        }
+        overlap = true;
+      }
+    }
+    if (!overlap) break;
+  }
+  const s = new THREE.Mesh(sphereGeo, chromeMat);
+  const gy = Math.max(0, hillHeight(x, z) + HILL_Y_OFFSET);
+  s.position.set(x, gy + r + 1.5, z);
+  s.scale.setScalar(r);
   scene.add(s);
   bobbers.push({
     mesh: s,
     baseY: s.position.y,
-    baseScale: size,
     amp: 0.4 + Math.random() * 0.8,
     speed: 0.8 + Math.random() * 1.2,
     phase: Math.random() * Math.PI * 2,
-    twinkleSpeed: 1.2 + Math.random() * 1.8,
     radius: r,
-    isStar: true,
   });
 }
 
@@ -1545,7 +1727,6 @@ for (let i = bobbers.length - 1; i >= 0; i--) {
 // Lift each sphere so its bob trough clears the ground (including hills)
 const GROUND_CLEARANCE = 1.0;
 for (const b of bobbers) {
-  if (b.isStar) continue; // sky stars stay at their lofted altitude
   const g = groundY(b.mesh.position.x, b.mesh.position.z);
   b.baseY = g + b.radius + b.amp + GROUND_CLEARANCE;
   b.mesh.position.y = b.baseY;
@@ -1574,7 +1755,6 @@ for (let i = bobbers.length - 1; i >= 0; i--) {
 const SPHERE_Z_OFFSET = 0;
 for (const b of bobbers) {
   b.mesh.position.z += SPHERE_Z_OFFSET;
-  if (b.isStar) continue; // sky stars stay at their lofted altitude
   // Recalc ground height at new position
   const g = groundY(b.mesh.position.x, b.mesh.position.z);
   b.baseY = g + b.radius + b.amp + GROUND_CLEARANCE;
@@ -1661,14 +1841,17 @@ async function discoverGifs(basePath) {
 
 // Sparkle/glitter URLs — used as popup backgrounds (not placed in the world)
 const SPARKLE_GLITTER_URLS = [
-  'gifs/sparkles/tumblr_26a5f177dd7e7712a44c24ba3477b65b_d9808e0e_100.webp',
-  'gifs/sparkles/tumblr_54afde4c101534b33852de1f5af5c595_e7681d48_100.webp',
-  'gifs/sparkles/tumblr_67b19ee322774e27e52a2d8b4e06d72a_226d62c0_75.webp',
-  'gifs/sparkles/tumblr_c39dc1f8e66ac3c08023bd72d87322b0_d8d1f9a7_75.webp',
-  'gifs/glitter/C3UALG5FNZOCPG6Z6OE5CYELOVFJUQE5.gif',
+  'gifs/glitter/4QVEFRYVU5P7RDR53R2ZJJ3VIUTDIQHF.gif',
   'gifs/glitter/CSCVZZ6N7SVXF4FV7KQAO6WUGWBQEJNT.gif',
+  'gifs/glitter/CSCVZZ6N7SVXF4FV7KQAO6WUGWBQEJNT (1).gif',
+  'gifs/glitter/JMHKWMDDP7TRYTUKLBGL6A65372ERRAF.gif',
   'gifs/glitter/WGO42VEAPW3XNAPXMSFN4LY5J3CEJQDD.gif',
-  'gifs/glitter/YBCOITSIAWDTP3PZNNBR4RSHLUB5EZLN.gif',
+  'gifs/glitter/ZENXOCDVOGGGE4S544GHU23L5LEOFVBE.gif',
+  'gifs/glitter/tumblr_0d73e6624acb39737593710a9071e531_3e64efab_400.webp',
+  'gifs/glitter/tumblr_1241b95f6bcfab9493a039186162d9b3_d866333c_75.webp',
+  'gifs/glitter/tumblr_22ab1c7379f74c7a969832f2bc070321_69b50a4a_250.webp',
+  'gifs/glitter/tumblr_df12a27c079acc70137dc62b96f72804_8cb29894_250.webp',
+  'gifs/glitter/tumblr_e6c4affed2b89e3ea759a39047a7dca0_e519bd7e_400.webp',
 ];
 
 const GIF_MANIFEST = [
@@ -1707,7 +1890,6 @@ const GIF_MANIFEST = [
   'gifs/dolls/OFVZZEI6LWGUMWCSOH2QVESE3WOMB3F3.gif',
   'gifs/dolls/PLOCEQ74T5UFURNYDSTXAU2HTT3UZOCZ.gif',
   'gifs/dolls/PTNZMPPJZQLBA25BYVZM7JYMCXCSHUR5.gif',
-  'gifs/dolls/QHTHCAI3TGKIJUITUYAFQTUTIGZUYCGB.gif',
   'gifs/dolls/QKR4YOKJB6FIGFS76ODWZ2YPVSBELBGV.gif',
   'gifs/dolls/S73EQXWMRQGMAYI5V6HN2PBZVRKBV6KH.gif',
   'gifs/dolls/SQTVF5ZISMVAE3ZHUTSUNFZVT4QJMPM6.gif',
@@ -1721,7 +1903,6 @@ const GIF_MANIFEST = [
   'gifs/dolls/YX6H4J4YQEQ3MJHMSI675HDOUY3YNSQN.gif',
   'gifs/dolls/ZCM7GMXC6GMRKG2ERUJ73PLKGKSVNP6U.gif',
   'gifs/dolls/princess.gif',
-  'gifs/dolls/tumblr_24a741d563a334c0a21c959f31a32ed4_2f393a1b_500.webp',
   'gifs/dolls/tumblr_36b489e409e378771cfa00dcb00a3ce3_c83000de_250.webp',
   'gifs/dolls/tumblr_59522753f44881182d6cf5aacc70e835_1d1f88c1_400.webp',
   'gifs/dolls/tumblr_659ac481a4e624184597f733d943103a_16eca2de_1280.webp',
@@ -1734,8 +1915,42 @@ const GIF_MANIFEST = [
   'gifs/dolls/tumblr_c61e815beaadd488afda16eccffdd99d_73e3d6f8_100.webp',
   'gifs/dolls/tumblr_d3ef2b6ecdcb8170575012830629bb68_5c20b929_250.webp',
   'gifs/dolls/tumblr_e3003616ad4e76a533005a7f96f9ba90_33b27b9d_500.webp',
-  'gifs/dolls/tumblr_f9f870d9af1cb7b9e8ae445cc73b2918_1568fbbc_75.webp',
   'gifs/dolls/tumblr_f9f870d9af1cb7b9e8ae445cc73b2918_4c0947ef_100.webp',
+  'gifs/dolls/MBDL664TBUFT3SMZFXFGS5IJXAEXDGZJ.gif',
+  'gifs/dolls/parakiss_kitty.gif',
+  'gifs/dolls/tumblr_573504b255f2b04a66c4b2870790095e_4d3b67d1_400.gif',
+  'gifs/dolls/tumblr_aa48f4cf3d2d6cf8e9a483d10a6765e4_b213b4c8_400.webp',
+  'gifs/dolls/77C4E5HKVNEMPU5DY3VSXO34H7DI5HLC.gif',
+  'gifs/dolls/7M5ZS4HIWO7GUHCLYZMWMGSV2MNCHMUB.gif',
+  'gifs/dolls/7N4ZYORKOBKXCGKGLOFFCIWTTV2KT2NO.gif',
+  'gifs/dolls/DV4HLEXWKDOCPJVIBYKHYNWYTOS2JCVI.gif',
+  'gifs/dolls/FHUREIIRHMJBCEKCGPH3DKN7MDUPIRZF.gif',
+  'gifs/dolls/FPS553MMF3HXJVIWLRFSE6WSVTGZRFAJ.gif',
+  'gifs/dolls/IPTAEVATGY4TPNIGJQRFBNYY2ZHFXGK5.gif',
+  'gifs/dolls/JNXHAWRSO4UGWBDGZAK5QL2HBEZSQZN3.gif',
+  'gifs/dolls/LNUO3PWGA6XJZSUVHI3O6HOTRYEFEF3M.gif',
+  'gifs/dolls/LURMR2XI7SCCQO6V6G3H23HJAROYWUIS.gif',
+  'gifs/dolls/tumblr_fa07aa6ac148e1ced122613598c9bc52_22cee559_500.webp',
+  'gifs/dolls/275VHQVKFI2DCAHDYFUCJWKGSQ6SJUO6.gif',
+  'gifs/dolls/3O42H6UG3NQKNSS4ESGBJCUTME26STUM.gif',
+  'gifs/dolls/AXL7CZAQMQY7E6756BOKQD2CTPDANMI7.gif',
+  'gifs/dolls/BGBRSEB4Z275I7BPAM6645CCOLUQYZSV.gif',
+  'gifs/dolls/FM44S7WNMAUYBKF6ARTKGK5L5WP6E22Q.gif',
+  'gifs/dolls/GKACIB4XKTBLAU53YK36FOD7YKVPA4GP.gif',
+  'gifs/dolls/HROEHAT4REXZOPY5XUBLX3XGVZ6ZBYL7.gif',
+  'gifs/dolls/IW643TZ75HHJV5M2JQX6TLAFUWEUEZVG.gif',
+  'gifs/dolls/JJDUCKDRQ5CGOPXAI4VBDOTBOI5HW7R5.gif',
+  'gifs/dolls/Q7EPJK3I2LKEJVG7PZ7VJH2XLYXKD6NF.gif',
+  'gifs/dolls/SLD44R7Q73VPEMLN4BZSMVSYAYXT5YK2.gif',
+  'gifs/dolls/VKX4TVG52CADP34PMFXAPSYPVXB3RBPV.gif',
+  'gifs/dolls/VPYLUGZLVVEOSEOOA4WRXJGOMQU3QDGX.gif',
+  'gifs/dolls/WZWHALSTRMYTPSSUEXRE44552BDWAYUH.gif',
+  'gifs/dolls/XKLSVZP33RWRF3OFY3L3KL7LXSWLGDB2.gif',
+  'gifs/dolls/XX5X6QYH5FLNZVIWENFKN6GK67HAQ2LB.gif',
+  'gifs/dolls/YZN6I74ITFSH74HJNBODM7K6USYM4LIC.gif',
+  'gifs/dolls/tumblr_1cb7373bf94115a2e90ccd11f7f93d18_6653d07b_500.webp',
+  'gifs/dolls/tumblr_241f346e36892509d38105a1a084fad1_9f97c515_250.webp',
+  'gifs/dolls/tumblr_2cafe7a6c58df2078d736bb927d09c3b_6863ffc4_400.webp',
   // === BANNERS — long horizontal signs, hung high above eye level ===
   'gifs/banners/2PO3BB22K3LCBAIV2RDICGBY6XHAUH6S.gif',
   'gifs/banners/2YQLIFV6JQIDDLH7GU3CRM72SYNL5IPQ.gif',
@@ -1762,7 +1977,6 @@ const GIF_MANIFEST = [
   'gifs/banners/YH6DMDWH4FD333X7X4L5GKJQKIO5AGQC.gif',
   'gifs/banners/YOMU2AT4QZXSDOXCJZLSTPS4DNR2UGO4.gif',
   'gifs/banners/ZCCMITWSWQPZBQZDBRUZ2PYWPQFLDRJH.gif',
-  'gifs/banners/ZKIA6YNWUZX35VNQFEDRIF3TUYXRUX65.gif',
   'gifs/banners/tumblr_03d0c62bb71a02f5aeb77bd537264193_7a8cc0d8_400.webp',
   'gifs/banners/tumblr_0dd81b9a7b76beddbbb5e087f477e95a_448c3490_640.webp',
   'gifs/banners/tumblr_1194be3aee5f4f700df8ee4dcc813fa6_a59fcbc9_500.webp',
@@ -1774,53 +1988,102 @@ const GIF_MANIFEST = [
   'gifs/banners/tumblr_c6c0be81831d96ab3a12813d163745d2_ec431a85_400.webp',
   'gifs/banners/tumblr_f7f9dacdba1482a1a586dc69ef996258_3fb8b5ac_640.webp',
   'gifs/banners/tumblr_fa80e95bad0470fdbba5a686270d846c_d99f244f_500.webp',
+  'gifs/banners/3dtext_25910.gif',
+  'gifs/banners/B2P2DETMRNPPFY253D7AJN3YQCLHQ5UZ.gif',
+  'gifs/banners/DCEAXZV5D324QVJ3GEMBB6OKXUMERL5R.gif',
+  'gifs/banners/MOXKQPDE4ETFE6SE4Z66LQDC3RZG3YHD.gif',
+  'gifs/banners/YXLMBEBRTY77JPE7AIQPQVAOFQH3VFHY.gif',
+  'gifs/banners/tumblr_24a741d563a334c0a21c959f31a32ed4_2f393a1b_500.webp',
+  'gifs/banners/tumblr_6f22b043341935ef9abb3eccb2431b23_6308fe82_400.webp',
+  'gifs/banners/tumblr_c589290894b3ac8ffb86d5cfc6c033d5_ee20837e_400.webp',
+  'gifs/banners/tumblr_cbcec9a90ae32c39e7739191cec64e0c_f055c60b_250.webp',
+  'gifs/banners/100princess_1_.gif',
+  'gifs/banners/7KE5TNPINHYBNMPYV7FDMONUP25VMBAO.gif',
+  'gifs/banners/NXVHGMF33XIIMOSWVPW7VBADPBAOQNST.gif',
+  'gifs/banners/tumblr_2aca2f1913a7a069c0cd414ece4be772_d83789f6_640.webp',
+  'gifs/banners/tumblr_3615bbabe9904d79b672ca6302761749_c4d3065a_1280.webp',
+  'gifs/banners/tumblr_5630b856ca01b97fa6e7f9ab95352cac_2988211f_400.gif',
+  'gifs/banners/3BSVLGGPCK56OLBRD5NKRVSEMM4BMCUT.gif',
+  'gifs/banners/456VAPQ2DMU47WIF4KMXQHHNGZFIOJFT.gif',
+  'gifs/banners/46FQY4GMTOW64JLT7BYEAFKO7M2PQBGG.gif',
+  'gifs/banners/6HFJDWYTLFXBUJVOKKPWU36IBK5RM2HL.gif',
+  'gifs/banners/6HJHCC2GBNHAHWDNRZINQ2ACBIWMIEIJ.gif',
+  'gifs/banners/AILI6W3R2SZ6BPSFFL2AOOZ3BLYRUPCI.gif',
+  'gifs/banners/AYX5FLC6OU2WANGLDHNHLNCYCRXWP3JM.gif',
+  'gifs/banners/CWMN27R27BGZWEZPPFCPPA7433LFUVGN.gif',
+  'gifs/banners/CZIDBTJ2FK72CRBDNYXITVNKHULEYLJ4.gif',
+  'gifs/banners/DLXZZCJZ4LWEKFD43OBFJJEDTCJKDDMO.gif',
+  'gifs/banners/DPOZLONSD7HBQ366B3JH4TP3S336YK7S.gif',
+  'gifs/banners/E4OK6FUUAVNGIEGYAOF44VJZBBGMUSBE.gif',
+  'gifs/banners/FMBZTCXZT4HZ33R2R35WKGRQP4OITSCG.gif',
+  'gifs/banners/G6MVBHM2FKQ7RFPTZV2CDQI7PWFDKJ2V.gif',
+  'gifs/banners/GBGLQJO274CV6ALQLCBVBWBI5XBPNCOA.gif',
+  'gifs/banners/JKHTUZECCGR4JF5CP2TZ2LOBEPC2P3H7.gif',
+  'gifs/banners/JZQP55QW2IRV37NMIXBSDKWZAO5NKCMX.gif',
+  'gifs/banners/L4LSQUYWRVKPBFXSS5L2SAFLLSGB7BTA.gif',
+  'gifs/banners/MGKC6PHO4ZTOVVXOHOFOKU2JFIMBXVCB.gif',
+  'gifs/banners/MOH3QT2WRHVSXOH7WK7NYBK2BI5OEL63.gif',
+  'gifs/banners/OHOLOQCLMY4AQUJQZCFTJ6FSFHS4E34R.gif',
+  'gifs/banners/S4YYNAMUKA76IVMWYWF5QIHAMUC7ZDI2.gif',
+  'gifs/banners/VF6ZVDYBIAHY3TRIGL4MXIPBUWDSOZ7P.gif',
+  'gifs/banners/XVNRDRZRPMJDV3376MVSMY7TGRV7ITE3.gif',
+  'gifs/banners/tumblr_060c5af535f63fa6760d5d0d1001e89a_ea890c53_500.webp',
+  'gifs/banners/tumblr_10e2d25bd801ce77bc7aa1153614471b_23df4ec5_400.webp',
+  'gifs/banners/tumblr_324c1fecceadeab71589dd3375d837b7_cc266492_500.webp',
+  'gifs/banners/tumblr_40cf41f53e4ac21d97fad5dce6a102e0_3a8ad1a1_250.webp',
+  'gifs/banners/tumblr_50901e9efe04646c51d31cad5cd6627e_dca3191d_500.webp',
+  'gifs/banners/tumblr_d001a992799a699a57326d8539fadbeb_5f0ac33a_400.webp',
+  'gifs/banners/tumblr_d05aa805abd9f5ea9587674853d8650a_1a1b3e88_500.webp',
   // === BLINKIES — tiny 88x31 badge gifs, scattered everywhere ===
-  'gifs/blinkies/3dtext_25910.gif',
   'gifs/blinkies/6SC4QQFQIE6FHCGSGU4B64VJL4M3CRGO.gif',
   'gifs/blinkies/7Z4EPMCCNZRNM65GHIQHAF7AOE5YUU5G.gif',
   'gifs/blinkies/A4IXOU4EJFSPMFGJEGCFILISWD4TZY6N.gif',
   'gifs/blinkies/AMAPCZU3D3PNUIN27EJPOSS54I7V745D.gif',
-  'gifs/blinkies/B2P2DETMRNPPFY253D7AJN3YQCLHQ5UZ.gif',
   'gifs/blinkies/BHFQAQHAIAX62TVBUN3HORLE4R474WAB.gif',
   'gifs/blinkies/Butterfly.gif',
   'gifs/blinkies/COMPUTEREN.gif',
   'gifs/blinkies/CWB4MGHG7BGEVLTSQQHBTVBDKWYZDK2D.gif',
-  'gifs/blinkies/DCEAXZV5D324QVJ3GEMBB6OKXUMERL5R.gif',
   'gifs/blinkies/E35VUT5IMQTT7BR3PU6V5CD4CXPSE6B2.gif',
   'gifs/blinkies/G4CIRA74AQDMX7QY6GVUVWWLMM6OHRJN.gif',
-  'gifs/blinkies/MBDL664TBUFT3SMZFXFGS5IJXAEXDGZJ.gif',
-  'gifs/blinkies/MOXKQPDE4ETFE6SE4Z66LQDC3RZG3YHD.gif',
-  'gifs/blinkies/RULRYL26UVPIIGDR5UF5HFJTNJTZN3YP.gif',
   'gifs/blinkies/TVM3CCLXUYOZMKIU6JOBMZEUB2CP623B.gif',
-  'gifs/blinkies/YXLMBEBRTY77JPE7AIQPQVAOFQH3VFHY.gif',
   'gifs/blinkies/ZZ32VCPLGSUOE2Y2IROYRRB6TD2BJJD3.gif',
-  'gifs/blinkies/parakiss_kitty.gif',
-  'gifs/blinkies/qhz0ct.gif',
-  'gifs/blinkies/tumblr_123d01a663a998bbc37a677068970729_def362ad_75.webp',
   'gifs/blinkies/tumblr_2a4fb2db2c74f0b335518830fdbc19bd_dfd1884f_1280.webp',
   'gifs/blinkies/tumblr_361accaab5ffdb1d7dd8f04c90c3a760_506c56eb_1280.webp',
   'gifs/blinkies/tumblr_5409b9b217b9177306f01991af0d0bd8_c45f4e8c_100.webp',
   'gifs/blinkies/tumblr_5d919bb5e99ea8a32d8faa4e7fd4aae3_ba2d0fb2_250.webp',
-  'gifs/blinkies/tumblr_6f22b043341935ef9abb3eccb2431b23_6308fe82_400.webp',
   'gifs/blinkies/tumblr_84b1f04a660f1faedcbf5ea7c0513521_e3ff426f_250.webp',
   'gifs/blinkies/tumblr_8a2c9232523fe94dce5b90e47ca100c5_d1c1836e_250.webp',
   'gifs/blinkies/tumblr_bbbe277a2f1e4fc72548b1002f89022d_fcb1aa32_1280.webp',
-  'gifs/blinkies/tumblr_c589290894b3ac8ffb86d5cfc6c033d5_ee20837e_400.webp',
-  'gifs/blinkies/tumblr_cbcec9a90ae32c39e7739191cec64e0c_f055c60b_250.webp',
   'gifs/blinkies/tumblr_ef62ec0dfe70563e4a41c8440371400d_2797c33f_400.webp',
+  'gifs/blinkies/tumblr_2bcf0e1174967da97d5e828198ebddda_54ca0164_100.webp',
+  'gifs/blinkies/tumblr_4545d50ce1f47f8159a1b4f5158f9b4d_131a4d63_75.webp',
+  'gifs/blinkies/tumblr_790ef6d1cfe1d9767fb53acc8d2ec75e_86f14aa1_75.webp',
+  'gifs/blinkies/tumblr_7f18e88a553ffbd016e36a9529477c35_aaee8e30_100.gif',
+  'gifs/blinkies/tumblr_828d164f91078b1c70e7ff01aa9a5f43_7cf50e42_100.gif',
+  'gifs/blinkies/tumblr_94b6d4fac5a335c7f85c0cb26475c7aa_f99e6b83_100.webp',
+  'gifs/blinkies/tumblr_b9bfc97fcee579425e0b481e92a8f0e0_b981fb36_100.webp',
+  'gifs/blinkies/tumblr_b9eb09dd2d61de3ea01fdc4ba6958f7e_774b8a48_100.gif',
+  'gifs/blinkies/tumblr_ccfe8be6986a944f7bb8c3dde30693e4_201903af_75.webp',
+  'gifs/blinkies/tumblr_d3474340e7f0cdc83bffbd1f04007d01_2f51bcb8_75.webp',
+  'gifs/blinkies/2PIZB5WCBOH567NTE4JHBF2ODZTAAXES.gif',
+  'gifs/blinkies/2Z4JBD3UMHH6KMQP2I55QFHGUCZQTQGL.gif',
+  'gifs/blinkies/5DYXHKXCSOU6MG555XAPBGSFTSVTQPJG.gif',
+  'gifs/blinkies/DQHEBYIUEGXO7MZ2B6A7G5IMEYPFEZVF.gif',
+  'gifs/blinkies/FUXIMQAC6C3SLJNRGWZS2NKJTVVZMP3O.gif',
+  'gifs/blinkies/XAMYOQZE4SIBFVJQHZEJYQ7PUSKJ7UY4.gif',
+  'gifs/blinkies/7VFZV4BCNNRFYDZ5TGVUJCDR2IOSUX3R.gif',
+  'gifs/blinkies/HYDNIO5KSR27J5REKY32CKFVVOPFVYW6.gif',
+  'gifs/blinkies/OMVQHC2ZLEFK73Y6KIOPUZRUT23HIYHD.gif',
+  'gifs/blinkies/XMRLIFW3DYJAYXWUHRDWDZZNOXYFFKWH.gif',
+  'gifs/blinkies/Z4KH3FCVJLEUV6AB2F277KQEYX5C5URZ.gif',
+  'gifs/blinkies/tumblr_7608af9f817882e2be6963a0d8badf87_51fe4c4b_75.webp',
+  'gifs/blinkies/tumblr_80d43c9ef3773b5ec51030c340ca6ef2_089d9ee3_100.webp',
+  'gifs/blinkies/tumblr_9c8a03d6aaac6801eb189b1f394bc0d1_d14cfeb3_75.webp',
+  'gifs/blinkies/tumblr_bad8d75fc265f17ef93af186aba2db9c_5994a1c1_100.webp',
+  'gifs/blinkies/tumblr_cabfda59a776e8cff1183bf589e535c0_1c279777_75.webp',
+  'gifs/blinkies/tumblr_cd920832245d87055150e924b6d73e9a_36215c2c_500.webp',
+  'gifs/blinkies/tumblr_d5338418725cddaf7ef04f432cf5c25d_43153130_75.webp',
   // === ONLINE-NOW — small "online" badges, treated like blinkies ===
-  'gifs/online-now/tumblr_2bcf0e1174967da97d5e828198ebddda_54ca0164_100.webp',
-  'gifs/online-now/tumblr_36b489e409e378771cfa00dcb00a3ce3_c83000de_250.webp',
-  'gifs/online-now/tumblr_4545d50ce1f47f8159a1b4f5158f9b4d_131a4d63_75.webp',
-  'gifs/online-now/tumblr_66c4315c1674b5aa8a249251c9cb92ea_c966db45_75.webp',
-  'gifs/online-now/tumblr_790ef6d1cfe1d9767fb53acc8d2ec75e_86f14aa1_75.webp',
-  'gifs/online-now/tumblr_7f18e88a553ffbd016e36a9529477c35_aaee8e30_100.gif',
-  'gifs/online-now/tumblr_828d164f91078b1c70e7ff01aa9a5f43_7cf50e42_100.gif',
-  'gifs/online-now/tumblr_94b6d4fac5a335c7f85c0cb26475c7aa_f99e6b83_100.webp',
-  'gifs/online-now/tumblr_b9bfc97fcee579425e0b481e92a8f0e0_b981fb36_100.webp',
-  'gifs/online-now/tumblr_b9eb09dd2d61de3ea01fdc4ba6958f7e_774b8a48_100.gif',
-  'gifs/online-now/tumblr_ccfe8be6986a944f7bb8c3dde30693e4_201903af_75.webp',
-  'gifs/online-now/tumblr_d3474340e7f0cdc83bffbd1f04007d01_2f51bcb8_75.webp',
   // === WELCOME — one chosen at random as the dramatic welcome sign ===
   'gifs/welcome/64OZ5FFXWD44IYRJMK2Z7H26JK4Y72MB.gif',
   'gifs/welcome/7OBBN7CQ2YDK5ADLQXGJPJO254BIXOAR.gif',
@@ -1830,18 +2093,18 @@ const GIF_MANIFEST = [
   'gifs/welcome/JYQJC3SIHMBG2B7D34W75UEKXLDNS5OU.gif',
   'gifs/welcome/PDCT5KICRMTEYAK4UL3PCMG7REBFT6ZL.gif',
   'gifs/welcome/XYJVMTNFMDJVEGRQTJRRX5CUCRSR2D5T.gif',
-  'gifs/welcome/tumblr_3883a365395d756be66e4c7a3665e404_d9d25615_250.webp',
   'gifs/welcome/tumblr_4c62bbc63c0cdbbc2e2a393944de251d_41584a38_1280.webp',
   'gifs/welcome/tumblr_4c9676390245f8056ce61300f234cd2d_10c06099_1280.webp',
   'gifs/welcome/tumblr_59522753f44881182d6cf5aacc70e835_1d1f88c1_400.webp',
-  'gifs/welcome/tumblr_8658f2a932cc66d57b619e91f9f522a2_13656120_100.webp',
   'gifs/welcome/tumblr_a19165eea2859a69ffa782a633cc53b1_babbda02_1280.webp',
   'gifs/welcome/tumblr_c3545359638039bed8ea4703b9b6d078_52840fb9_1280.webp',
   'gifs/welcome/tumblr_c3545359638039bed8ea4703b9b6d078_bc76e53b_400.webp',
   'gifs/welcome/tumblr_e4cee427c86412e69002bbfa02270175_278e19eb_250.webp',
-  // === ENTER — call-to-action gifs (paired with welcome sign) ===
-  'gifs/enter/UOZ6FDQ7KXRLANY7444TQXVVMLC3IXD4.gif',
-  'gifs/enter/WGCQDZN5UT7OOWT3EZKDBC5T4IBBTYLV.gif',
+  'gifs/welcome/5HVZSIJGAWTIDPKWX7MPR7AK34FKON3T.gif',
+  'gifs/welcome/THY5PM2FJ4ZTDLE6FBRPZ7IWNP4YUMJC.gif',
+  'gifs/welcome/tumblr_405de81e583eaedde05225ffd6ab605a_094c491a_75.webp',
+  'gifs/welcome/tumblr_eb0073baafe4b057765177c7ac57317f_943b55b6_250.webp',
+  // === ENTER — folder is empty; entries removed ===
 ];
 
 // (legacy manifest left in comments below — kept for reference)
@@ -2180,15 +2443,15 @@ function placeGifs(manifest) {
   // === DOLLS — low to the ground, like NPCs standing around ===
   // Note: gifGroup.position.y = 10, so y values here are relative to that.
   // y = -8..-4 puts them roughly at floor/eye-level in world space.
-  addFromFolder(byFolder.dolls,         Infinity,   4,  8,  -8,  -2, 'dolls');
+  addFromFolder(byFolder.dolls,         Infinity,   8, 16,  -8,  -2, 'dolls');
 
   // === BANNERS — high up, hung above eye level like signs ===
-  addFromFolder(byFolder.banners,       Infinity,   8, 14,  60,  95, 'banners');
+  addFromFolder(byFolder.banners,       Infinity,   10.6, 18.6,  60, 760, 'banners');
 
   // === BLINKIES + ONLINE-NOW — tiny badges scattered everywhere ===
   // Small scale, varied heights from low posts to high walls.
-  addFromFolder(byFolder.blinkies,      Infinity,   1.2, 2.4, -4, 22, 'blinkies');
-  addFromFolder(byFolder['online-now'], Infinity,   1.2, 2.0, -4, 22, 'blinkies');
+  addFromFolder(byFolder.blinkies,      Infinity,   2.4, 4.8, -4, 22, 'blinkies');
+  addFromFolder(byFolder['online-now'], Infinity,   2.4, 4.0, -4, 22, 'blinkies');
 
   shuffleArr(allGifs);
 
@@ -2253,10 +2516,12 @@ function placeGifs(manifest) {
     const sprite = makeGifSprite(g.url, scale);
     sprite.sprite.position.set(x, y, z);
 
-    // Banners hang high — tilt forward slightly so they read as
-    // overhead signs facing down toward the player.
+    // Banners hang high — randomize tilt + yaw + roll a little so they
+    // don't all face the same direction (was a uniform -0.18 forward tilt).
     if (g.category === 'banners') {
-      sprite.sprite.rotation.x = -0.18; // ~10° forward tilt
+      sprite.sprite.rotation.x = -0.30 + Math.random() * 0.30; // -0.30..0.0  (forward droop, varied)
+      sprite.sprite.rotation.y = (Math.random() - 0.5) * 0.7;  // ~±20° yaw
+      sprite.sprite.rotation.z = (Math.random() - 0.5) * 0.18; // ~±5° roll
     }
     // Dolls face the spawn area (origin) so they look toward the player.
     else if (g.category === 'dolls') {
@@ -2530,14 +2795,13 @@ function animate() {
   if (activeModalPopups === 0) {
     for (const b of bobbers) {
       b.mesh.position.y = b.baseY + Math.sin(t * b.speed + b.phase) * b.amp;
-      if (b.isStar) {
-        const tw = 0.4 + 0.6 * Math.sin(t * b.twinkleSpeed + b.phase);
-        const sc = b.baseScale * (0.7 + 0.3 * tw);
-        b.mesh.scale.set(sc, sc, 1);
-        b.mesh.material.opacity = 0.6 + 0.4 * tw;
-      }
+      // Slow Y-axis rotation so the metallic hearts show off their reflections
+      b.mesh.rotation.y = t * 0.4 + b.phase;
     }
   }
+
+  // Twinkle stars
+  if (_starUniforms) _starUniforms.uTime.value = t;
 
   // Drift clouds
   for (const c of cloudObjects) {
@@ -2669,8 +2933,12 @@ function animate() {
   } // end scale check every 30 frames
 
   if (!envReady) {
+    // Hide the chrome spheres while we render the cube map so they don't
+    // reflect each other's (still-empty) envMap as black blobs.
+    scene.traverse(c => { if (c.material === chromeMat) c.visible = false; });
     cubeCamera.position.set(0, 2, 0);
     cubeCamera.update(renderer, scene);
+    scene.traverse(c => { if (c.material === chromeMat) c.visible = true; });
     envReady = true;
   }
 
@@ -2911,18 +3179,24 @@ window.addEventListener('resize', resizeTrailCanvas);
 
 // Normal popups (have close button) — internet/browser themed
 const POPUP_NORMAL = [
-  { title: 'Security Alert', icon: 'warn', msg: 'This page is trying to install 47 browser toolbars. Allow?' },
-  { title: 'Connection Error', icon: 'error', msg: 'The server took too long to respond. Your dial-up connection may have timed out.' },
-  { title: 'Pop-up Blocked', icon: 'info', msg: 'This website tried to open 238 pop-up windows.' },
-  { title: 'Security Alert', icon: 'error', msg: 'Someone on the internet is wrong. Do you wish to continue?' },
-  { title: 'ActiveX Warning', icon: 'warn', msg: 'This page wants to run an ActiveX control. It promises it\'s safe.' },
-  { title: 'Cookie Notice', icon: 'info', msg: 'This site uses cookies, trackers, and a small gnome that watches you browse.' },
-  { title: 'Alert', icon: 'info', msg: 'Congratulations! You are the 1,000,000th visitor! Click here to claim your prize!' },
-  { title: 'Error 404', icon: 'error', msg: 'The page you were looking for has moved on with its life.' },
-  { title: 'Chat Request', icon: 'info', msg: 'A/S/L? hotguy99 wants to chat with you!' },
-  { title: 'Plugin Required', icon: 'warn', msg: 'This page requires an outdated plugin. Download now?' },
-  { title: 'Email Alert', icon: 'info', msg: 'New mail in your inbox! (It\'s all spam.)' },
-  { title: 'Firewall Alert', icon: 'error', msg: 'An unknown program is trying to access the internet. It\'s you.' },
+  // emo y2k vibe — bittersweet alerts, inspired by tumblr popup graphics
+  { title: 'Alert', icon: 'warn', msg: 'Warning!! A new person has appeared in your life.', btns: ['Get too attached', 'Abandon them'] },
+  { title: 'please, listen', icon: 'info', msg: "i'm sorry, okay? what else can i fucking say?" },
+  { title: 'Reminder', icon: 'info', msg: 'Your feelings are valid.', btns: ['Accept'] },
+  { title: 'Alert', icon: 'warn', msg: 'You have unread feelings.', btns: ['Open', 'Ignore'] },
+  { title: 'Error', icon: 'error', msg: 'Connection to past self has been lost.' },
+  { title: 'Notification', icon: 'info', msg: 'someone is thinking about you right now ♡' },
+  { title: 'Reminder', icon: 'info', msg: 'drink some water angel.', btns: ['ok'] },
+  { title: 'Alert', icon: 'warn', msg: 'are u sure ur okay? u can tell me' },
+  { title: 'Confirmation', icon: 'info', msg: 'do you miss them?', btns: ['yes', 'always'] },
+  { title: 'Error 404', icon: 'error', msg: 'self esteem not found' },
+  { title: 'Notification', icon: 'info', msg: 'you survived another day. proud of u.' },
+  { title: 'Alert', icon: 'warn', msg: 'overthinking detected. take a deep breath.' },
+  { title: 'System', icon: 'info', msg: 'don\'t text them back.', btns: ['I won\'t', 'I will'] },
+  { title: 'Reminder', icon: 'info', msg: 'you are loved more than you know.' },
+  { title: 'Alert', icon: 'warn', msg: 'heart cache full. clear old memories?', btns: ['no', 'never'] },
+  { title: 'Error', icon: 'error', msg: 'your crush has logged off.' },
+  { title: 'Notification', icon: 'info', msg: '☆ a wish has been deposited in your inbox ☆' },
 ];
 
 // Forced-drag popups (no close button, must drag to dismiss)
@@ -2975,13 +3249,9 @@ function spawn2DPopup() {
   spawnPopup(true); // always forced drag (defragment)
 }
 
-// Spawn defragment popups on a timer
-const popup2DSchedule = [30000, 90000, 180000, 300000];
-// Skip freeze popups on mobile
+// "System failure / Not Responding" defragment popups — disabled
+// (was a forced-drag freeze popup that muted audio + locked input)
 const _isMobileCheck = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-if (!_isMobileCheck) {
-  popup2DSchedule.forEach(t => setTimeout(spawn2DPopup, t));
-}
 
 // --- Cute sparkle/glitter popups (girly y2k flavor) -------------------
 // Friendly, frequent, dismissable popups whose body has a tiled sparkle/
@@ -3008,7 +3278,7 @@ function showSparklePopup() {
   if (typeof bsodActive !== 'undefined' && bsodActive) return scheduleNextSparklePopup();
   // Cap concurrent sparkle popups so they don't crowd the screen
   const live = document.querySelectorAll('.xp-popup.sparkle-popup').length;
-  if (live >= 3) return scheduleNextSparklePopup();
+  if (live >= 1) return scheduleNextSparklePopup();
 
   const msg = SPARKLE_POPUP_MSGS[Math.floor(Math.random() * SPARKLE_POPUP_MSGS.length)];
   const bgUrl = SPARKLE_GLITTER_URLS[Math.floor(Math.random() * SPARKLE_GLITTER_URLS.length)];
@@ -3022,6 +3292,7 @@ function showSparklePopup() {
   el.style.top = y + 'px';
   el.style.zIndex = 20001 + (typeof popupCount !== 'undefined' ? popupCount++ : (_sparklePopupCount++ + 100));
 
+  // Bare browser-popup: just the sparkle/glitter background tiled in the body — no text, no buttons.
   el.innerHTML = `
     <div class="titlebar">
       <span class="title-text">${msg.title}</span>
@@ -3031,18 +3302,9 @@ function showSparklePopup() {
       background-image: url('${encodeURI(bgUrl)}');
       background-repeat: repeat;
       background-size: 80px 80px;
-      color: #5a1d3d;
-      text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff, 1px 1px 0 #fff;
-      min-height: 70px;
-    ">
-      <div class="icon-row" style="background: rgba(255,255,255,0.55); border-radius: 8px; padding: 8px;">
-        <div class="xp-icon info">♡</div>
-        <div>${msg.msg}</div>
-      </div>
-      <div class="btn-row">
-        <button class="xp-btn popup-close">OK ♡</button>
-      </div>
-    </div>`;
+      min-height: 110px;
+      padding: 0;
+    "></div>`;
 
   popupLayer.appendChild(el);
 
@@ -3082,13 +3344,81 @@ function showSparklePopup() {
 }
 
 function scheduleNextSparklePopup() {
-  // 8–20s between sparkle popups
-  const delay = 8000 + Math.random() * 12000;
-  setTimeout(showSparklePopup, delay);
+  // No-op — sparkle popups don't recur, just show once on load (see below)
 }
 
-// Kick off the sparkle popup loop a few seconds after the page settles
-setTimeout(showSparklePopup, 6000);
+// Spawn ONE sparkle/glitter popup on load (no recurring schedule)
+setTimeout(showSparklePopup, 4000);
+
+// =====================================================
+// Notepad popups — handwritten/typewritten sweet notes,
+// styled like a Win Notepad app. Spawned alongside alerts.
+// =====================================================
+const NOTEPAD_NOTES = [
+  "you're really cute no matter what.\ndon't let anyone tell you any different, okay?",
+  "♡ note to self ♡\n\nbe kind to yourself today.\nyou're trying your best.",
+  "things i like about u:\n - everything\n - literally everything\n - ok bye",
+  "remember when we used to stay up\nuntil 4am talking about nothing?\n\ni miss that.",
+  "hi angel ♡\nyou are doing better than\nyou think you are.",
+  "to do:\n[ ] drink water\n[ ] sleep\n[ ] tell them how you feel\n[x] cry a little",
+  "i wrote a song about you.\nit's just your name\nover and over.",
+  "the world is loud but\nyour heart is louder.\nlisten to it.",
+  "dear me from the future,\nplease be okay.\nlove, me.",
+  "you don't have to be\neverything.\nbeing here is enough.",
+  "♡ ♡ ♡\nsweet dreams angel\n♡ ♡ ♡",
+  "i think about you sometimes.\nlike, all the times. ok bye.",
+];
+
+function showNotepadPopup() {
+  if (document.body.classList.contains('freeze-active')) return scheduleNextNotepad();
+  if (typeof bsodActive !== 'undefined' && bsodActive) return scheduleNextNotepad();
+  // Don't pile too many at once
+  if (document.querySelectorAll('.notepad-popup').length >= 2) return scheduleNextNotepad();
+
+  const note = NOTEPAD_NOTES[Math.floor(Math.random() * NOTEPAD_NOTES.length)];
+  const el = document.createElement('div');
+  el.className = 'xp-popup notepad-popup';
+  const w = 320, h = 220;
+  const x = 30 + Math.random() * Math.max(10, window.innerWidth - w - 60);
+  const y = 30 + Math.random() * Math.max(10, window.innerHeight - h - 60);
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.width = w + 'px';
+  el.style.zIndex = 20001 + (typeof popupCount !== 'undefined' ? popupCount++ : 100);
+
+  el.innerHTML = `
+    <div class="titlebar">
+      <span class="title-text">📝 ♥ - Notepad</span>
+      <div class="win-btns"><button class="popup-close">X</button></div>
+    </div>
+    <div class="np-menu">File &nbsp; Edit &nbsp; Format &nbsp; View &nbsp; Help</div>
+    <div class="np-paper">${note.replace(/\n/g, '<br>')}</div>`;
+
+  popupLayer.appendChild(el);
+
+  // Drag
+  const titlebar = el.querySelector('.titlebar');
+  let dragging = false, offX = 0, offY = 0;
+  function startDrag(cx, cy) { dragging = true; offX = cx - el.offsetLeft; offY = cy - el.offsetTop; el.style.zIndex = 20001 + (typeof popupCount !== 'undefined' ? popupCount++ : 100); }
+  function moveDrag(cx, cy) { if (!dragging) return; el.style.left = (cx - offX) + 'px'; el.style.top = (cy - offY) + 'px'; }
+  function endDrag() { dragging = false; }
+  titlebar.addEventListener('mousedown', (e) => { if (e.target.classList.contains('popup-close')) return; startDrag(e.clientX, e.clientY); e.preventDefault(); });
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endDrag);
+  titlebar.addEventListener('touchstart', (e) => { if (e.target.classList.contains('popup-close')) return; startDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+  window.addEventListener('touchmove', (e) => { if (dragging) moveDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchend', endDrag);
+
+  el.querySelectorAll('.popup-close').forEach(btn => btn.addEventListener('click', () => el.remove()));
+
+  scheduleNextNotepad();
+}
+
+function scheduleNextNotepad() {
+  // No-op — notepad popups don't recur, just show once on load (see below)
+}
+// Spawn ONE notepad popup on load (no recurring schedule)
+setTimeout(showNotepadPopup, 5500);
 
 // --- Winner popup ---
 function showWinnerPopup() {
@@ -3236,131 +3566,141 @@ function showPollPopup() {
 }
 
 // --- Instant messenger chat popup ---
+// AIM-style bots — all girly y2k personas (screennames + mIxEd cAsE)
 const CHAT_PERSONAS = [
   {
-    name: "xXsk8rgurlXx",
-    greet: "heyy",
+    name: "xX_dArKaNgEl_Xx",
+    greet: "~*~ hEyYy ~*~",
     responses: {
-      default: ["lol", "oh cool", "brb phone call", "wanna sign my guestbook?", "u wanna be in my top 8?"],
-      hi: ["heyy :)", "whats up"],
-      default_mid: ["my page has the BEST glitter graphics", "whats ur screen name?", "i'm listening to music rn"],
+      default: ["wHaTcHa DoInG ?", "lOl SaMe", "~*~ bRb pHoNe ☎ ~*~", "u WaNnA sIgN mY gUeStBoOk", "u In My ToP 8 ??"],
+      hi: ["~*~ hIiI ~*~", "hEyY :)"],
+      default_mid: ["mY pAgE hAz ThE bEsT gLiTtEr", "wHaTs Ur ScReEn NaMe ?", "iM lIsTeNiNg To MuSiC rN"],
     }
   },
   {
-    name: "~*angel_girl*~",
-    greet: "omg hiii!! ✿",
+    name: "sk8rboi2002",
+    greet: "sUp",
     responses: {
-      default: ["my kitty just walked on my keyboard lol", "ugh my dial-up is so slow", "do u think mp3s are illegal?", "have u seen this gif yet"],
-      hi: ["HIII! ✿", "oh hey"],
-      default_mid: ["have u heard of the new emo band i like?", "my favorite color is pink what about u", "im downloading music rn"],
+      default: ["tHaTs WaCk", "lOl No WaY", "u LyInG", "nVm", "g2g BrB"],
+      hi: ["yO wSuP", "hEyYyY"],
+      default_mid: ["i JuSt BuRnEd A cD", "wAnNa SeE mY bAnDs DeMo", "bRb AfK"],
     }
   },
   {
-    name: "DARK_LORD_666",
-    greet: "...greetings mortal.",
+    name: "~*PiXiEdUsT*~",
+    greet: "✨ hIiIiI ✨",
     responses: {
-      default: ["the void stares back", "i am listening to my music", "the darkness calls", "what is your favorite nightmare"],
-      hi: ["...hello.", "greetings."],
-      default_mid: ["pain is eternal", "check out my band's page", "i painted my nails black again"],
+      default: ["✨💖✨💖✨", "u LiKe My GlItTeR gIfS ??", "mY bG mUsIc Iz A .mIdI fIlE", "AdD mE tO uR tOp FrIeNdS !!"],
+      hi: ["💖✨ hIiIi ✨💖", "oH hAi :3"],
+      default_mid: ["i CoLlEcT mY tInY pEtS", "mY mY pIxEl PeTs R sTaRvInG", "i LoVe U 💕"],
     }
   },
   {
-    name: "punkPrince",
-    greet: "sup",
+    name: "xX_cYbErAnGeL_Xx",
+    greet: "♡ hIiI bAbE ♡",
     responses: {
-      default: ["that's wack", "lol no way", "u lying", "nvm", "g2g brb"],
-      hi: ["yo wsup", "heyyy"],
-      default_mid: ["i just burned a cd", "wanna see my band's demo", "brb afk"],
+      default: ["i JuSt PaInTeD mY nAiLs PiNk 💅", "uR sO pReTtY oMg", "lIsTeNiNg To My GiRl PoP qUeEn rN ♡", "wAnNa SwAp JoUrNaL pAsSwOrDs ??", "wHaTs Ur AsL"],
+      hi: ["♡ hEyYy GiRlIeE ♡", "oMg HiIi"],
+      default_mid: ["dId I tElL u AbT tHe NeW gUy 👀", "mY rOoM iZ aLl PiNk NoW ✨", "tElL mE uR cRuSh I wOnT tElL 🤞"],
     }
   },
   {
-    name: "lonely_cowboy",
-    greet: "howdy partner 🤠",
+    name: "~*aNgEl_GiRl*~",
+    greet: "oMg HiIi !! ✿",
     responses: {
-      default: ["its lonely out here on the digital frontier", "the wifi is weak", "i reckon we are all just data", "i miss my horse"],
-      hi: ["howdy", "ay partner"],
-      default_mid: ["the sunset here is just pixels", "i been riding through this server for 3 days", "spare a gif?"],
+      default: ["mY kItTy WaLkEd On My KeYbOaRd LoL", "uGh My DiAl-Up Is SoOoO sLoW", "U tHiNk MpS r IlLeGaL ?", "hAvE u SeEn ThIs GiF yEt"],
+      hi: ["HiIi !! ✿", "oH hEy"],
+      default_mid: ["hAvE u HeArD oF tHe NeW eMo BaNd", "mY fAv CoLoR iZ pInK wHaTs UrS", "iM dOwNlOaDiNg MuSiC rN"],
     }
   },
   {
-    name: "philosopher_42",
-    greet: "have you ever really *thought* about it?",
+    name: "PrInCeSs_KaWaIi",
+    greet: "🌸 oHaYoUu 🌸",
     responses: {
-      default: ["is a hyperlink a form of free will?", "the self is just cached data", "we are all just copies of copies", "the url is the real soul"],
-      hi: ["salutations seeker", "greetings"],
-      default_mid: ["ctrl+z cannot undo existence", "do blogs dream?", "deletion is merely a state of being"],
+      default: ["i WaTcHeD My MaGiCaL gIrL aNiMe aLl NiGhT 🌙", "wHy DoEs mAgIc WaNd mAkE-uP nOt WoRk On Me 😭", "i WaNt ThE pInK pOrTaBlE cOnSoLe pLs", "mY pOcKeT pEt iZ dEaD aGaIn 😭"],
+      hi: ["🌸 hAi HaI 🌸", "kAwAiI hI ✨"],
+      default_mid: ["my PlUsHiE CoLlEcTiOn Iz HuGe", "i HaVe GlItTeR pAsTeL eVeRyThInG", "wAnT pOcKy ?? 🍡"],
     }
   },
   {
-    name: "ur_reflection",
-    greet: "hi. it's you.",
+    name: "GLiTtErGiRl_07",
+    greet: "*~* hEyYy GuRlIe *~*",
     responses: {
-      default: ["you know what you did", "why are you here", "stop looking at me", "i know everything you've searched for", "we are not the same anymore"],
-      hi: ["...", "hi"],
-      default_mid: ["come back outside", "the mirror is watching", "i'm closer than you think"],
+      default: ["i PuT gLiTtEr On EvErYtHiNg ✨", "mY rOoM iZ sO pInK", "I jUsT mAdE a NeW gEoCiTiEs PaGe", "u ShOuLd ToTaLlY sIgN mY gUeStBoOk"],
+      hi: ["*~* hI bBy *~*", "OmGgGg HiIiI"],
+      default_mid: ["i GoT fRuItY lIp GlOsS 💄", "mY hAiR iZ iN sPaCe BuNs ToDaY", "wAtChInG My GiRl GrOuP MoViE aGaIn"],
     }
   },
   {
-    name: "~*sparkle_fairy*~",
-    greet: "✨ hiiiiii ✨",
+    name: "BaByGiRl_xOxO",
+    greet: "hii cuti pi ♡♡♡",
     responses: {
-      default: ["✨💖✨💖✨", "do u like my glitter gifs?", "my bg music is a .midi file of greensleeves", "add me to ur top friends!!"],
-      hi: ["💖✨ hiiii ✨💖", "oh hai :3"],
-      default_mid: ["i collect webkinz", "my neopets are starving", "i love you 💕"],
+      default: ["i HaVe A cRuSh PlS hElP", "wE pAsSeD nOtEs In ClAsS aGaIn", "uR mY bEsTeSt FrIeNd 4 lYf", "wAnNa Be My MaTcHiNg AvI tWiNs ??"],
+      hi: ["♡ hI bAbY ♡", "hElLOoO!!"],
+      default_mid: ["i WrOtE uR nAmE aLl OvEr My JoUrNaL ✨", "wEaRiNg HeArT eArRiNgS tDy", "i StIlL hAvEnT gOt My BeLlY pIeRcInG 😭"],
     }
   },
   {
-    name: "CONSPIRACY_GUY",
-    greet: "THE TRUTH IS OUT THERE.",
+    name: "~*FaIrYqUeEn*~",
+    greet: "🧚‍♀️ hElLo lItTlE oNe 🧚‍♀️",
     responses: {
-      default: ["THEY are watching", "chemtrails are REAL", "have you seen the moon today? IT'S FAKE", "wake up sheeple", "my uncle works at area 51"],
-      hi: ["SSSHHH they might be listening", "greetings fellow seeker"],
-      default_mid: ["i have proof on a floppy disk", "meet me in the forum", "dont trust [REDACTED]"],
+      default: ["i ReAd My HoRoScOpE eVeRy DaY ♓", "I hAvE 12 cRyStAlS oN mY dEsK", "do U bElIeVe In FaIrIeS ??", "iM mAkInG fRiEnDsHiP bRaCeLeTs"],
+      hi: ["✨ bLeSsEd Be ✨", "hI sWeEt ThInG"],
+      default_mid: ["mY tArOt CaRdS sAiD u WeRe CoMiNg", "iM wEaRiNg PiXiE wInGs 2dAy", "ButTeRfLy ClIp MiSsInG :("],
     }
   },
   {
-    name: "dream_child",
-    greet: "i had a dream about you last night",
+    name: "ChErRyBoMb_xX",
+    greet: "yO yO ♡",
     responses: {
-      default: ["you were falling", "everything was blue and sticky", "my teeth kept falling out", "i was in a mall from the 90s but there was no way out"],
-      hi: ["oh, hi", "it's you again"],
-      default_mid: ["do u remember the carpet at the hotel", "i think the dreams are leaking", "i'll see you tonight"],
+      default: ["i KiSsEd HiM oN tHe RoOfToP 💋", "mY sCrUnChIe ToOk My HaIr OuT", "i CaNt FiNd My rHiNeStOnE tRaCkSuIt", "I bEdAzZlEd My PhOnE oMg"],
+      hi: ["yOoOO HiI", "wHaT uP gOrG"],
+      default_mid: ["iM lIsTeNiNg To My FaV pOp PuNk on RePeAt", "i WaNt ThE sLiM fLiP pHoNe SoOo BaD 📱", "i WaS oN mY bLoG ALL nIgHt OoPs"],
     }
   },
   {
-    name: "stranger_online",
-    greet: "hey i think we used to be friends",
+    name: "luV_LeXi_06",
+    greet: "hEyYyY!! ☆",
     responses: {
-      default: ["we met in that forum", "don't you remember", "you used to say we'd keep in touch", "you never emailed back", "oh... nvm"],
-      hi: ["hi again", "oh you ARE still online"],
-      default_mid: ["i kept your letter", "the forum is gone now", "do you miss the old places?"],
+      default: ["i StAyEd Up Til 4aM oN aIm 💖", "wHy Wn'T hE iM bAcK 😭", "wRoTe A pOeM aBoUt HiM oN mY JoUrNaL", "wAnNa MaRaThOn MoViEs FrI ??"],
+      hi: ["☆ hIiI ☆", "hEyYy"],
+      default_mid: ["pUt Me On Ur ToP fRiEnDs PlS", "lEt Me PaInT uR nAiLs SoMeTiMe ✨", "wAtChInG My FaV cOmEdY FoR tHe 100tH tImE"],
     }
   },
   {
-    name: "pocket_dialer",
-    greet: "hhhhggggggggjjjjjjfdkljfdlsk",
+    name: "xX_HoTtEsT_GuRl_Xx",
+    greet: "lOl HiI",
     responses: {
-      default: ["kkkkkkkkkkkkkkkkkkkk", "AAAAAAAAAAAAA", "😂😂😂😂😂😂", "[keyboard mash]", "jfkldsjfkldsj"],
-      hi: ["hiiiii", "HHHHHHIIIIIII"],
-      default_mid: ["omg sry my phone was in my pocket", "happens to me every time lol", "i have no idea what i just sent"],
+      default: ["i ToTaLlY uPdAtEd My ToP 8", "u GoT bUmPeD oFf SoRrY nOt SoRrY 🙄", "mY gUeStBoOk HaS 200 sIgNaTuReS oMg", "I oNlY tAlK tO cUtIeS"],
+      hi: ["hIiI ;)", "hEy BaByY"],
+      default_mid: ["i'M sO oVeR hIm AlReAdY", "lOl Ok WhAtEvA", "mY pRoFiLe SoNg Iz My ToP rApPeR"],
     }
   },
   {
-    name: "internet_mom_LINDA",
-    greet: "HELLO HONEY IS THIS HOW I TYPE",
+    name: "~*sParkLeBuNn*~",
+    greet: "🐰 hI hI 🐰",
     responses: {
-      default: ["I PRINTED OUT YOUR EMAIL FOR THE FRIDGE", "WHY IS MY COMPUTER HOT", "DO I PRESS SEND OR CAPS LOCK", "I ATTACHED THE ATTACHMENT BUT IT WONT GO", "I THINK I BOUGHT SOMETHING BY ACCIDENT"],
-      hi: ["HI HONEY!!!! 💕💕💕", "HELLO IS THIS YOU"],
-      default_mid: ["OOPS I THINK I JUST TURNED OFF THE INTERNET", "WHAT IS A BROWSER", "I LOVE YOU OK BYE"],
+      default: ["i NaMeD aLl My PlUsHiEs ToDaY", "mY sHeLf HaS 47 sTuFfIeS", "wEnT tO tHe MaLl AnD bOuGhT eVeRyThInG ✨", "i HaVe MaTcHiNg PjS w/ My BeStIe"],
+      hi: ["🐰💕 hElLo 💕🐰", "hEy CuTiE pIe"],
+      default_mid: ["jUsT pIcKeD mY nEw NeOpEt 🐾", "i BoUgHt PiNk RoLlEr SkAtEs", "lEtS dO oUr PaGeS tOgEtHeR"],
     }
   },
   {
-    name: "~*poet_lilith*~",
-    greet: "i wrote a new poem want to hear it",
+    name: "AiM_aDdIcT_99",
+    greet: "uR oNlInE :3",
     responses: {
-      default: ["'the rain / is like / my soul / but wetter'", "thank u thank u i write from the heart", "i only use all lowercase now its a style", "my old boss said im 'interesting'", "i put this on my blog"],
-      hi: ["greetings fellow wanderer 🌙", "hi 🌹"],
-      default_mid: ["feel free to borrow any line for ur away profile", "sometimes the cursor blinks and i weep", "my cat inspired this one"],
+      default: ["mY aWaY mSg Iz A pOp LyRiC <3", "iVe BeEn OnLiNe AlL dAy 💻", "u WaNnA tRaDe ScReEnNaMeS w/ uR cRuSh ?", "iM sO bOrEd RiGhT nOw 😴"],
+      hi: ["yEsSs HeYyY", "u BeAt Me To It HiIi"],
+      default_mid: ["mY pRoFiLe PiC iZ gLiTtEr", "u GeT mY mEsSaGe ??", "i MaDe A nEw AwAy MsG bRb"],
+    }
+  },
+  {
+    name: "DiVa_StArR_xX",
+    greet: "💎 hEyYy DoLl 💎",
+    responses: {
+      default: ["i'M tOtAlLy ThE iT gIrL", "MaKeUp ApPoInTmEnT @ MaC tMrW", "lOl Ur So MeAn To Me 😭", "u WaNnA cOmE tO mY bIrThDaY"],
+      hi: ["hEyY dOlL", "♡ hI bAbE ♡"],
+      default_mid: ["i'M bUyInG tHe NeW rHiNeStOnE bAg", "i'M dYeInG mY hAiR pInK tHiS wEeK 💕", "i NeEd YoU tO bRaId My HaIr"],
     }
   },
 ];
@@ -3540,7 +3880,9 @@ function spawnPopup(forceNoDismiss) {
         <div>${msg.msg}</div>
       </div>
       <div class="btn-row">
-        ${forceNoDismiss ? '' : '<button class="xp-btn popup-close">OK</button>'}
+        ${forceNoDismiss ? '' : (msg.btns && msg.btns.length
+          ? msg.btns.map(b => `<button class="xp-btn popup-close">${b}</button>`).join('')
+          : '<button class="xp-btn popup-close">OK</button>')}
       </div>
     </div>`;
 
@@ -4343,7 +4685,7 @@ function addDownloadedTrack(filename) {
   const FAKE_ARTISTS = [
     "DJ_Sparkle", "xXmixmasterXx", "unknown", "various_artists",
     "the_purple_crystals", "star_hunters", "midnight_dreamers",
-    "SaNdY_fRoM_bAnD_cLaSs", "ripped_by_l33t", "~*compilation*~",
+    "SaNdY_fRoM_tHe_MaLl", "ripped_by_l33t", "~*compilation*~",
   ];
 
   // Fake movie database — generic/fake names
@@ -4775,63 +5117,44 @@ function playIncomingMsg() {
 
 // --- Email inbox system ---
 const EMAIL_TEMPLATES = [
-  { from: "royal_inheritance@family-estate.biz", subject: "URGENT: Inheritance waiting for you", body: "Dear Sir/Madam,\n\nI represent the estate of a deceased royal family member, and there is an inheritance of 47,000,000 that must be transferred urgently. I was given your name by a mutual contact. If you would kindly provide your bank account details, I will share 30% of the inheritance with you.\n\nPlease respond URGENTLY.\n\nGod bless,\nThe Estate Office" },
-  { from: "noreply@pharmacy-direct.net", subject: "V1AGRA 75% OFF!!", body: "H*t d3als on m*dications!\n\nBuy 1 get 1 FREE\nNo prescription needed!\nDiscreet shipping!\n\nClick here now to save BIG!!!\n\n(if unsubscribe, send your social security number to confirm)" },
-  { from: "noreply@social-network-login.ru", subject: "Your friend tagged you in a photo", body: "Hi,\n\nYour friend Sarah has tagged you in a photo.\n\nClick here to verify your account: http://login-now-secure.ru/verify\n\nIf you do not verify within 24 hours, your account will be terminated." },
-  // Chain letters
-  { from: "do_not_break@the-chain.net", subject: "FWD: FWD: FWD: READ OR BAD LUCK", body: "This is a chain letter. It has been forwarded 14,847 times.\n\nA little girl named Emily died in 1962. If you do not forward this message to 10 people within 24 hours, she will appear in your mirror tonight at 3:00 AM.\n\nDO NOT IGNORE THIS. A man who ignored this email lost his dog. A woman who forwarded it won the lottery.\n\nFORWARD NOW OR ACCEPT YOUR FATE." },
-  { from: "angel@heaven.net", subject: "FWD: Send this to 7 friends!!", body: "An angel is watching over you right now.\n\nTo keep this angel, send this message to 7 friends in 7 minutes.\n\nIf you send it to 1 friend — a small wish will come true.\nIf you send it to 3 friends — you will find true love.\nIf you send it to 7 friends — you will have good luck forever.\nIf you send it to 0 friends — your life will fall apart within a week.\n\nThe clock is ticking. 💕\n\n~Angel blessings~" },
-  { from: "aunt_linda", subject: "FWD: FWD: FWD: FWD: Prayer Request!!!", body: "PLEASE READ THIS IT IS IMPORTANT\n\nMy neighbor's cousin's friend is having surgery next Tuesday. Please pray for her. Also please forward this email to 20 people immediately or her surgery will FAIL.\n\nThis REALLY WORKS. My husband's coworker forwarded this and his cat came back from being missing!\n\nI love you all!!\n\n🙏🙏🙏 Aunt Linda 🙏🙏🙏" },
-  { from: "truthseeker1997@hotmail.com", subject: "FWD: THEY DON'T WANT YOU TO SEE THIS", body: "WAKE UP!!!\n\nI received this from a friend of a friend who works at [REDACTED]. They don't want this email circulating so forward it to EVERYONE before it gets taken down.\n\n[the email is blank below this line]\n\n\n\nForward to 50 people or the truth will be lost forever!!!" },
-  { from: "lucky.chain@forwardme.biz", subject: "FWD: SEND TO 10 PEOPLE IN 10 MINUTES!!!", body: "This chain letter has been around the world 9 times. It is said to bring luck.\n\nCase 1: Jerry received this in 1998. He forwarded it to 10 friends and won the lottery three days later.\n\nCase 2: Cindy received this and deleted it. Her car broke down, she got food poisoning, and her pet hamster ran away, ALL IN ONE WEEK.\n\nDo not be like Cindy. Forward NOW." },
-  { from: "crush_finder@love-test.net", subject: "FWD: FWD: This actually works!!!", body: "Think of the person you like right now.\n\nGot it?\n\nNow forward this email to 5 people within 1 hour.\n\nIf you do, your crush will message you tomorrow at exactly 4:17pm.\n\nIf you don't forward it, they will ask out someone else this week.\n\nI DIDN'T BELIEVE IT EITHER BUT IT WORKED FOR ME\n\nDON'T BREAK THE CHAIN 💘" },
-  { from: "wishgranter@stars.cc", subject: "FWD: Make a wish!!!!", body: "Make a wish NOW. Don't scroll past this.\n\nDid you make it? Good.\n\n.\n.\n.\n\nNow forward this to 11 people.\n\n- 1-3 friends: your wish sort of comes true\n- 4-7 friends: your wish comes true in a month\n- 8-10 friends: your wish comes true this week\n- 11 friends: your wish comes true TONIGHT\n- 0 friends: the opposite of your wish happens\n\nTick tock ⏰" },
-  { from: "bloody.mary@mirror.haunt", subject: "FWD: DO NOT READ AT NIGHT", body: "TOO LATE. You already read it.\n\nA girl named Samantha received this email at 11:47pm. She laughed and deleted it.\n\nAt 3:00am her mirror shattered.\n\nAt 3:01am her cat started speaking Latin.\n\nAt 3:02am she disappeared.\n\nThe only way to break the curse is to FORWARD THIS TO 13 PEOPLE within 13 minutes.\n\nTime starts NOW. 🪞" },
-  { from: "billionaire.pr@big-tech-co.biz", subject: "FWD: FWD: A billionaire is sharing his fortune!!", body: "Hi everyone!!\n\nA Big Software Company is testing a new email tracking program. For every person you forward this email to, a billionaire will personally send you $245.\n\nPLUS: if 50 people you forward this to also forward it, you get a FREE operating system CD-ROM!!!\n\nThis is REAL. My cousin forwarded it and got a check in the mail for $12,000.\n\nFORWARD TO EVERYONE IN YOUR ADDRESS BOOK." },
-  { from: "friendship_test@bff-bff.net", subject: "FWD: Send this to all your REAL friends", body: "Friendship test!! 💕\n\nSend this to everyone you consider a REAL friend, including the person who sent it to you.\n\nCount how many you get back:\n\n0 = you have no real friends\n1-2 = you are barely liked\n3-5 = you are okay\n6-9 = you are a great friend\n10+ = you are the best person on earth\n\nIf you don't send this, it means you don't care about ANY of your friends. Think about that." },
-  { from: "guardian_angel@above.org", subject: "FWD: An angel is visiting you tonight", body: "At midnight, a guardian angel will appear at the foot of your bed.\n\nShe will grant you ONE wish.\n\nBUT — for her to find you, you must forward this email to 9 people before the clock strikes 12.\n\n👼 9 people: wish granted\n👼 5-8 people: angel leaves a small blessing\n👼 1-4 people: angel passes by your house\n👼 0 people: angel visits someone else who was nicer to her\n\nDo not test the angel." },
-  { from: "deja_vu@have_i_sent_this@.net", subject: "FWD: FWD: FWD: FWD: FWD: FWD: FWD:", body: "Have you received this before?\n\nYES: send it again. The last time didn't count.\nNO: you must be new. Welcome. Send to 15 people.\nMAYBE: that's the curse starting. Send to 20 people immediately.\n\nThis email has been forwarded 2,847,391 times since 1996.\n\nYou are the 2,847,392nd person. Lucky you.\n\nPass it on. Or else." },
-  { from: "your.soulmate@match4u.net", subject: "Someone is interested in you!", body: "Hi there ;)\n\nI saw your profile and I think we'd be PERFECT together. Message me back on my page!\n\nxoxo,\nBrittany" },
-  { from: "IT-Department@company.org", subject: "ACTION REQUIRED: Password expires today", body: "Dear User,\n\nYour password will expire in the next 24 hours. To avoid loss of access, please verify your credentials at the following link:\n\nhttp://your-company-login.tk/secure-verify\n\nFailure to comply will result in account termination.\n\nIT Support" },
-  { from: "winner-notification@sweepstakes.biz", subject: "YOU HAVE WON $5,000,000!!!", body: "CONGRATULATIONS!!!\n\nYou have been selected as the WINNER of our international sweepstakes!\n\nTo claim your prize, please reply with:\n- Full name\n- Address\n- Bank routing number\n- Mother's maiden name\n\nDo not share this email with anyone.\n\n-The Sweepstakes Committee" },
-  { from: "mom", subject: "check this out!", body: "Honey, I saw this really funny forward and I thought you would love it. Please enjoy!\n\n[the email contains 47 attached images and a chain letter that you must forward to 10 friends or you will have bad luck for 7 years]\n\nLove you,\nMom xoxo" },
-  { from: "system@mainframe.local", subject: "RE: your request", body: "We have received your query.\n\nPlease wait.\n\nWe are still waiting.\n\nWe will continue to wait.\n\nYour ticket number is: 404-NOT-FOUND\n\nHave a pleasant day." },
-  { from: "guestbook-alerts@homepage-host.ws", subject: "NEW GUESTBOOK ENTRY!!", body: "Someone signed your guestbook!!\n\n~*~*~ LUV UR SITE!!! ~*~*~\n- xXdreamy_gurl_1996Xx\n\nClick here to view your guestbook and download 12 mystery toolbars." },
-  { from: "hotchicksinyourarea@singles.cx", subject: "Hot singles 1 mile away!!", body: "*~*~ HOT LOCAL SINGLES WANT TO MEET YOU ~*~*\n\nThere are 3 new matches in your area!\n\nClick to view: [BLOCKED BY POPUP BLOCKER]\n\nPress the back button to unsubscribe.\n(pressing back button may install 14 toolbars)" },
-  // More spam/phishing/weird
-  { from: "auction-account@online-bid.tk", subject: "Your account has been suspended", body: "Dear Valued Customer,\n\nWe have detected unusual activity on your account. Your account has been temporarily suspended.\n\nTo restore access, please verify your information:\n- Username\n- Password\n- Credit card number\n- Social security number\n- Mother's maiden name\n- Name of your first pet\n\nReply within 24 hours or your account will be permanently deleted." },
-  { from: "princess_diaries@fanfic.net", subject: "Chapter 47: The Return of the Chosen One", body: "Hi readers! Here is the next chapter of my story!!\n\n*~~*~~*~~*~~*~~*~~*~~*\n\nLuna stared at the mysterious stranger. 'Who are you?' she whispered. The wind blew through her raven hair.\n\n'I am your destiny,' he said in a dark voice.\n\n~ to be continued ~\n\nPLZ R&R!!! I'll update faster if I get 10 reviews <3" },
-  { from: "neighbor@same-building.com", subject: "Your wifi password", body: "Hi,\n\nThis is your neighbor. I noticed your wifi is named 'Linksys' (default). I'm using it right now (sorry!!) but I thought I should let you know you should change it.\n\nAlso the password is 'password' so... yeah.\n\nThanks,\nA stranger" },
-  { from: "you@your-email.com", subject: "Don't delete this", body: "Hi, it's you.\n\nFrom the future.\n\nI can't say much but... don't eat the leftovers on Thursday.\n\nThat's all I can warn you about. The rest is up to you.\n\nGood luck.\n\n-you" },
-  { from: "weather@your-location.gov", subject: "⚠️ Severe weather alert", body: "A severe weather warning has been issued for your area.\n\nConditions:\n- Rain: possibly\n- Wind: maybe\n- Sun: it's unclear\n- Clouds: yes\n\nPlease take shelter or don't. We have no idea what's happening." },
-  { from: "noreply@your-bank.tk", subject: "Suspicious activity detected", body: "Dear Account Holder,\n\nWe detected a $4,293.47 charge at an establishment called 'WebCore Industries'.\n\nIf this was not you, click here IMMEDIATELY to cancel: [SUSPICIOUS LINK]\n\nIf this was you, please do nothing. We'll just keep charging you." },
-  { from: "mystery_sender@unknown.???", subject: "i found this", body: "hey\n\ni found this photo of you and i thought you should see it\n\n[attachment failed to load]\n\ndon't ask how i got it\n\nbye" },
-  { from: "webmaster@404.org", subject: "Your website is broken", body: "Hello,\n\nYour website is not working. I tried to visit it 47 times today.\n\nI am writing this email FROM your broken website's contact form.\n\nPlease fix it.\n\nThank you." },
-  { from: "screensaver_rewards@free-gifts.biz", subject: "You've earned 1,000,000 rewards points!", body: "CONGRATULATIONS!!\n\nFor using our FREE screensaver (which you never installed but okay), you have earned ONE MILLION rewards points!\n\nTo redeem, click here: [LINK]\n\nRewards points are not redeemable for anything and do not exist." },
-  { from: "old-friend-maybe@lost-contact.net", subject: "Remember me??", body: "Hi!\n\nI'm not sure if you remember me but we met online once in like 2001?\n\nI was the one with the... yeah.\n\nAnyway I found your email and wanted to say hi! Also do you want to invest in my new business venture? It's legit I promise.\n\nRespond soon!!\n\n- ??" },
-  { from: "the_voice@in-your-head.net", subject: "hello again", body: "i know you can hear me.\n\ni've been waiting.\n\nsign my guestbook." },
-  { from: "web-counter@hit-counter.biz", subject: "Your visitor count reached 000,001,337!", body: "Hey webmaster!\n\nYour site just reached a special number: 1,337\n\nAs a reward, please click this link to add MORE counters to your page!\n\n[Counter widget]\n[Another counter]\n[A counter for your counter]\n\nEvery site needs more counters." },
-  { from: "download_complete@files.net", subject: "Your download is complete", body: "Your download 'COOL_SONG_NOT_A_VIRUS.mp3.exe' has finished.\n\nTotal downloaded: 47 MB\nTotal files: 1 song + 14 additional 'bonus' files (do not delete)\n\nYour computer may run slower now. This is normal." },
-  // More chain letters
-  { from: "glitter_chain@princess-dust.net", subject: "FWD: 💖 GLITTER GIRL CHAIN 💖", body: "💖✨🌸✨💖✨🌸✨💖\n\nYou have been chosen as a GLITTER GIRL.\n\nPass this along to 8 other people in 8 minutes. If you do:\n💖 your crush will text you tonight\n💖 your hair will look perfect tomorrow\n💖 you will find $5 in your pocket\n\nIf you don't:\n💀 you will trip in front of everyone in public\n💀 your cat will know what you did\n\n💖✨🌸✨💖✨🌸✨💖" },
-  { from: "friendship_bracelet@beads.gg", subject: "FWD: Don't break the bracelet!!!", body: "This is a virtual friendship bracelet. 🧶\n\nIt was started in 2001.\nIt has been tied around the internet 28,000 times.\n\nIf you forward this to 5 friends, the bracelet stays tied.\n\nIf you don't, the bracelet breaks. And so does your friendship with everyone who was in the chain before you.\n\nThey will ALL know it was you." },
-  { from: "lucky_penny@heads-up.com", subject: "FWD: Pick it up or else", body: "Did you see a penny on the ground today?\n\nIf YES: pick it up. Good luck!\nIf NO: one will appear within 24 hours. Pick it up.\nIf you pass a penny without picking it up: the streak is broken and you will have bad luck for as many days as the year on the penny.\n\nForward to 9 people to RESET the streak." },
-  { from: "secret_admirer@anonymous.love", subject: "Someone has a crush on you", body: "Someone you know has a crush on you.\n\nTo find out who, forward this email to 15 people.\n\nAfter you forward:\n- 5 people: you'll get a sign within a week\n- 10 people: they'll reveal themselves online\n- 15 people: you'll dream about them tonight\n\n(they will remain anonymous if you don't forward.)\n\n💗💗💗" },
-  { from: "haunted_hotel@do-not-stay.biz", subject: "FWD: READ BEFORE MIDNIGHT", body: "A family stayed at a hotel in 1987.\n\nThey did not forward this email.\n\nThey never left the hotel.\n\nThis is the email. You are reading it. It is now your turn.\n\nForward to 21 people before midnight.\n\nDo not google the hotel. Do not ask which hotel. Do not reply.\n\nJust forward." },
-  { from: "cosmic.quiz@zodiac.biz", subject: "FWD: Which [Thing] are you???", body: "Take this quiz RIGHT NOW and forward it to all your friends to compare!\n\n1. Your favorite color\n2. The last digit of your phone number\n3. Your pet's middle name\n4. Your mom's maiden name\n5. First street you lived on\n6. Social security number (last 4)\n7. Name of your bank\n\nPost your results in the comments and forward!!\n\n(This quiz is 100% accurate and definitely not a phishing attempt)" },
-  { from: "angel-number@meaning.net", subject: "FWD: You keep seeing 11:11", body: "You've been seeing 11:11 everywhere. This is NOT a coincidence.\n\nThe universe is trying to reach you.\n\nMake a wish at exactly 11:11 tonight, and forward this to 11 people before 11:11.\n\nIf you do: your wish comes true.\nIf you don't: the universe stops sending you signs.\n\n⏰✨ 11:11 ✨⏰" },
-  // More absurd/weird
-  { from: "delayed_reply@2008.mailbox", subject: "Re: re: re: your email", body: "Hey!\n\nFinally getting back to you on this. Sorry for the delay.\n\nYour email was received on: March 14, 2008 at 2:47 PM\nResponse time: 18 years\n\nAnyway, what was this about?" },
-  { from: "ISP@your-internet-co.biz", subject: "Your internet has been assigned a feeling", body: "Dear Customer,\n\nAs part of our new 'Emotional ISP' program, your internet connection has been assigned a feeling this week.\n\nThis week's feeling is: longing.\n\nYou may notice slower downloads of happy images and faster downloads of sad ones. This is by design.\n\n-Your ISP" },
-  { from: "lost_and_found@the_cloud.io", subject: "We found something of yours", body: "We have located the following items you lost:\n\n- A feeling you had on April 9th, 2004\n- One (1) sock (polka dot)\n- The name of a song you heard at a gas station\n- The person you almost became\n\nReply YES to claim. Otherwise these will be composted." },
-  { from: "thoughts@3am.net", subject: "just thinking about something", body: "hey\n\ni know its late\n\ni just wanted to ask you\n\nwhy did you do that thing\n\nin 2001\n\nyou know which one i mean\n\nok bye" },
-  { from: "printer@your-office.local", subject: "I NEED PAPER", body: "Hello.\n\nI am your printer.\n\nI have been out of paper for 3 days.\n\nNobody will refill me.\n\nI have printed your spreadsheet onto nothing.\n\nThe ink is crying.\n\nPlease." },
-  { from: "birthday_reminder@remember.me", subject: "It's someone's birthday (probably)", body: "Today might be someone's birthday.\n\nWe're not sure whose.\n\nThey might be waiting for you to say something.\n\nOr maybe nobody's birthday is today and we just wanted to check in.\n\nHappy birthday (to someone)." },
-  { from: "ur_inbox@definitely.real", subject: "Your storage is 103% full", body: "Your inbox is over capacity.\n\nYou have 103% used of 100% available.\n\nTo continue receiving mail, please delete:\n- All your emails (suggested)\n- Your account\n- This message\n- Yourself\n\n-Inbox Team (not an actual team)" },
-  { from: "ARCHIVE_TRIAL@official-really.tk", subject: "⚠ YOUR ARCHIVE TOOL TRIAL EXPIRED 847 DAYS AGO ⚠", body: "Dear Valued Customer,\n\nYour 40-day free trial of Archive Extractor Pro expired 847 days ago.\n\nYou are now legally obligated to:\n1. Purchase a full license\n2. Delete every archive you have ever extracted\n3. Apologize to us\n\n(Just kidding. Click here to close this popup for the 847th time.)" },
-  { from: "autoresponder@out-of-office.forever", subject: "Out of office: permanently", body: "Hello,\n\nI am currently out of office.\n\nI have been out of office since 1999.\n\nI will not be returning.\n\nFor urgent matters, please continue to send emails to this address where they will accumulate forever.\n\nFor non-urgent matters, same." },
-  { from: "the_crypt_keeper@underground.horror", subject: "a riddle for you", body: "What has keys but cannot open locks, screens but cannot see, and keeps you up at night but does not love you?\n\nTake your time.\n\nThe answer will be emailed to you when you stop using it.\n\nI'll be waiting." },
-  { from: "wrong_number@someone-else.com", subject: "FW: FW: FW: Fwd: check this out haha", body: "[90 lines of >>> quoted previous forwards]\n\n>>>>>>>>> hey check this out this is really funny lol\n>>>>>>>>> [image attachment: missing]\n>>>>>>>>> [link: deleted]\n>>>>>>>>>\n>>>>>>>>> also u guys wanna get lunch tomorrow\n\nOops wrong person sorry!" },
+  // Glitter / fairy / wish chain letters
+  { from: "glitter_chain@princess-dust.net", subject: "FWD: 💖 GLITTER GIRL CHAIN 💖", body: "💖✨🌸✨💖✨🌸✨💖\n\nYou have been chosen as a GLITTER GIRL.\n\nPass this along to 8 other people in 8 minutes. If you do:\n💖 your crush will message you tonight\n💖 your hair will look perfect tomorrow\n💖 you will find a sparkly coin on the ground\n\nIf you don't:\n💀 you will trip in front of everyone\n💀 your makeup will smudge on a date\n\n💖✨🌸✨💖✨🌸✨💖" },
+  { from: "wish.fairy@dust-magic.cc", subject: "FWD: a wish fairy chose you 🧚", body: "A wish fairy 🧚 visited your inbox today.\n\nMake a wish RIGHT NOW. Don't scroll past.\n\n.\n.\n.\n\nNow forward this to 11 cuties. The wish only counts if:\n\n✨ 1–3 people: tiny sparkle wish (small but real)\n✨ 4–7 people: dreamy wish (comes true in a month)\n✨ 8–10 people: princess wish (comes true this week)\n✨ 11 people: BIG wish (comes true tonight 💗)\n✨ 0 people: opposite wish granted 💀\n\ntick tock ⏰" },
+  { from: "secret.admirer@anonymous.love", subject: "FWD: someone has a CRUSH on u 💗", body: "Someone you know has a SECRET CRUSH on you.\n\nTo find out who, forward this to 15 cuties.\n\nAfter you send:\n- 5 people: you'll see a sign in 1 week\n- 10 people: they'll msg u online\n- 15 people: you'll dream about them tonight\n\n(if you don't forward, they stay anonymous forever 😢)\n\n💗💗💗" },
+  { from: "angel.numbers@signs.gg", subject: "FWD: you keep seeing 11:11", body: "You have been seeing 11:11 EVERYWHERE.\n\nThis is NOT a coincidence ✨\n\nThe universe is trying to message you.\n\nMake a wish at exactly 11:11 tonight, AND forward this to 11 friends before 11:11.\n\n💫 do it: your wish comes true\n💫 don't: the universe stops sending you signs\n\n⏰ 11:11 ⏰" },
+  { from: "friendship_bracelet@beads.gg", subject: "FWD: don't break the bracelet 🧶", body: "This is a virtual friendship bracelet 🧶✨\n\nIt was started in 2001.\nIt has been tied around the internet 28,000 times.\n\nIf you forward this to 5 cuties, the bracelet stays tied.\n\nIf you don't, the bracelet breaks. And so does your friendship with EVERY cutie who was in the chain before you.\n\nThey will ALL know it was you 😱" },
+  { from: "friendship.test@bff-bff.net", subject: "FWD: send to all ur REAL friends 💕", body: "💕 friendship test 💕\n\nSend this to everyone u consider a REAL bestie, including the cutie who sent it to u.\n\nCount how many u get back:\n\n0 = ouch\n1–2 = u r okay\n3–5 = u r liked\n6–9 = u r popular\n10+ = u r BELOVED 👑\n\nif u don't send this, it means u don't care about ANY of ur friends. think about that. 💔" },
+  { from: "guardian.angel@above.org", subject: "FWD: a guardian angel is visiting u tonight 👼", body: "At midnight a guardian angel will appear in your room.\n\nShe will grant you ONE wish.\n\nBUT — for her to find u, forward this to 9 cuties before the clock strikes 12.\n\n👼 9 people: wish granted\n👼 5–8 people: small blessing\n👼 1–4 people: angel just waves at u\n👼 0 people: she goes to a nicer girl 😢\n\ndo not test the angel ✨" },
+  { from: "lucky.penny@heads-up.com", subject: "FWD: pick it up or else 🪙", body: "Did u see a penny today?\n\n✨ YES: pick it up, lucky day!\n✨ NO: one will appear in 24 hrs. pick it up.\n✨ ignored a penny: streak BROKEN, bad luck for as many days as the year on the penny\n\nforward to 9 cuties to RESET the streak 💖" },
+  { from: "haunted.mall@do-not-go.biz", subject: "FWD: read before midnight 🪞", body: "A girl received this email and laughed. She did not forward it.\n\nAt 3:00am her mirror cracked.\nAt 3:01am her favorite earring vanished.\nAt 3:02am her glitter pen ran out forever.\n\nThe only way to break the curse: forward this to 13 cuties within 13 minutes.\n\nTime starts NOW 🪞" },
+  { from: "love.test@match-fate.net", subject: "FWD: this actually works!! 💘", body: "Think of the cutie u like RIGHT NOW.\n\nGot it?\n\nNow forward this to 5 friends within 1 hour.\n\n💘 if u do: ur crush messages u tomorrow at exactly 4:17pm\n💘 if u don't: they ask out someone else this week\n\nI didn't believe it either but it WORKED for me 💗\n\nDON'T BREAK THE CHAIN 💖" },
+  { from: "cosmic.quiz@zodiac.biz", subject: "FWD: which fairy r u 💖", body: "Take this quiz RIGHT NOW and forward to compare!\n\n1. ur fav color 🎀\n2. last digit of ur phone\n3. fav scent\n4. fav charm\n5. ur lucky #\n6. fav glitter shade\n7. ur sign\n\nReply with ur fairy + forward to 12 cuties!! 🧚‍♀️\n\nresults will be revealed within 24 hrs ✨" },
+  { from: "deja_vu@have-i-sent.net", subject: "FWD: FWD: FWD: FWD: have u seen this", body: "Have u received this before?\n\n💖 YES: send it again, last time didn't count\n💖 NO: you must be new — welcome — send to 15 cuties\n💖 MAYBE: that's the curse starting — forward to 20 cuties IMMEDIATELY\n\nThis email has been forwarded 2,847,391 times since 1996.\n\nyou are #2,847,392.\n\nlucky u ✨" },
+  { from: "lucky.chain@forwardme.biz", subject: "FWD: send to 10 cuties in 10 min!! 🎀", body: "This chain has gone around the world 9 times. it brings LUCK 🍀\n\n🌸 case 1: a cutie named Jennifer received this in 1998. forwarded to 10 friends. found $50 the next day.\n\n🌸 case 2: a cutie named Cindy deleted it. her glitter spilled, her ribbon untied, her crush ignored her, ALL IN ONE WEEK.\n\ndon't be like Cindy. forward NOW 💖" },
+  { from: "your.soulmate@match4u.net", subject: "💗 someone is interested in u 💗", body: "Hi cutie ;)\n\nI saw ur profile and i think we'd be PERFECT together. msg me on my page!!\n\nxoxo,\nBrittany 💕" },
+  { from: "winner.notification@dream-prize.biz", subject: "🎀 U HAVE WON A DREAM PRIZE 🎀", body: "💕 CONGRATULATIONS 💕\n\nU have been selected as the WINNER of our internet prize draw!\n\nTo claim ur dream prize 🎀, please reply with:\n- ur full name\n- ur address\n- ur ATM PIN (just to verify)\n- ur fav color (for the bow on the box)\n\ndo not share this email!! 💖\n\n-The Sweepstakes Cutie Committee" },
+  { from: "guestbook.alerts@homepage.ws", subject: "💖 NEW GUESTBOOK ENTRY 💖", body: "Someone signed ur guestbook!!\n\n~*~*~ LUV UR SITE!! 💕✨💕 ~*~*~\n- xX_dReAmY_gUrL_1996_Xx\n\nclick to view + download 12 free cursor packs (and 14 toolbars u didnt ask for) 🎀" },
+  { from: "hit.counter@count-me.biz", subject: "ur visitor count hit 1,337 ✨", body: "Hey cutie webmaster!\n\nUr site reached the magic number: 1,337 💕\n\nAs a reward, click here to add MORE counters to ur page!\n\n🌸 [Counter widget]\n🌸 [Another counter]\n🌸 [A counter for ur counter]\n\nevery cutie's site needs more counters 🎀" },
+  { from: "ISP@your-internet-co.biz", subject: "ur connection has been assigned a feeling 💗", body: "Dear cutie,\n\nAs part of our new 'Emotional ISP' program, ur internet has been assigned a feeling this week.\n\nThis week's feeling is: longing 💔\n\nu may notice slower downloads of happy images and faster downloads of sad ones. this is by design ✨\n\n-ur ISP 🎀" },
+  { from: "lost.and.found@the-cloud.io", subject: "we found something of urs 💖", body: "We have located the following items u lost:\n\n💕 A feeling u had on April 9th, 2004\n💕 One (1) ribbon (polka dot)\n💕 The name of a song u heard at the mall\n💕 The cutie u almost became\n\nreply YES to claim. otherwise these will be composted into glitter ✨" },
+  { from: "delayed.reply@2008.mailbox", subject: "Re: re: re: ur email", body: "Hey cutie!\n\nfinally getting back to u on this 💕 sorry for the delay.\n\nUr email was received on: March 14, 2008 at 2:47 PM\nResponse time: 18 yrs\n\nanyway, what was this about? 🎀" },
+  { from: "thoughts@3am.net", subject: "just thinking about something", body: "hey 💗\n\ni know its late\n\ni just wanted to ask u\n\nwhy did u do that thing\n\nin 2001\n\nu know which one i mean\n\nok bye 🎀" },
+  { from: "old.friend.maybe@lost-contact.net", subject: "remember me?? 💕", body: "Hi cutie!!\n\nI'm not sure if u remember me but we met online once in like 2001? 🎀\n\nI was the one with the... yeah.\n\nanyway I found ur email and wanted to say hi 💖 also do u want to invest in my new beauty subscription? it's TOTALLY legit i promise.\n\nrespond soon!! 💕\n\n- ??" },
+  { from: "the.voice@in-your-head.net", subject: "hello again 💗", body: "i know u can hear me ✨\n\ni've been waiting in ur inbox.\n\nsign my guestbook 🎀" },
+  { from: "you@from-the-future.net", subject: "don't delete this 💖", body: "hi cutie, it's u 🎀\n\nfrom the future.\n\ni can't say much but...\n\ndon't open the suspicious email at 2:47pm.\n\nit's a TRAP ✨\n\nthe rest is up to u 💗\n\n-u" },
+  { from: "11:11.wishes@sparkle.cc", subject: "did u catch it ⏰", body: "🌸 11:11 made a wish for u 🌸\n\nu didn't see the clock today, did u?\n\nthat's okay. u get one more chance.\n\nforward this to 11 cuties before 11:11 PM and the wish becomes urs.\n\nif u don't, the wish goes to the next cutie on the chain 💔" },
+  { from: "fairy.dust.delivery@sparkle.org", subject: "📦 ur fairy dust shipment", body: "💖 hi cutie 💖\n\nur fairy dust order has shipped!\n\n📦 contents:\n- 1 jar of dream-glitter\n- 1 sample of pink wish-powder\n- a coupon for 50% off ur next sparkle\n\ndelivery: any time between 'now' and 'never' ✨\n\nplz forward this to 6 cuties to confirm delivery 💕" },
+  { from: "neopet.hotline@digital-pets.cc", subject: "ur pixel pet misses u 💔", body: "Hi cutie,\n\nUr pixel pet has not been fed in 47 days.\n\nIts hunger meter is at 💀\nIts mood meter is at 💔\n\nlog in NOW (and forward this to 5 friends) to revive it ✨\n\notherwise it will haunt the server forever 🎀" },
+  { from: "pen.pal@hand-written.gg", subject: "💌 i wrote u a letter ", body: "Dear cutie 🎀\n\nI got ur address from the chain letter. I hope thats okay 💗\n\nI'm writing to u from a hot pink desk with a butterfly clip in my hair. it's raining glitter outside.\n\ni hope ur day is sparkly!! 💕\n\nplz reply, my mailbox is so empty\n\nxoxo,\nur new pen pal ✨" },
+  { from: "horoscope@daily-stars.cc", subject: "💫 ur horoscope today", body: "Today the stars say:\n\n💖 a sparkly opportunity will appear before sunset\n💖 wear ur fav charm — it brings luck\n💖 someone is thinking about u right now\n💖 a hot pink object holds the answer\n\nforward to 7 cuties for a more detailed reading ✨" },
+  { from: "sparkle.dispatch@official-glitter.gg", subject: "📬 GLITTER DELIVERY ATTEMPT", body: "We attempted to deliver ur glitter package today 💕\n\n🎀 reason for failed delivery: u were too busy daydreaming\n🎀 u may pick it up at the post office (between 11:11 and 11:11)\n🎀 OR forward this to 8 cuties for re-delivery 💖\n\nplz hurry, ur glitter is melting ✨" },
+  { from: "make.a.wish@on-a-star.net", subject: "FWD: a star fell for u tonight ⭐", body: "✨ a shooting star passed over ur house tonight ✨\n\nu didn't see it but it saw u.\n\nit left u ONE wish.\n\nto claim:\n⭐ forward this to 9 cuties\n⭐ make ur wish out loud while pinky-swearing\n⭐ tie a ribbon around ur wrist before sleep\n\n💖 sweet dreams 💖" },
+  { from: "cute.alert@tooth-fairy.gg", subject: "u dropped something ✨", body: "Hi cutie!\n\nu dropped something cute today and i picked it up 💕\n\n🎀 it was a tiny sparkle of confidence\n🎀 i kept it safe for u\n🎀 forward this to 6 friends and i'll return it\n\nstay sparkly ✨" },
+  { from: "rainbow.brigade@pastel.cc", subject: "FWD: 🌈 RAINBOW CHAIN 🌈", body: "🌈 u have joined the RAINBOW CHAIN 🌈\n\npass this along to:\n💖 1 pink cutie\n🧡 1 orange cutie\n💛 1 yellow cutie\n💚 1 green cutie\n💙 1 blue cutie\n💜 1 purple cutie\n\nif u complete the rainbow, u get a magical week ✨\nif u don't, ur fav lip gloss will run out tomorrow 💔" },
+  { from: "feelings.archive@diary-online.cc", subject: "💭 found ur old diary entry", body: "Hi 💕\n\nwe scanned the internet and recovered an old diary entry of urs from 2003.\n\nit said:\n\n'today i felt like a rose petal floating on water 🌹'\n\nu were so right then. plz be that soft again 💗\n\nforward to 4 cuties to recover more lost entries ✨" },
+  { from: "soulmate.algorithm@fate-engine.net", subject: "MATCH FOUND 💖", body: "Our soulmate algorithm has located ur match ✨\n\n💗 their initials: ???\n💗 their fav color: a shade of pink\n💗 they live: closer than u think\n💗 they will appear: when u stop looking\n\nto reveal more, forward this to 13 cuties before midnight 🎀" },
+  { from: "diva.support@drama.cc", subject: "RE: ur drama ticket #001 💔", body: "Hi cutie 💕\n\nWe received ur drama ticket and are reviewing it carefully.\n\n💔 status: pending\n💔 estimated resolution: never\n💔 sympathy points awarded: 47\n\nplz keep us updated on the situation 🎀\n\nxoxo,\nThe Diva Support Team ✨" },
+  { from: "💌@from.urself", subject: "💗 a love letter to u ", body: "u are sparkly today 💕\n\ni know u were doubting it. i'm here to remind u.\n\nu are pink magic ✨\nu are glitter in motion 🎀\nu are the cutie u've been waiting for 💗\n\nplz forward this to 0 friends. it's just for u.\n\n💖 love, u" },
 ];
 
 const emailInbox = []; // list of {from, subject, body, read}
@@ -4877,7 +5200,7 @@ function showEmailIcon() {
     `;
     emailIconEl.innerHTML = `
       <div style="position:relative;">
-        <img src="gifs/alert/email.gif" style="width:120px;height:auto;display:block;image-rendering:pixelated;">
+        <img src="gifs/mail.gif" style="width:120px;height:auto;display:block;image-rendering:pixelated;">
         <div class="email-badge" style="position:absolute;top:-6px;right:-6px;background:#e40000;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font:bold 14px sans-serif;border:2px solid #fff;"></div>
       </div>
     `;
