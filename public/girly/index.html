@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>~*~*~</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: -apple-system, Segoe UI, sans-serif; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+    /* cursor styles get injected by the rotator script in <body> */
+    canvas { display: block; }
+
+    #info {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      color: #fff;
+      font-size: 12px;
+      text-shadow: 0 1px 4px rgba(180, 40, 100, 0.85);
+      pointer-events: none;
+      letter-spacing: 0.4px;
+      z-index: 5;
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      z-index: 10;
+      cursor: pointer;
+      transition: opacity 0.5s ease;
+    }
+    #overlay.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── HINT (Aero-pink keycaps, Comic Sans label) ─────────────── */
+    #hint {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-family: "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-shadow:
+        -1px -1px 0 #cc3380, 1px -1px 0 #cc3380,
+        -1px  1px 0 #cc3380, 1px  1px 0 #cc3380,
+         0   2px 4px rgba(180, 30, 90, 0.6);
+      pointer-events: none;
+      z-index: 6;
+      transition: opacity 0.5s ease;
+    }
+    #hint.hidden { opacity: 0; }
+    #hint kbd {
+      display: inline-block;
+      padding: 3px 9px;
+      border: 1px solid #ff66aa;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.85),
+        0 1px 3px rgba(180, 30, 90, 0.4);
+      color: #aa3366;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      font-weight: bold;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+      margin: 0 3px;
+    }
+
+    #crosshair {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 8px;
+      background: radial-gradient(circle, #fff 0%, #ffaadd 50%, transparent 100%);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      pointer-events: none;
+      z-index: 4;
+      box-shadow: 0 0 8px rgba(255, 110, 180, 0.9);
+    }
+
+    #fader {
+      position: absolute;
+      inset: 0;
+      background: #ffd0e6;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9;
+      transition: opacity 1.2s ease;
+    }
+    #fader.on { opacity: 1; }
+
+    /* ── ABOUT BUTTON (Aero-pink pill, Comic Sans rainbow letters) ── */
+    #about-btn {
+      position: fixed; top: 14px; right: 14px; z-index: 20;
+      background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+      border: 2px solid #ff66aa;
+      border-radius: 999px;
+      font: bold 18px "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      padding: 6px 22px;
+      cursor: pointer;
+      pointer-events: auto;
+      letter-spacing: 2px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.85),
+        0 4px 14px rgba(255, 80, 150, 0.55);
+      color: #aa3366;
+    }
+    #about-btn:hover {
+      background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 50%, #ffadd5 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.95),
+        0 6px 18px rgba(255, 80, 150, 0.7);
+    }
+    #about-btn:active {
+      background: linear-gradient(180deg, #ff9fcc 0%, #ffc9e0 50%, #ffe8f3 100%);
+      box-shadow: inset 0 2px 4px rgba(180, 30, 90, 0.4);
+    }
+    @keyframes about-blink {
+       0%   { color: #ff3388; }
+      16%   { color: #ff66aa; }
+      33%   { color: #ee5599; }
+      50%   { color: #cc4488; }
+      66%   { color: #ff77bb; }
+      83%   { color: #ff99cc; }
+     100%   { color: #ff3388; }
+    }
+    #about-btn span {
+      animation: about-blink 1.4s steps(6) infinite;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+    }
+    #about-btn span:nth-child(1) { animation-delay: 0s; }
+    #about-btn span:nth-child(2) { animation-delay: -0.2s; }
+    #about-btn span:nth-child(3) { animation-delay: -0.4s; }
+    #about-btn span:nth-child(4) { animation-delay: -0.6s; }
+    #about-btn span:nth-child(5) { animation-delay: -0.8s; }
+
+    /* ── ABOUT MODAL (Aero-pink window chrome) ─────────────────── */
+    #about-modal {
+      position: fixed; inset: 0; z-index: 30;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(255, 80, 150, 0.30);
+      pointer-events: auto;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    #about-modal.open { display: flex; }
+    /* Aero-pink window: rounded corners, drop shadow, frosted body */
+    #about-modal .about-wrap {
+      position: relative;
+      max-width: 560px; width: 88%; max-height: 82vh;
+      border: 2px solid rgba(255, 110, 170, 0.95);
+      border-radius: 12px;
+      background: rgba(255, 240, 248, 0.95);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.5) inset,
+        0 14px 32px rgba(255, 80, 150, 0.55),
+        0 6px 20px rgba(0,0,0,0.25);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    /* Aero-pink title bar with glossy white highlight */
+    #about-modal .about-titlebar {
+      flex: 0 0 auto;
+      position: relative;
+      padding: 8px 14px;
+      font: bold 13px/1.4 "Segoe UI", "Tahoma", sans-serif;
+      color: #5a1d3d;
+      background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 40%, #ff9fcc 100%);
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+      display: flex; align-items: center; gap: 8px;
+      user-select: none;
+      border-bottom: 1px solid rgba(255, 110, 170, 0.55);
+    }
+    /* Glossy highlight on top half of titlebar */
+    #about-modal .about-titlebar::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%);
+      pointer-events: none;
+    }
+    #about-modal .about-titlebar > * { position: relative; z-index: 1; }
+    /* Body */
+    #about-modal .about-inner {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: scroll;
+      padding: 18px 38px 22px 22px;
+      color: #4a1830;
+      font: 12px/1.6 "Segoe UI", "Tahoma", sans-serif;
+      background: #fff5fa;
+      scrollbar-width: none;
+    }
+    #about-modal .about-inner::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+    /* Pink Aero scrollbar */
+    #about-modal .about-scrollbar {
+      position: absolute;
+      top: 36px;
+      right: 0;
+      bottom: 0;
+      width: 16px;
+      background: #ffe0ee;
+      border-left: 1px solid #ff9fcc;
+      z-index: 3;
+      user-select: none;
+      touch-action: none;
+    }
+    #about-modal .about-scrollbar-up,
+    #about-modal .about-scrollbar-down {
+      position: absolute; left: 0; right: 0;
+      height: 16px;
+      background: linear-gradient(180deg, #fff0f8 0%, #ffc9e0 100%);
+      border: 1px solid #ff9fcc;
+      box-sizing: border-box;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    #about-modal .about-scrollbar-up { top: 0; }
+    #about-modal .about-scrollbar-down { bottom: 0; }
+    #about-modal .about-scrollbar-up::before {
+      content: ""; width: 0; height: 0;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      border-bottom: 5px solid #aa3366;
+    }
+    #about-modal .about-scrollbar-down::before {
+      content: ""; width: 0; height: 0;
+      border-left: 4px solid transparent; border-right: 4px solid transparent;
+      border-top: 5px solid #aa3366;
+    }
+    #about-modal .about-scrollbar-thumb {
+      position: absolute; left: 1px; right: 1px;
+      background: linear-gradient(180deg, #ffc9e0 0%, #ff8bbc 50%, #ee5599 100%);
+      border: 1px solid #cc3388;
+      border-radius: 4px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+      cursor: pointer;
+      min-height: 20px;
+    }
+    #about-modal .about-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #ffd9ec 0%, #ff9fcc 50%, #ff77bb 100%);
+    }
+
+    #about-modal .about-inner h2 {
+      font: bold 22px/1.1 "Comic Sans MS", "Chalkboard SE", cursive, sans-serif;
+      color: #cc3388;
+      margin: 4px 0 6px 0;
+      letter-spacing: 0px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    }
+    #about-modal .about-inner .meta {
+      font: 11px/1.6 "Segoe UI", "Tahoma", sans-serif;
+      color: #6a2244;
+      margin: 4px 0 16px 0;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #ff9fcc;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 0 rgba(255,200,225,0.5);
+      white-space: pre-line;
+    }
+    #about-modal .about-inner p {
+      margin: 0 0 12px 0;
+      color: #4a1830;
+    }
+    #about-modal .about-inner em, #about-modal .about-inner i {
+      font-style: italic;
+      color: #cc3388;
+    }
+    #about-modal .about-inner .related {
+      margin-top: 18px; padding: 10px 12px;
+      background: #fff;
+      border: 1px solid #ff9fcc;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 0 rgba(255,200,225,0.5);
+    }
+    #about-modal .about-inner .related-title {
+      font: bold 12px/1.4 "Comic Sans MS", "Segoe UI", sans-serif;
+      color: #cc3388;
+      margin-bottom: 8px;
+    }
+    #about-modal .about-inner .related-list {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; flex-wrap: wrap; gap: 4px 6px;
+    }
+    #about-modal .about-inner .related-list li {
+      font: 10px/1.4 "Segoe UI", "Tahoma", sans-serif;
+      color: #6a2244;
+      background: linear-gradient(180deg, #fff0f8 0%, #ffd9ec 100%);
+      border: 1px solid #ff9fcc;
+      border-radius: 10px;
+      padding: 2px 9px;
+      white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+    #about-modal .about-inner .credit {
+      margin-top: 18px; padding: 10px 12px;
+      background: #fffaf2;
+      border: 1px solid #ffcc99;
+      border-radius: 6px;
+      font: 11px/1.55 "Segoe UI", "Tahoma", sans-serif;
+      color: #6a2244;
+    }
+    #about-modal .about-inner a {
+      color: #cc3388; text-decoration: underline;
+      border: none;
+    }
+    #about-modal .about-inner a:visited { color: #884466; }
+    #about-modal .about-inner a:hover { color: #ff3388; }
+
+    /* Red Aero close button (matches pink-desktop) */
+    #about-modal .close-about {
+      position: absolute; top: 6px; right: 8px;
+      width: 30px; height: 22px; padding: 0;
+      background: linear-gradient(180deg, #ff9999 0%, #dd3333 50%, #aa1111 100%);
+      border: 1px solid #7a0000;
+      border-radius: 3px 6px 6px 3px;
+      color: #fff;
+      font: bold 14px/20px "Segoe UI", "Tahoma", sans-serif;
+      cursor: pointer; z-index: 2;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.45),
+        0 2px 4px rgba(150, 20, 40, 0.4);
+    }
+    #about-modal .close-about:hover {
+      background: linear-gradient(180deg, #ffb3b3 0%, #ee5555 50%, #cc2222 100%);
+    }
+    #about-modal .close-about:active {
+      background: linear-gradient(180deg, #aa1111 0%, #7a0000 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    #settings-toggle {
+      position: fixed; top: 10px; right: 10px; z-index: 20;
+      background: rgba(0,0,0,0.5); color: #0f0; border: 1px solid #0f0;
+      font: 12px monospace; padding: 4px 10px; cursor: pointer;
+      pointer-events: auto;
+    }
+    #settings-toggle:hover { background: rgba(0,80,0,0.5); }
+    #settings-panel {
+      position: fixed; top: 36px; right: 10px; z-index: 20;
+      background: rgba(0,0,0,0.8); border: 1px solid #0f0;
+      color: #0f0; font: 12px monospace; padding: 12px 14px;
+      min-width: 220px; display: none; pointer-events: auto;
+    }
+    #settings-panel.open { display: block; }
+    #settings-panel label { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
+    #settings-panel input[type="range"] { width: 100px; accent-color: #0f0; }
+    #settings-panel .val { min-width: 36px; text-align: right; }
+  </style>
+</head>
+<body>
+  <style id="cursor-rot"></style>
+  <script>
+    // Rotate through the cursors/ folder — swap default + pointer cursors on a timer
+    (() => {
+      const CURSORS = [
+        "gifs/cursors/tumblr_06a2aeded2e365c91f54c8d04df87b12_1abf8d91_100.webp",
+        "gifs/cursors/tumblr_0c9bf7afb3ecfb776e9449c7fd2e95d5_bbdf3d58_100.webp",
+        "gifs/cursors/tumblr_0ef8bcf9e6e81665cd946520b2fdc4b3_0bf673ec_100.webp",
+        "gifs/cursors/tumblr_179de0f393cc90fb96e05f29236fcc82_5eb494cf_75.webp",
+        "gifs/cursors/tumblr_3883a365395d756be66e4c7a3665e404_d9d25615_250.webp",
+        "gifs/cursors/tumblr_38e2c9cf3e04d09348ef0af9948d4620_d1e9f925_75.webp",
+        "gifs/cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp",
+        "gifs/cursors/tumblr_4ed11c604ba4a66a11109b0b59dadc68_2839eb3a_100.webp",
+        "gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp",
+        "gifs/cursors/tumblr_6b69b1fac2766724812bf14b565deba5_9a15d3df_100.webp",
+        "gifs/cursors/tumblr_734f0fa22c07ecb4fc675c59251a6298_af39f2e5_75.webp",
+        "gifs/cursors/tumblr_7433e1047b83424374a7a3536e7138f6_9f2e786a_75.webp",
+        "gifs/cursors/tumblr_7f53982f5c6d7ead8263d5a4307668aa_d9f5e87b_100.webp",
+        "gifs/cursors/tumblr_8878c078d226b0742dc4f2e88d01e2d9_d25e45c1_100.webp",
+        "gifs/cursors/tumblr_9c21d6e382dd3c44abe5df9a906b5830_60ac9645_100.webp",
+        "gifs/cursors/tumblr_a31c3e32fa82bc567a16641f56d8e45d_1a24ad3a_100.webp",
+        "gifs/cursors/tumblr_b4ef741d1109054a36962e8fc536430c_54b08306_75.webp",
+        "gifs/cursors/tumblr_ce73fa30e4f8988bfcfc8bb21ba6ab80_4b87e70c_75.webp",
+        "gifs/cursors/tumblr_cf8eed39de6be94045a13563c75972a9_f75f971c_75.webp",
+        "gifs/cursors/tumblr_d4b362546e21896ecfc5892ad2a5f0b9_3bb2c843_75.webp",
+        "gifs/cursors/tumblr_df64edb6e6140ef82fb2ad795987f063_9a81b4bf_75.webp",
+      ];
+      // Preload so the swap is instant
+      CURSORS.forEach(src => { const img = new Image(); img.src = src; });
+
+      const styleEl = document.getElementById('cursor-rot');
+      const ROTATE_MS = 700;   // how long each cursor stays visible
+      let i = 0;
+      function update() {
+        const def = CURSORS[i % CURSORS.length];
+        const ptr = CURSORS[(i + Math.floor(CURSORS.length / 2)) % CURSORS.length];
+        styleEl.textContent = `
+          html, body { cursor: url("${def}") 4 4, auto; }
+          a, button, [role="button"], label, summary, select,
+          input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"] {
+            cursor: url("${ptr}") 4 4, pointer !important;
+          }
+        `;
+        i++;
+      }
+      update();
+      setInterval(update, ROTATE_MS);
+    })();
+  </script>
+  <button id="settings-toggle" style="display:none;">⚙ Settings</button>
+  <div id="settings-panel" style="display:none !important;">
+    <label>Enter X <input type="range" id="s-ex" min="-3" max="3" step="0.01" value="0"><span class="val" id="v-ex">0</span></label>
+    <label>Enter Y <input type="range" id="s-ey" min="0" max="4" step="0.01" value="1.7"><span class="val" id="v-ey">1.7</span></label>
+    <label>Enter Z <input type="range" id="s-ez" min="-15" max="5" step="0.01" value="-8.8"><span class="val" id="v-ez">-8.8</span></label>
+    <label>Enter Scale <input type="range" id="s-escale" min="0.05" max="2" step="0.01" value="0.7"><span class="val" id="v-escale">0.7</span></label>
+    <button id="btn-copy-enter" style="width:100%;margin-top:6px;background:#0a0;color:#000;border:1px solid #0f0;font:12px monospace;padding:4px;cursor:pointer;">Copy JSON</button>
+  </div>
+  <button id="about-btn"><span>a</span><span>b</span><span>o</span><span>u</span><span>t</span></button>
+  <div id="about-modal">
+    <div class="about-wrap">
+      <div class="about-titlebar">
+        <span>📄</span>
+        <span>About — webcore.html</span>
+      </div>
+      <button class="close-about">×</button>
+      <div class="about-inner">
+      <h2>webcore.html</h2>
+      <div class="meta">by Violet Forest<br>2026<br>Browser, Three.js</div>
+      <p>Webcore is an internet aesthetic that grew up mostly on Tumblr in the late 2010s and early 2020s. Specific communities and archives there pulled early-web gifs and assets from the Internet Archive Wayback Machine, GeoCities, Angelfire, and Xanga, and started mashing them into dreamy, surreal compositions. Tumblr's reblog culture let the aesthetic spread fast through moodboards and themed blogs.</p>
+      <p>Webcore uses the visual and auditory language of the early internet (approximately 1995&ndash;2005) to evoke a sense of nostalgia&mdash;pixelated graphics, dated user interfaces, and the sounds of obsolete technology such as system notifications and dial-up modems. The aesthetic is predicated on the appropriation of obsolete internet artifacts&mdash;early-era animated GIFs, high-contrast browser windows, system-level error dialogues&mdash;placed into abstract voids or dreamlike contexts. Although it draws from historical sources, Webcore functions as a surrealist deconstruction of digital nostalgia.</p>
+      <p>Webcore developed as a reaction to the highly curated, centralized, and corporate nature of the modern internet. Its ethos is a nostalgic yearning for the perceived freedom and amateur creativity of the early web, before it was dominated by a few large social media platforms and algorithmic content feeds. The aesthetic romanticizes the period&rsquo;s utopian vision of the internet as a decentralized space for individual expression.</p>
+      <p>The visual style celebrates the rough-around-the-edges quality of early web design&mdash;clunky animations, low-resolution pixel art, glitter graphics, and the sharp-edged windows of dated operating systems. It embraces what was once considered poor design as a form of authentic, unfiltered creativity.</p>
+      <p style="font-size:10px;color:#666;">Source: <a href="https://aesthetics.fandom.com/wiki/Webcore" target="_blank">Aesthetics Wiki &mdash; Webcore</a></p>
+      <div class="related">
+        <div class="related-title">Related aesthetics</div>
+        <ul class="related-list">
+          <li>2010s Meme Maximalism</li>
+          <li>Cybercore</li>
+          <li>Demoscene</li>
+          <li>Dreamcore</li>
+          <li>Frutiger Aero</li>
+          <li>Glitch Art</li>
+          <li>Glitchcore</li>
+          <li>Old Web</li>
+          <li>Silicon Dreams</li>
+          <li>TechnoNeko2000</li>
+          <li>Vaporwave</li>
+          <li>Weirdcore</li>
+          <li>Xpiritualism</li>
+          <li>Y2K Futurism</li>
+          <li>Yabujincore</li>
+        </ul>
+      </div>
+      <div class="credit">GIF collection sourced from <a href="https://oldwww.tumblr.com/" target="_blank">oldwww.tumblr.com</a>, a Tumblr dedicated to preserving early internet graphics and culture.</div>
+      </div>
+      <div class="about-scrollbar">
+        <div class="about-scrollbar-up"></div>
+        <div class="about-scrollbar-thumb"></div>
+        <div class="about-scrollbar-down"></div>
+      </div>
+    </div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="fader"></div>
+
+  <div id="overlay"></div>
+  <div id="hint" style="display:none;">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk &nbsp;·&nbsp; <kbd>shift</kbd> run &nbsp;·&nbsp; <kbd>mouse</kbd> look &nbsp;·&nbsp; <kbd>esc</kbd> release
+  </div>
+  <script>
+    // Only show controls on desktop, not mobile/touch
+    const isDesktop = window.innerWidth > 1024 && !(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    if (isDesktop) {
+      if (navigator.xr) {
+        navigator.xr.isSessionSupported('immersive-vr').then(supported => {
+          if (!supported) document.getElementById('hint').style.display = '';
+        });
+      } else {
+        document.getElementById('hint').style.display = '';
+      }
+    }
+  </script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+    import gifuctDefault from './lib/gifuct-js.esm.js';
+    const { parseGIF, decompressFrames } = gifuctDefault;
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { VRButton } from 'three/addons/webxr/VRButton.js';
+
+    /* ----------------------------- scene ---------------------------- */
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0c);
+    scene.fog = new THREE.Fog(0x0a0a0c, 8, 34);
+
+    const camera = new THREE.PerspectiveCamera(
+      72, window.innerWidth / window.innerHeight, 0.05, 200
+    );
+    camera.position.set(0, 1.65, 8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
+    const vrBtn = VRButton.createButton(renderer);
+    document.body.appendChild(vrBtn);
+    // Hide the button if VR isn't supported (avoid "VR NOT SUPPORTED" text)
+    if (navigator.xr) {
+      navigator.xr.isSessionSupported('immersive-vr').then(supported => {
+        if (!supported) vrBtn.style.display = 'none';
+      });
+    } else {
+      vrBtn.style.display = 'none';
+    }
+
+    /* --------------------------- postprocess ------------------------ */
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      0.55,  // strength
+      0.6,   // radius
+      0.78   // threshold — only very bright pixels bloom
+    );
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+
+    /* ------------------------------ room ---------------------------- */
+    // plaster wall texture procedurally via canvas
+    function makePlasterTex(color = '#d5d0c7', streaks = 180) {
+      const c = document.createElement('canvas');
+      c.width = c.height = 512;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // subtle grain
+      const img = ctx.getImageData(0, 0, 512, 512);
+      for (let i = 0; i < img.data.length; i += 4) {
+        const n = (Math.random() - 0.5) * 22;
+        img.data[i]   += n;
+        img.data[i+1] += n;
+        img.data[i+2] += n;
+      }
+      ctx.putImageData(img, 0, 0);
+
+      // scuffs and streaks
+      for (let i = 0; i < streaks; i++) {
+        ctx.strokeStyle = `rgba(40,35,30,${Math.random()*0.08})`;
+        ctx.lineWidth = Math.random() * 1.4;
+        ctx.beginPath();
+        const x = Math.random()*512, y = Math.random()*512;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random()-0.5)*40, y + (Math.random()-0.5)*60);
+        ctx.stroke();
+      }
+
+      // a few darker smudges
+      for (let i = 0; i < 14; i++) {
+        const x = Math.random()*512, y = Math.random()*512;
+        const r = 20 + Math.random()*80;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, 'rgba(60,55,48,0.09)');
+        g.addColorStop(1, 'rgba(60,55,48,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x-r, y-r, r*2, r*2);
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.anisotropy = 8;
+      return tex;
+    }
+
+    const wallTex = makePlasterTex('#d9d4cb');
+    wallTex.repeat.set(4, 2);
+
+    const floorTex = makePlasterTex('#6d6962', 320);
+    floorTex.repeat.set(6, 6);
+
+    const ROOM_W = 16, ROOM_D = 18, ROOM_H = 5;
+
+    // floor
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(ROOM_W, ROOM_D),
+      new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.92, metalness: 0.02 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // ceiling
+    const ceiling = new THREE.Mesh(
+      new THREE.PlaneGeometry(ROOM_W, ROOM_D),
+      new THREE.MeshStandardMaterial({ color: 0xbfbab1, roughness: 1 })
+    );
+    ceiling.rotation.x = Math.PI / 2;
+    ceiling.position.y = ROOM_H;
+    scene.add(ceiling);
+
+    const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.95 });
+
+    // back wall (with door cutout via two pieces + header)
+    const DOOR_W = 1.5, DOOR_H = 3.1;
+    const backZ = -ROOM_D / 2;
+
+    const leftPiece = new THREE.Mesh(
+      new THREE.PlaneGeometry((ROOM_W - DOOR_W) / 2, ROOM_H),
+      wallMat
+    );
+    leftPiece.position.set(-(ROOM_W + DOOR_W) / 4, ROOM_H / 2, backZ);
+    scene.add(leftPiece);
+
+    const rightPiece = new THREE.Mesh(
+      new THREE.PlaneGeometry((ROOM_W - DOOR_W) / 2, ROOM_H),
+      wallMat
+    );
+    rightPiece.position.set((ROOM_W + DOOR_W) / 4, ROOM_H / 2, backZ);
+    scene.add(rightPiece);
+
+    const header = new THREE.Mesh(
+      new THREE.PlaneGeometry(DOOR_W, ROOM_H - DOOR_H),
+      wallMat
+    );
+    header.position.set(0, DOOR_H + (ROOM_H - DOOR_H) / 2, backZ);
+    scene.add(header);
+
+    // front wall
+    const frontWall = new THREE.Mesh(
+      new THREE.PlaneGeometry(ROOM_W, ROOM_H),
+      wallMat
+    );
+    frontWall.position.set(0, ROOM_H / 2, ROOM_D / 2);
+    frontWall.rotation.y = Math.PI;
+    scene.add(frontWall);
+
+    // side walls
+    const sideL = new THREE.Mesh(
+      new THREE.PlaneGeometry(ROOM_D, ROOM_H),
+      wallMat
+    );
+    sideL.position.set(-ROOM_W / 2, ROOM_H / 2, 0);
+    sideL.rotation.y = Math.PI / 2;
+    scene.add(sideL);
+
+    const sideR = new THREE.Mesh(
+      new THREE.PlaneGeometry(ROOM_D, ROOM_H),
+      wallMat
+    );
+    sideR.position.set(ROOM_W / 2, ROOM_H / 2, 0);
+    sideR.rotation.y = -Math.PI / 2;
+    scene.add(sideR);
+
+    // a pipe near ceiling, for character
+    const pipeGeo = new THREE.CylinderGeometry(0.07, 0.07, ROOM_W * 0.9, 12);
+    const pipe = new THREE.Mesh(
+      pipeGeo,
+      new THREE.MeshStandardMaterial({ color: 0x1a1a1d, roughness: 0.6, metalness: 0.4 })
+    );
+    pipe.rotation.z = Math.PI / 2;
+    pipe.position.set(0, ROOM_H - 0.25, backZ + 0.25);
+    scene.add(pipe);
+
+    /* ----------------------------- steps ---------------------------- */
+    // concrete steps in front of the door, matching the reference
+    const stepMat = new THREE.MeshStandardMaterial({ color: 0xd7d2c8, roughness: 0.95 });
+    const STEP_COUNT = 2;
+    const STEP_RISE = 0.18;
+    const STEP_DEPTH = 0.42;
+    const STEP_WIDTH = 2.6;
+
+    for (let i = 0; i < STEP_COUNT; i++) {
+      const step = new THREE.Mesh(
+        new THREE.BoxGeometry(STEP_WIDTH, STEP_RISE, STEP_DEPTH * (STEP_COUNT - i)),
+        stepMat
+      );
+      step.position.set(
+        0,
+        STEP_RISE / 2 + i * STEP_RISE,
+        backZ + (STEP_DEPTH * (STEP_COUNT - i)) / 2 + STEP_DEPTH * i
+      );
+      step.castShadow = true;
+      step.receiveShadow = true;
+      scene.add(step);
+    }
+
+    // handrails — two bent tubes on either side of the steps
+    function makeHandrail(xSide) {
+      const group = new THREE.Group();
+      const railMat = new THREE.MeshStandardMaterial({
+        color: 0xeeeae2, roughness: 0.45, metalness: 0.15
+      });
+
+      // vertical post at back
+      const postBack = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, 0.95, 10),
+        railMat
+      );
+      postBack.position.set(xSide, 0.48 + STEP_RISE * STEP_COUNT, backZ + 0.18);
+      group.add(postBack);
+
+      // vertical post at front
+      const postFront = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, 0.78, 10),
+        railMat
+      );
+      postFront.position.set(xSide, 0.39, backZ + STEP_DEPTH * STEP_COUNT + 0.35);
+      group.add(postFront);
+
+      // horizontal rail connecting them
+      const dx = 0;
+      const p1 = new THREE.Vector3(xSide, 0.95 + STEP_RISE * STEP_COUNT, backZ + 0.18);
+      const p2 = new THREE.Vector3(xSide, 0.78, backZ + STEP_DEPTH * STEP_COUNT + 0.35);
+      const len = p1.distanceTo(p2);
+      const rail = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.025, 0.025, len, 10),
+        railMat
+      );
+      rail.position.copy(p1).lerp(p2, 0.5);
+      rail.lookAt(p2);
+      rail.rotateX(Math.PI / 2);
+      group.add(rail);
+
+      return group;
+    }
+    scene.add(makeHandrail(-0.8));
+    scene.add(makeHandrail(0.8));
+
+    /* --------------------------- sky door --------------------------- */
+    // procedural cloud texture — soft cumulus on cyan
+    function makeCloudTex() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 1024;
+      const ctx = c.getContext('2d');
+
+      // sky gradient — XP Bliss style (deep blue top, pale horizon)
+      const g = ctx.createLinearGradient(0, 0, 0, 1024);
+      g.addColorStop(0.00, '#1a5fb1');
+      g.addColorStop(0.35, '#4a9de0');
+      g.addColorStop(0.65, '#87c5ea');
+      g.addColorStop(1.00, '#c8e4f0');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 512, 1024);
+
+
+      // puffy clouds — soft radial blobs (above the hills)
+      function cloudBlob(cx, cy, scale) {
+        for (let i = 0; i < 9; i++) {
+          const ox = cx + (Math.random()-0.5) * 120 * scale;
+          const oy = cy + (Math.random()-0.5) * 40 * scale;
+          const r  = (40 + Math.random()*70) * scale;
+          const gr = ctx.createRadialGradient(ox, oy, 0, ox, oy, r);
+          gr.addColorStop(0.0, 'rgba(255,255,255,0.95)');
+          gr.addColorStop(0.5, 'rgba(240,250,255,0.45)');
+          gr.addColorStop(1.0, 'rgba(255,255,255,0)');
+          ctx.fillStyle = gr;
+          ctx.fillRect(ox-r, oy-r, r*2, r*2);
+        }
+      }
+
+      cloudBlob(160, 180, 1.3);
+      cloudBlob(360, 300, 1.5);
+      cloudBlob(120, 440, 1.1);
+      cloudBlob(340, 550, 1.4);
+      cloudBlob(80,  80, 0.8);
+      cloudBlob(420, 130, 0.9);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const cloudTex = makeCloudTex();
+
+    // the glowing panel itself
+    const doorGeo = new THREE.PlaneGeometry(DOOR_W * 0.95, DOOR_H * 0.95);
+    const doorMat = new THREE.MeshBasicMaterial({
+      map: cloudTex,
+      toneMapped: false  // keep colors bright, let bloom handle it
+    });
+    const doorPanel = new THREE.Mesh(doorGeo, doorMat);
+    doorPanel.position.set(0, DOOR_H / 2, backZ + 0.01);
+    scene.add(doorPanel);
+
+    // frame around it — thin bright lines
+    const frameMat = new THREE.MeshBasicMaterial({ color: 0xcef6ff, toneMapped: false });
+    const frameThickness = 0.035;
+    const frameDepth = 0.02;
+
+    const fTop = new THREE.Mesh(
+      new THREE.BoxGeometry(DOOR_W * 0.95 + frameThickness*2, frameThickness, frameDepth),
+      frameMat
+    );
+    fTop.position.set(0, DOOR_H * 0.95, backZ + 0.02);
+    scene.add(fTop);
+
+    const fBot = new THREE.Mesh(
+      new THREE.BoxGeometry(DOOR_W * 0.95 + frameThickness*2, frameThickness, frameDepth),
+      frameMat
+    );
+    fBot.position.set(0, 0.02, backZ + 0.02);
+    scene.add(fBot);
+
+    const fLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(frameThickness, DOOR_H * 0.95, frameDepth),
+      frameMat
+    );
+    fLeft.position.set(-DOOR_W * 0.475, DOOR_H * 0.475, backZ + 0.02);
+    scene.add(fLeft);
+
+    const fRight = new THREE.Mesh(
+      new THREE.BoxGeometry(frameThickness, DOOR_H * 0.95, frameDepth),
+      frameMat
+    );
+    fRight.position.set(DOOR_W * 0.475, DOOR_H * 0.475, backZ + 0.02);
+    scene.add(fRight);
+
+    // a hidden bright plane just in front of the wall, slightly larger than the door,
+    // to give the soft halo bleed onto the wall when bloomed
+    const haloGeo = new THREE.PlaneGeometry(DOOR_W * 1.25, DOOR_H * 1.08);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0x7fd3ee,
+      transparent: true,
+      opacity: 0.18,
+      toneMapped: false,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    halo.position.set(0, DOOR_H / 2, backZ + 0.005);
+    scene.add(halo);
+
+    /* ---------------------------- lighting -------------------------- */
+    // very dim ambient — the room should feel dark, lit primarily by the door
+    scene.add(new THREE.AmbientLight(0x2a3038, 0.35));
+
+    // cyan light spilling out of the door onto floor and walls
+    const doorLight = new THREE.PointLight(0x7fd3ee, 6, 22, 1.8);
+    doorLight.position.set(0, DOOR_H * 0.55, backZ + 0.8);
+    doorLight.castShadow = true;
+    doorLight.shadow.mapSize.set(1024, 1024);
+    doorLight.shadow.radius = 6;
+    scene.add(doorLight);
+
+    // a faint warm ceiling source to keep the far end of the room readable
+    const roomFill = new THREE.PointLight(0xffe6c2, 0.45, 18, 2);
+    roomFill.position.set(0, ROOM_H - 0.4, ROOM_D * 0.25);
+    scene.add(roomFill);
+
+    /* ---------------------- first person controls ------------------- */
+    const controls = new PointerLockControls(camera, renderer.domElement);
+    scene.add(controls.getObject());
+
+    let touchDown = false;
+    const overlay = document.getElementById('overlay');
+    overlay.addEventListener('click', () => controls.lock());
+    // On mobile, dismiss overlay on touch and start walking
+    overlay.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      overlay.classList.add('hidden');
+      touchDown = true;
+    }, { passive: false });
+    controls.addEventListener('lock',   () => overlay.classList.add('hidden'));
+    controls.addEventListener('unlock', () => {
+      if (!transitioning) overlay.classList.remove('hidden');
+    });
+
+    const keys = { w:false, a:false, s:false, d:false, shift:false };
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyW' || e.code === 'ArrowUp')    keys.w = true;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft')  keys.a = true;
+      if (e.code === 'KeyS' || e.code === 'ArrowDown')  keys.s = true;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = true;
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true;
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyW' || e.code === 'ArrowUp')    keys.w = false;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft')  keys.a = false;
+      if (e.code === 'KeyS' || e.code === 'ArrowDown')  keys.s = false;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.d = false;
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = false;
+    });
+
+    /* ------------------------ movement + collide ------------------- */
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    const player = controls.getObject();
+    const SPEED = 3.6;
+    const RADIUS = 0.3;
+
+    // keep the player inside the room walls (except the door gap)
+    function collide(pos) {
+      const half = { x: ROOM_W/2 - RADIUS, z: ROOM_D/2 - RADIUS };
+      pos.x = Math.max(-half.x, Math.min(half.x, pos.x));
+
+      // back wall — allow passing through the door gap
+      const inDoorGap = Math.abs(pos.x) < DOOR_W/2 - RADIUS + 0.05;
+      if (!inDoorGap) {
+        pos.z = Math.max(-half.z, pos.z);
+      }
+      // always clamp front wall
+      pos.z = Math.min(half.z, pos.z);
+    }
+
+    /* -------------------- mobile touch-to-walk ---------------------- */
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      touchDown = true;
+      if (!controls.isLocked) {
+        document.getElementById('overlay').classList.add('hidden');
+      }
+    }, { passive: false });
+    renderer.domElement.addEventListener('touchend', () => { touchDown = false; });
+    renderer.domElement.addEventListener('touchcancel', () => { touchDown = false; });
+
+    /* -------------------- animated gif display --------------------- */
+    const GIF_EXTENSIONS = ['.gif', '.webp', '.png', '.jpg', '.jpeg'];
+    const gifSprites = [];
+
+    function makeGifSprite(url, baseScale) {
+      const holder = {
+        sprite: null, canvas: null, ctx: null, texture: null,
+        frames: [], durations: [], frameIdx: 0, elapsedMs: 0,
+      };
+      const mat = new THREE.SpriteMaterial({
+        transparent: true, depthWrite: false,
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(baseScale, baseScale, 1);
+      sprite.userData.baseScale = baseScale;
+      sprite.userData.loaded = false;
+      sprite.visible = false;
+      holder.sprite = sprite;
+
+      const ext = url.split('.').pop().toLowerCase();
+      const mime = ext === 'webp' ? 'image/webp'
+                 : ext === 'gif' ? 'image/gif'
+                 : ext === 'png' ? 'image/png'
+                 : 'image/jpeg';
+
+      // Fallback: parse GIF frames with gifuct-js (for iOS Safari, no ImageDecoder).
+      async function fallbackGifuct() {
+        try {
+          const resp = await fetch(encodeURI(url));
+          const buffer = await resp.arrayBuffer();
+          const gif = parseGIF(buffer);
+          const gifFrames = decompressFrames(gif, true);
+          if (gifFrames.length === 0) throw new Error('No frames');
+
+          const fw = gifFrames[0].dims.width;
+          const fh = gifFrames[0].dims.height;
+          const aspect = fw / fh;
+          sprite.scale.set(baseScale * aspect, baseScale, 1);
+
+          const maxDim = 256;
+          const canvas = document.createElement('canvas');
+          if (aspect >= 1) { canvas.width = maxDim; canvas.height = Math.max(1, Math.round(maxDim / aspect)); }
+          else { canvas.height = maxDim; canvas.width = Math.max(1, Math.round(maxDim * aspect)); }
+          const ctx = canvas.getContext('2d');
+
+          // Full-size temp canvas we composite frames onto, then scale into the main canvas
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = fw; tempCanvas.height = fh;
+          const tempCtx = tempCanvas.getContext('2d');
+
+          const drawFrame = (idx) => {
+            const frame = gifFrames[idx];
+            const imgData = tempCtx.createImageData(frame.dims.width, frame.dims.height);
+            imgData.data.set(frame.patch);
+            tempCtx.putImageData(imgData, frame.dims.left, frame.dims.top);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+          };
+
+          drawFrame(0);
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.magFilter = THREE.LinearFilter;
+          texture.minFilter = THREE.LinearFilter;
+          mat.map = texture;
+          mat.needsUpdate = true;
+
+          holder.canvas = canvas;
+          holder.ctx = ctx;
+          holder.texture = texture;
+          holder.frames = gifFrames;                                // length used by frame-count check
+          holder.durations = gifFrames.map(f => (f.delay || 100));  // ms per frame
+          holder._gifuctDraw = drawFrame;                           // animation driver uses this
+          sprite.visible = true;
+          sprite.userData.loaded = true;
+        } catch (e) {
+          console.warn('gifuct fallback failed', url, e.message);
+        }
+      }
+
+      (async () => {
+        if (typeof ImageDecoder === 'undefined') { fallbackGifuct(); return; }
+        try {
+          const resp = await fetch(encodeURI(url));
+          const buffer = await resp.arrayBuffer();
+          const decoder = new ImageDecoder({ data: buffer, type: mime });
+          await decoder.tracks.ready;
+          const track = decoder.tracks.selectedTrack;
+          const frameCount = track.frameCount || 1;
+
+          const first = await decoder.decode({ frameIndex: 0 });
+          const w = first.image.displayWidth;
+          const h = first.image.displayHeight;
+          const aspect = w / h;
+          sprite.scale.set(baseScale * aspect, baseScale, 1);
+
+          const maxDim = 256;
+          const canvas = document.createElement('canvas');
+          if (aspect >= 1) { canvas.width = maxDim; canvas.height = Math.max(1, Math.round(maxDim/aspect)); }
+          else { canvas.height = maxDim; canvas.width = Math.max(1, Math.round(maxDim*aspect)); }
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(first.image, 0, 0, canvas.width, canvas.height);
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.magFilter = THREE.LinearFilter;
+          texture.minFilter = THREE.LinearFilter;
+          mat.map = texture;
+          mat.needsUpdate = true;
+
+          holder.canvas = canvas;
+          holder.ctx = ctx;
+          holder.texture = texture;
+          holder.frames[0] = first.image;
+          holder.durations[0] = first.duration ? first.duration / 1000 : 100;
+          sprite.visible = true;
+          sprite.userData.loaded = true;
+
+          for (let i = 1; i < frameCount; i++) {
+            try {
+              const frame = await decoder.decode({ frameIndex: i });
+              holder.frames[i] = frame.image;
+              holder.durations[i] = frame.duration ? frame.duration / 1000 : 100;
+            } catch (e) { break; }
+          }
+        } catch (e) {
+          console.warn('gif decode failed, falling back', url, e.message);
+          fallbackGifuct();
+        }
+      })();
+
+      return holder;
+    }
+
+    // "ENTER" button gif floating in front of the door — fixed plane, not a sprite
+    // Using .gif version so gifuct-js can decode frame-by-frame on iOS Safari
+    const enterGif = makeGifSprite('gifs/metallic/enter.gif', 0.6);
+    gifSprites.push(enterGif);
+    // Once loaded, swap sprite for a fixed plane mesh
+    const enterCheck = setInterval(() => {
+      if (!enterGif.sprite.userData.loaded) return;
+      clearInterval(enterCheck);
+      const tex = enterGif.sprite.material.map;
+      const aspect = enterGif.sprite.scale.x / enterGif.sprite.scale.y || 1;
+      const h = 0.19, w = h * aspect;
+      const geo = new THREE.PlaneGeometry(w, h);
+      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(0, 1.7, -8.98);
+      mesh.userData = enterGif.sprite.userData;
+      scene.add(mesh);
+      enterGif.sprite = mesh;
+    }, 100);
+
+    /* ----------------------- WebXR touch-to-walk -------------------- */
+    const xrDolly = new THREE.Group();
+    xrDolly.add(camera);
+    scene.add(xrDolly);
+
+    let xrSelectActive = false;
+    const xrWalkDir = new THREE.Vector3();
+
+    renderer.xr.addEventListener('sessionstart', () => {
+      // Position dolly at player spawn
+      xrDolly.position.set(0, 0, 8);
+      camera.position.set(0, 1.65, 0);
+    });
+
+    const xrController = renderer.xr.getController(0);
+    xrController.addEventListener('selectstart', () => { xrSelectActive = true; });
+    xrController.addEventListener('selectend', () => { xrSelectActive = false; });
+    xrDolly.add(xrController);
+
+    function updateXRWalk(dt) {
+      if (!renderer.xr.isPresenting || !xrSelectActive) return;
+      camera.getWorldDirection(xrWalkDir);
+      xrWalkDir.y = 0;
+      xrWalkDir.normalize();
+      xrDolly.position.addScaledVector(xrWalkDir, SPEED * dt);
+
+      // Check door transition in XR
+      if (xrDolly.position.z < backZ + 0.2 && Math.abs(xrDolly.position.x) < DOOR_W / 2) {
+        triggerTransition();
+      }
+    }
+
+    /* --------------------- sky door transition --------------------- */
+    const NEXT_PAGE = 'webcore.html';
+
+    const fader = document.getElementById('fader');
+    let transitioning = false;
+
+    function triggerTransition() {
+      if (transitioning) return;
+      transitioning = true;
+
+      // pull camera toward and into the door for a short moment while fading
+      fader.classList.add('on');
+      // slow player and keep animating; the navigation happens after the fade
+      setTimeout(() => { window.location.href = NEXT_PAGE; }, 1200);
+    }
+
+    /* ---------------------------- animate --------------------------- */
+    const clock = new THREE.Clock();
+    function animate() {
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      // XR walk
+      if (renderer.xr.isPresenting) {
+        updateXRWalk(dt);
+      }
+
+      // gentle cloud drift
+      cloudTex.offset.y -= dt * 0.015;
+      cloudTex.offset.x += dt * 0.005;
+      cloudTex.needsUpdate = true;
+
+      // door light flickers very subtly
+      doorLight.intensity = 5.6 + Math.sin(performance.now() * 0.0017) * 0.2
+                                + Math.sin(performance.now() * 0.0061) * 0.12;
+
+      // Mobile touch: walk forward toward the door
+      if (touchDown && !transitioning && !controls.isLocked) {
+        const fwd = new THREE.Vector3(0, 0, -1); // always walk toward the door (-Z)
+        const next = player.position.clone().addScaledVector(fwd, SPEED * dt);
+        collide(next);
+        player.position.copy(next);
+        if (player.position.z < backZ + 0.2 && Math.abs(player.position.x) < DOOR_W/2) {
+          triggerTransition();
+        }
+      }
+
+      // Desktop movement
+      if (controls.isLocked && !transitioning) {
+        direction.set(0, 0, 0);
+        if (keys.w) direction.z -= 1;
+        if (keys.s) direction.z += 1;
+        if (keys.a) direction.x -= 1;
+        if (keys.d) direction.x += 1;
+        direction.normalize();
+
+        // move relative to camera yaw
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        forward.y = 0; forward.normalize();
+        const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).negate();
+
+        const speed = SPEED * (keys.shift ? 2 : 1);
+        velocity.set(0, 0, 0);
+        velocity.addScaledVector(forward, -direction.z * speed * dt);
+        velocity.addScaledVector(right,   -direction.x * speed * dt);
+
+        const next = player.position.clone().add(velocity);
+        collide(next);
+        player.position.copy(next);
+
+        // check if we've walked through the door
+        if (player.position.z < backZ + 0.2 && Math.abs(player.position.x) < DOOR_W/2) {
+          triggerTransition();
+        }
+      }
+
+      // while transitioning, drift forward through the door
+      if (transitioning) {
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        player.position.addScaledVector(forward, dt * 1.2);
+      }
+
+      // Animate gif frames
+      for (const g of gifSprites) {
+        if (!g.sprite.userData.loaded || !g.frames || g.frames.length <= 1) continue;
+        g.elapsedMs += dt * 1000;
+        let guard = 0;
+        while (g.elapsedMs >= (g.durations[g.frameIdx] || 100) && guard++ < 64) {
+          g.elapsedMs -= (g.durations[g.frameIdx] || 100);
+          g.frameIdx = (g.frameIdx + 1) % g.frames.length;
+          if (!g.frames[g.frameIdx]) { g.frameIdx = 0; break; }
+        }
+        if (g._gifuctDraw) {
+          // gifuct-js fallback — re-composite patch into the canvas
+          g._gifuctDraw(g.frameIdx);
+          g.texture.needsUpdate = true;
+        } else {
+          const frame = g.frames[g.frameIdx];
+          if (frame && g.ctx) {
+            g.ctx.clearRect(0, 0, g.canvas.width, g.canvas.height);
+            g.ctx.drawImage(frame, 0, 0, g.canvas.width, g.canvas.height);
+            g.texture.needsUpdate = true;
+          }
+        }
+      }
+
+      composer.render();
+    }
+    renderer.setAnimationLoop(animate);
+
+    /* ----------------------------- resize --------------------------- */
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+    // --- Settings panel ---
+    // About modal
+    document.getElementById('about-btn').addEventListener('click', () => {
+      document.getElementById('about-modal').classList.add('open');
+    });
+    document.querySelector('#about-modal .close-about').addEventListener('click', () => {
+      document.getElementById('about-modal').classList.remove('open');
+    });
+    document.getElementById('about-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+
+    // --- Custom XP-style overlay scrollbar for the about modal ---
+    (() => {
+      const body = document.querySelector('#about-modal .about-inner');
+      const bar = document.querySelector('#about-modal .about-scrollbar');
+      if (!body || !bar) return;
+      const thumb = bar.querySelector('.about-scrollbar-thumb');
+      const up = bar.querySelector('.about-scrollbar-up');
+      const down = bar.querySelector('.about-scrollbar-down');
+      const TRACK_INSET = 16;   // height of each button
+
+      function trackHeight() { return bar.clientHeight - TRACK_INSET * 2; }
+      function syncThumb() {
+        const sh = body.scrollHeight;
+        const ch = body.clientHeight;
+        if (sh <= ch) {
+          thumb.style.display = 'none';
+          return;
+        }
+        thumb.style.display = '';
+        const track = trackHeight();
+        const thumbH = Math.max(20, Math.min(track, (ch / sh) * track));
+        const maxScroll = sh - ch;
+        // Clamp scrollTop into [0, maxScroll] (iOS rubber-band can push past)
+        const st = Math.max(0, Math.min(maxScroll, body.scrollTop));
+        const pct = maxScroll > 0 ? st / maxScroll : 0;
+        const thumbTop = TRACK_INSET + pct * (track - thumbH);
+        thumb.style.height = thumbH + 'px';
+        thumb.style.top = thumbTop + 'px';
+      }
+      body.addEventListener('scroll', syncThumb);
+      new ResizeObserver(syncThumb).observe(body);
+      document.getElementById('about-btn').addEventListener('click', () => setTimeout(syncThumb, 50));
+
+      // Arrow buttons — scroll by ~30px
+      const STEP = 30;
+      up.addEventListener('click', () => { body.scrollTop -= STEP; });
+      down.addEventListener('click', () => { body.scrollTop += STEP; });
+      // Hold to repeat
+      function holdRepeat(el, dir) {
+        let iv = null;
+        const start = () => { body.scrollTop += dir * STEP; iv = setInterval(() => { body.scrollTop += dir * STEP; }, 80); };
+        const stop = () => { if (iv) { clearInterval(iv); iv = null; } };
+        el.addEventListener('mousedown', start);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); start(); }, { passive: false });
+        el.addEventListener('mouseup', stop);
+        el.addEventListener('mouseleave', stop);
+        el.addEventListener('touchend', stop);
+      }
+      holdRepeat(up, -1);
+      holdRepeat(down, 1);
+
+      // Drag the thumb to scrub
+      let dragging = false, dragStartY = 0, dragStartScroll = 0;
+      function onDragStart(clientY) {
+        dragging = true;
+        dragStartY = clientY;
+        dragStartScroll = body.scrollTop;
+      }
+      function onDragMove(clientY) {
+        if (!dragging) return;
+        const dy = clientY - dragStartY;
+        const track = trackHeight();
+        const thumbH = thumb.offsetHeight;
+        const maxThumbTravel = track - thumbH;
+        if (maxThumbTravel <= 0) return;
+        const maxScroll = body.scrollHeight - body.clientHeight;
+        const scrollDelta = (dy / maxThumbTravel) * maxScroll;
+        // Clamp so the thumb can't be dragged past the track ends
+        body.scrollTop = Math.max(0, Math.min(maxScroll, dragStartScroll + scrollDelta));
+      }
+      function onDragEnd() { dragging = false; }
+      thumb.addEventListener('mousedown', (e) => { e.preventDefault(); onDragStart(e.clientY); });
+      thumb.addEventListener('touchstart', (e) => { e.preventDefault(); onDragStart(e.touches[0].clientY); }, { passive: false });
+      window.addEventListener('mousemove', (e) => onDragMove(e.clientY));
+      window.addEventListener('touchmove', (e) => { if (dragging) { e.preventDefault(); onDragMove(e.touches[0].clientY); } }, { passive: false });
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('touchend', onDragEnd);
+
+      // Click the track area to page-jump
+      bar.addEventListener('mousedown', (e) => {
+        if (e.target === bar) {
+          const rect = bar.getBoundingClientRect();
+          const y = e.clientY - rect.top;
+          const thumbTop = parseFloat(thumb.style.top) || 0;
+          body.scrollTop += (y < thumbTop ? -1 : 1) * body.clientHeight * 0.9;
+        }
+      });
+
+      // Initial sync after layout
+      syncThumb();
+      window.addEventListener('resize', syncThumb);
+    })();
+
+    document.getElementById('settings-toggle').addEventListener('click', () => {
+      document.getElementById('settings-panel').classList.toggle('open');
+    });
+
+    window.__enterMesh = null;
+    const enterCheck2 = setInterval(() => {
+      if (!window.__enterMesh) {
+        // Find the enter mesh once it's swapped in
+        for (const g of gifSprites) {
+          if (g.sprite.isMesh) { window.__enterMesh = g.sprite; break; }
+        }
+        if (!window.__enterMesh) return;
+      }
+      clearInterval(enterCheck2);
+      const em = window.__enterMesh;
+      // Set slider defaults from actual position
+      document.getElementById('s-ex').value = em.position.x;
+      document.getElementById('v-ex').textContent = em.position.x.toFixed(1);
+      document.getElementById('s-ey').value = em.position.y;
+      document.getElementById('v-ey').textContent = em.position.y.toFixed(1);
+      document.getElementById('s-ez').value = em.position.z;
+      document.getElementById('v-ez').textContent = em.position.z.toFixed(1);
+    }, 200);
+
+    ['s-ex', 's-ey', 's-ez'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const em = window.__enterMesh;
+        if (!em) return;
+        em.position.set(
+          parseFloat(document.getElementById('s-ex').value),
+          parseFloat(document.getElementById('s-ey').value),
+          parseFloat(document.getElementById('s-ez').value)
+        );
+        document.getElementById('v-ex').textContent = parseFloat(document.getElementById('s-ex').value).toFixed(1);
+        document.getElementById('v-ey').textContent = parseFloat(document.getElementById('s-ey').value).toFixed(1);
+        document.getElementById('v-ez').textContent = parseFloat(document.getElementById('s-ez').value).toFixed(1);
+      });
+    });
+    document.getElementById('s-escale').addEventListener('input', (e) => {
+      const em = window.__enterMesh;
+      if (!em) return;
+      const s = parseFloat(e.target.value);
+      const aspect = em.geometry.parameters ? em.geometry.parameters.width / em.geometry.parameters.height : 2;
+      em.scale.set(s, s, 1);
+      document.getElementById('v-escale').textContent = s;
+    });
+    document.getElementById('btn-copy-enter').addEventListener('click', () => {
+      const em = window.__enterMesh;
+      if (!em) return;
+      const json = JSON.stringify({
+        x: em.position.x,
+        y: em.position.y,
+        z: em.position.z,
+        scale: parseFloat(document.getElementById('s-escale').value)
+      }, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        const btn = document.getElementById('btn-copy-enter');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy JSON', 1500);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~*~ WeLcOmE 2 My SiTe ~*~</title>
+<style>
+  /* ===== Y2K CURSORS ===== */
+  html, body {
+    cursor: url("gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp") 4 4, auto;
+  }
+  a, button, [role="button"], .win95-btn, .win95-titlebar, label, summary, select,
+  input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"],
+  .taskbar-item, .start-button, .close-btn, .min-btn, .max-btn {
+    cursor: url("gifs/cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp") 4 4, pointer !important;
+  }
+
+  /* ===== PIXEL SPARKLE BACKGROUND ===== */
+  @keyframes sparkle-bg {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+  @keyframes sparkle-bg2 {
+    0%, 100% { opacity: 0.2; }
+    30% { opacity: 1; }
+    70% { opacity: 0; }
+  }
+
+  :root {
+    /* Aero-pink palette (matches pink-desktop.html) */
+    --win-bg: rgba(255, 240, 248, 0.92);
+    --win-bg-solid: #fff0f8;
+    --win-title-blue: #cc6699;
+    --win-title-pink: #ff66aa;
+    --win-title-cyan: #cc4488;
+    --pastel-pink: #ffd1e8;
+    --pastel-blue: #ffe5f0;
+    --baby-blue: #ffb8d8;
+    --hot-pink: #ff66aa;
+    --electric-blue: #ff99cc;
+    --win-light: #ffe8f3;
+    --win-dark: #dd66aa;
+    --win-darkest: #aa3366;
+    --win-lightest: #fff;
+    --aero-shadow: 0 6px 18px rgba(255, 80, 150, 0.45);
+    --aero-border: 1.5px solid rgba(255, 110, 170, 0.95);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Custom cursor */
+  body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 0L0 14L4 10L7 16L9 15L6 9L11 9Z' fill='%23ffb6c1' stroke='%23000' stroke-width='1'/%3E%3C/svg%3E") 0 0, auto;
+    overflow-x: hidden;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    background-color: #ff66aa;
+    min-height: 100vh;
+  }
+
+  /* Sparkle tile background via SVG data URI */
+  .sparkle-wallpaper {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at 30% 20%, #ffd6ea 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 80%, #ffa0cf 0%, transparent 55%),
+      linear-gradient(135deg, #ffb3d9 0%, #ff77bb 100%);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M15 48l1-3 1 3 3 1-3 1-1 3-1-3-3-1z' fill='%23fff' opacity='0.6'/%3E%3Cpath d='M60 55l1-3 1 3 3 1-3 1-1 3-1-3-3-1z' fill='%23ffe0f0' opacity='0.7'/%3E%3Cpath d='M45 15l0.7-2 0.7 2 2 0.7-2 0.7-0.7 2-0.7-2-2-0.7z' fill='%23fff' opacity='0.55'/%3E%3Ccircle cx='10' cy='10' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='70' cy='15' r='1' fill='%23fff' opacity='0.5'/%3E%3Ccircle cx='25' cy='70' r='0.8' fill='%23fff' opacity='0.45'/%3E%3C/svg%3E"),
+      linear-gradient(135deg, #ffb3d9 0%, #ff77bb 100%);
+    background-repeat: repeat;
+    pointer-events: none;
+  }
+
+  /* Animated sparkle overlay */
+  .sparkle-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .sparkle-overlay .sparkle {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    animation: sparkle-bg 1.5s ease-in-out infinite;
+  }
+  .sparkle-overlay .sparkle::before,
+  .sparkle-overlay .sparkle::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+  }
+  .sparkle-overlay .sparkle::before {
+    width: 100%;
+    height: 1px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+  .sparkle-overlay .sparkle::after {
+    width: 1px;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .sparkle-overlay .sparkle.pink::before,
+  .sparkle-overlay .sparkle.pink::after { background: var(--hot-pink); }
+  .sparkle-overlay .sparkle.blue::before,
+  .sparkle-overlay .sparkle.blue::after { background: var(--electric-blue); }
+  .sparkle-overlay .sparkle.white::before,
+  .sparkle-overlay .sparkle.white::after { background: #fff; }
+
+  /* ===== MAIN COLLAGE CONTAINER ===== */
+  .collage {
+    position: relative;
+    z-index: 2;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ===== AERO-PINK WINDOW (Y2K Windows 7 style) ===== */
+  .win95-window {
+    background: var(--win-bg);
+    border: var(--aero-border);
+    border-radius: 10px;
+    box-shadow: var(--aero-shadow), inset 0 1px 0 rgba(255,255,255,0.85);
+    padding: 0;
+    font-size: 11px;
+    overflow: hidden;
+    backdrop-filter: blur(2px);
+  }
+  .win95-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    color: #4a1a36;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    user-select: none;
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    border-radius: 8px 8px 0 0;
+    position: relative;
+  }
+  .win95-titlebar::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
+    pointer-events: none;
+    border-radius: 8px 8px 0 0;
+  }
+  .titlebar-blue,
+  .titlebar-pink,
+  .titlebar-cyan,
+  .titlebar-purple,
+  .titlebar-hotpink {
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 40%, #ff9fcc 100%);
+  }
+  .titlebar-purple { background: linear-gradient(180deg, #ffe1f5 0%, #ffb3dd 40%, #dd66aa 100%); }
+  .titlebar-hotpink { background: linear-gradient(180deg, #ffd6ea 0%, #ff9fcc 40%, #ff66aa 100%); }
+  .titlebar-cyan { background: linear-gradient(180deg, #ffe8f3 0%, #ffc0db 40%, #ee88bb 100%); }
+
+  .titlebar-buttons {
+    display: flex;
+    gap: 3px;
+    position: relative;
+    z-index: 1;
+  }
+  .titlebar-btn {
+    width: 22px;
+    height: 18px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 3px;
+    font-size: 10px;
+    color: #4a1a36;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .titlebar-btn:hover { background: rgba(255,255,255,0.7); }
+  .titlebar-btn:last-child {
+    background: linear-gradient(180deg, #ff9999 0%, #dd3333 50%, #aa1111 100%);
+    color: #fff;
+    border: 1px solid #aa1111;
+    text-shadow: none;
+  }
+  .titlebar-btn:last-child:hover { background: linear-gradient(180deg, #ffaaaa 0%, #ee4444 50%, #bb2222 100%); }
+  .win95-body {
+    background: #fff5fa;
+    border: none;
+    border-top: 1px solid rgba(255, 110, 170, 0.4);
+    padding: 8px;
+    font-size: 11px;
+    color: #3a0a24;
+    min-height: 40px;
+  }
+
+  /* ===== WIN95 SCROLLBARS ===== */
+  .scrollbar-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Vertical scrollbar — pink Aero style */
+  .scrollbar-v {
+    width: 16px;
+    background: linear-gradient(90deg, #ffe5f0, #ffd1e8);
+    border-left: 1px solid rgba(255, 110, 170, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .scrollbar-v.pink-scroll {
+    background: linear-gradient(90deg, #ffd6ea, #ffb8d8);
+  }
+  .scrollbar-v.blue-scroll {
+    background: linear-gradient(90deg, #ffe8f3, #ffc9e0);
+  }
+  .scroll-arrow {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(180deg, #ffe8f3, #ff9fcc);
+    border: 1px solid rgba(255,110,170,0.7);
+    border-radius: 3px;
+    color: #aa3366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .scroll-arrow.pink-arrow { background: linear-gradient(180deg, #ffd6ea, #ff77bb); }
+  .scroll-arrow.blue-arrow { background: linear-gradient(180deg, #ffe8f3, #ee88bb); }
+  .scroll-thumb {
+    width: 14px;
+    height: 30px;
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+    border: 1px solid rgba(255,110,170,0.85);
+    border-radius: 4px;
+    margin: 1px;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .scroll-thumb.pink-thumb { background: linear-gradient(180deg, #ffd6ea 0%, #ffa0cf 50%, #ff66aa 100%); }
+  .scroll-thumb.blue-thumb { background: linear-gradient(180deg, #ffe8f3 0%, #ffb8d8 50%, #ee88bb 100%); }
+
+  /* Horizontal scrollbar */
+  .scrollbar-h {
+    height: 16px;
+    background: linear-gradient(180deg, #ffe5f0, #ffd1e8);
+    border-top: 1px solid rgba(255, 110, 170, 0.5);
+    display: flex;
+    align-items: center;
+  }
+  .scrollbar-h.pink-scroll {
+    background: linear-gradient(180deg, #ffd6ea, #ffb8d8);
+  }
+  .scrollbar-h.blue-scroll {
+    background: linear-gradient(180deg, #ffe8f3, #ffc9e0);
+  }
+  .scroll-arrow-h {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(180deg, #ffe8f3, #ff9fcc);
+    border: 1px solid rgba(255,110,170,0.7);
+    border-radius: 3px;
+    color: #aa3366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .scroll-thumb-h {
+    width: 30px;
+    height: 14px;
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+    border: 1px solid rgba(255,110,170,0.85);
+    border-radius: 4px;
+    margin: 1px;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+
+  /* ===== COLLAGE ITEMS ===== */
+  .collage-item {
+    break-inside: avoid;
+  }
+
+  /* Scrollbar-only collage pieces */
+  .scrollbar-piece {
+    display: flex;
+    gap: 0;
+  }
+  .scrollbar-piece.vertical {
+    flex-direction: row;
+    height: 120px;
+  }
+  .scrollbar-piece.horizontal {
+    flex-direction: column;
+    width: 100%;
+  }
+  .scrollbar-piece .scroll-track-v {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .scrollbar-piece .scroll-track-h {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+  }
+
+  /* Span items across grid */
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+  .span-row-2 { grid-row: span 2; }
+
+  /* ===== PIXEL ART FIRE ===== */
+  .fire-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 60px;
+    gap: 1px;
+    padding: 4px;
+  }
+  .fire-col {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1px;
+    width: 4px;
+  }
+  .fire-pixel {
+    width: 4px;
+    height: 4px;
+    animation: fire-flicker 0.3s ease-in-out infinite alternate;
+  }
+  @keyframes fire-flicker {
+    0% { opacity: 0.7; transform: scaleY(1); }
+    100% { opacity: 1; transform: scaleY(1.2); }
+  }
+
+  /* ===== MARQUEE TEXT ===== */
+  .marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+    background: linear-gradient(180deg, #4a1230, #2a0820);
+    padding: 4px 0;
+    border: 1px solid rgba(255,110,170,0.6);
+    border-radius: 4px;
+    box-shadow: inset 0 0 8px rgba(255,102,170,0.3);
+  }
+  .marquee-text {
+    display: inline-block;
+    animation: marquee-scroll 12s linear infinite;
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  @keyframes marquee-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ===== UNDER CONSTRUCTION ===== */
+  .under-construction {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #000;
+  }
+  .caution-stripe {
+    width: 20px;
+    height: 20px;
+    background: repeating-linear-gradient(
+      -45deg,
+      #ff0 0px, #ff0 4px,
+      #000 4px, #000 8px
+    );
+    flex-shrink: 0;
+    image-rendering: pixelated;
+  }
+
+  /* ===== VISITOR COUNTER ===== */
+  .visitor-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    font-size: 10px;
+  }
+  .counter-digits {
+    display: flex;
+    gap: 1px;
+  }
+  .counter-digit {
+    width: 14px;
+    height: 20px;
+    background: linear-gradient(180deg, #2a0820, #4a1230);
+    color: #ffaadd;
+    text-shadow: 0 0 4px #ff66aa, 0 0 2px #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,110,170,0.6);
+    border-radius: 2px;
+  }
+
+  /* ===== AERO PINK BUTTON ===== */
+  .win95-btn {
+    background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
+    border: 1px solid rgba(255,110,170,0.85);
+    border-radius: 6px;
+    padding: 4px 14px;
+    color: #4a1a36;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(255,80,150,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+    transition: all 0.12s;
+  }
+  .win95-btn:hover {
+    background: linear-gradient(180deg, #fff0f8 0%, #ffd6ea 50%, #ffb0d6 100%);
+    box-shadow: 0 3px 8px rgba(255,80,150,0.4), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .win95-btn:active {
+    background: linear-gradient(180deg, #ff9fcc 0%, #ffc9e0 50%, #ffe8f3 100%);
+    box-shadow: inset 0 2px 4px rgba(180,40,100,0.3);
+  }
+  .win95-btn.pink-btn { background: linear-gradient(180deg, #ffd6ea 0%, #ffa0cf 50%, #ff66aa 100%); color: #fff; text-shadow: 0 1px 2px rgba(180,40,100,0.6); }
+  .win95-btn.blue-btn { background: linear-gradient(180deg, #ffe8f3 0%, #ffb8d8 50%, #ee88bb 100%); }
+
+  /* ===== PIXEL CURSORS ===== */
+  .pixel-cursor-display {
+    image-rendering: pixelated;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* ===== ANIMATED GIF PLACEHOLDERS ===== */
+  .email-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #000;
+  }
+  .email-icon {
+    font-size: 16px;
+    animation: email-bounce 0.8s ease-in-out infinite;
+  }
+  @keyframes email-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  /* ===== BLINK TEXT ===== */
+  @keyframes blink-text {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .blink { animation: blink-text 1s step-end infinite; }
+
+  /* ===== STAR DIVIDER ===== */
+  .star-divider {
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--hot-pink);
+    padding: 2px 0;
+    user-select: none;
+  }
+
+  /* ===== WEBRING ===== */
+  .webring {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+    font-size: 9px;
+  }
+  .webring a {
+    color: #cc4488;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .webring a:hover { color: #ff66aa; }
+
+  /* ===== RAINBOW DIVIDER ===== */
+  .rainbow-bar {
+    height: 4px;
+    background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+    image-rendering: pixelated;
+  }
+
+  /* ===== AERO PINK TASKBAR ===== */
+  .taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 36px;
+    background: linear-gradient(180deg, #ffb3d9 0%, #ff99cc 50%, #ff77bb 100%);
+    border-top: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 -4px 12px rgba(255,80,150,0.35), inset 0 1px 0 rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    gap: 4px;
+  }
+  .start-btn {
+    background: linear-gradient(180deg, #9ee99e 0%, #4ebb4e 50%, #1f7a1f 100%);
+    border: 1.5px solid #115511;
+    border-radius: 18px;
+    padding: 4px 14px 4px 10px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,40,0,0.6);
+    font-weight: bold;
+    font-size: 13px;
+    font-family: "Comic Sans MS", "Segoe UI", sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 6px rgba(20,80,20,0.4);
+  }
+  .start-logo {
+    width: 16px;
+    height: 16px;
+    display: grid;
+    grid-template: 1fr 1fr / 1fr 1fr;
+    gap: 1px;
+  }
+  .start-logo div:nth-child(1) { background: #ff0000; }
+  .start-logo div:nth-child(2) { background: #00ff00; }
+  .start-logo div:nth-child(3) { background: #0000ff; }
+  .start-logo div:nth-child(4) { background: #ffff00; }
+
+  .taskbar-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 1px 0 0 rgba(180,40,100,0.3);
+    margin: 0 4px;
+  }
+  .taskbar-item {
+    background: rgba(255, 240, 248, 0.85);
+    border: 1px solid rgba(170, 51, 102, 0.6);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: #4a1a36;
+    font-size: 11px;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+  .taskbar-item:hover { background: rgba(255,255,255,0.95); }
+  .taskbar-clock {
+    margin-left: auto;
+    background: transparent;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(180,40,100,0.7);
+    border: none;
+    padding: 4px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+  }
+
+  /* ===== LINK STYLES ===== */
+  .retro-link {
+    color: #cc4488;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 10px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .retro-link:hover { color: #ff66aa; }
+
+  /* ===== MIDI NOTICE ===== */
+  .midi-notice {
+    font-size: 8px;
+    color: #666;
+    text-align: center;
+    padding: 2px;
+    font-style: italic;
+  }
+
+  /* ===== GEOCITIES STYLE EXTRAS ===== */
+  .cool-text {
+    font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    font-weight: bold;
+    -webkit-text-stroke: 0.5px #000;
+  }
+  .text-rainbow {
+    background: linear-gradient(90deg, #ff66aa, #ffaadd, #ff3388, #ffd6ea, #ff66aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: rainbow-shift 3s linear infinite;
+    text-shadow: 0 2px 8px rgba(255,80,150,0.4);
+  }
+  @keyframes rainbow-shift {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .win95-inset {
+    border: 1px solid rgba(255,110,170,0.5);
+    border-radius: 4px;
+    background: #fff5fa;
+    box-shadow: inset 0 2px 4px rgba(180,40,100,0.15);
+  }
+
+  /* ===== ROTATING ICON ===== */
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .spin { animation: spin-slow 4s linear infinite; display: inline-block; }
+
+  /* ===== AOL IM AWAY MSG ===== */
+  .away-msg {
+    font-family: 'Times New Roman', serif;
+    font-size: 11px;
+    color: #3a0a24;
+    padding: 8px;
+    line-height: 1.4;
+    background: #fff5fa;
+  }
+  .away-msg .screenname {
+    font-weight: bold;
+    color: #dd3388;
+  }
+
+  /* Bottom padding for taskbar */
+  .collage { padding-bottom: 40px; }
+
+  /* ===== HOURGLASS CURSOR PIXEL ART ===== */
+  .hourglass-cursor {
+    width: 16px;
+    height: 16px;
+    position: relative;
+  }
+
+  /* Window with scrollbar composite */
+  .window-with-scroll {
+    display: flex;
+  }
+  .window-with-scroll .win95-body {
+    flex: 1;
+    border-right: none;
+  }
+  .window-with-scroll .scrollbar-v {
+    height: auto;
+  }
+
+  /* ===== FLOATING ITEMS ===== */
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+  }
+  .float-gentle { animation: float-gentle 3s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<script>
+  // Click anywhere on the pink desktop → navigate to the next route (webcore.html).
+  // If we're inside the bedroom iframe, navigate the bedroom (parent) page so the user
+  // exits the monitor view; otherwise navigate this page directly.
+  document.addEventListener('click', () => {
+    const target = (window.parent && window.parent !== window) ? window.parent : window;
+    try {
+      target.location.href = 'webcore.html';
+    } catch (e) {
+      // Cross-origin fallback (shouldn't happen — both are served from the same origin)
+      window.location.href = 'webcore.html';
+    }
+  });
+</script>
+<style>
+  html, body { cursor: url("gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp") 4 4, auto; }
+  a, button, [role="button"], .win95-btn, .win95-titlebar, label, summary, select,
+  input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"],
+  .taskbar-item, .start-button, .close-btn, .min-btn, .max-btn {
+    cursor: url("gifs/cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp") 4 4, pointer !important;
+  }
+</style>
+
+<div class="sparkle-wallpaper"></div>
+<div class="sparkle-overlay" id="sparkleOverlay"></div>
+
+<div class="collage">
+
+  <!-- TITLE WINDOW -->
+  <div class="win95-window span-3">
+    <div class="win95-titlebar titlebar-pink">
+      <span>~*~ WeLcOmE 2 My SiTe ~*~</span>
+      <div class="titlebar-buttons">
+        <div class="titlebar-btn">_</div>
+        <div class="titlebar-btn">□</div>
+        <div class="titlebar-btn">×</div>
+      </div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div class="cool-text text-rainbow" style="font-size:16px;">★ ~ wElCoMe 2 mY hOmEpAgE ~ ★</div>
+      <div class="star-divider">✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦</div>
+      <div style="font-size:10px;font-family:'Comic Sans MS',cursive;">best viewed in 800x600 with Netscape Navigator 4.0</div>
+    </div>
+  </div>
+
+  <!-- SCROLLBAR CLUSTER: vertical pink -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-hotpink">
+      <span>scroll.exe</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div style="display:flex;height:100px;">
+      <div class="win95-body" style="flex:1;overflow:hidden;font-size:9px;line-height:1.3;">
+        <div>♡ scroll me ♡</div>
+        <div>line 2</div><div>line 3</div><div>line 4</div>
+        <div>line 5</div><div>line 6</div><div>line 7</div>
+      </div>
+      <div class="scrollbar-v pink-scroll" style="height:100px;">
+        <div class="scroll-arrow pink-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:4px;">
+          <div class="scroll-thumb pink-thumb"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIXEL FIRE WINDOW - Electric blue -->
+  <div class="win95-window span-2">
+    <div class="win95-titlebar titlebar-blue">
+      <span>fire.exe ☆</span>
+      <div class="titlebar-buttons">
+        <div class="titlebar-btn">_</div>
+        <div class="titlebar-btn">×</div>
+      </div>
+    </div>
+    <div class="win95-body" style="background:#000;padding:0;">
+      <canvas id="fireCanvas1" width="300" height="60" style="width:100%;height:60px;image-rendering:pixelated;"></canvas>
+    </div>
+  </div>
+
+  <!-- SCROLLBAR: blue vertical -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-cyan">
+      <span>files.txt</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div style="display:flex;height:90px;">
+      <div class="win95-body" style="flex:1;overflow:hidden;font-size:9px;">
+        <div>📁 My Documents</div>
+        <div>📁 My Pictures</div>
+        <div>📁 Cool Sites</div>
+        <div>📁 MIDI Files</div>
+        <div>📁 GeoCities BkUp</div>
+      </div>
+      <div class="scrollbar-v blue-scroll" style="height:90px;">
+        <div class="scroll-arrow blue-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="scroll-thumb blue-thumb"></div>
+        </div>
+        <div class="scroll-arrow blue-arrow">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISITOR COUNTER -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-purple">
+      <span>counter.cgi</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div style="font-size:9px;margin-bottom:4px;">You are visitor #</div>
+      <div class="counter-digits" style="justify-content:center;">
+        <div class="counter-digit">0</div>
+        <div class="counter-digit">0</div>
+        <div class="counter-digit">4</div>
+        <div class="counter-digit">8</div>
+        <div class="counter-digit">2</div>
+        <div class="counter-digit">7</div>
+      </div>
+      <div style="font-size:8px;margin-top:3px;color:#666;">since Nov 1999</div>
+    </div>
+  </div>
+
+  <!-- MARQUEE WINDOW -->
+  <div class="win95-window span-2">
+    <div class="win95-titlebar titlebar-hotpink">
+      <span>news_ticker.exe</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="marquee-container">
+      <div class="marquee-text" style="color:var(--hot-pink);">
+        ★ WeLcOmE ★ tHiS sItE iS uNdEr CoNsTrUcTiOn ★ sIgN mY gUeStBoOk ★ bEsT vIeWeD iN nEtScApE ★ aDd Me On AiM ★
+      </div>
+    </div>
+    <div class="marquee-container" style="margin-top:1px;">
+      <div class="marquee-text" style="color:var(--electric-blue);animation-duration:8s;animation-direction:reverse;">
+        ♡ ∗ ☆ ♡ ∗ ☆ cYbErSpAcE dReAmZ ☆ ∗ ♡ ☆ ∗ ♡ ☆ ∗ ♡
+      </div>
+    </div>
+  </div>
+
+  <!-- UNDER CONSTRUCTION -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-blue">
+      <span>warning.txt</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div class="under-construction">
+        <div class="caution-stripe"></div>
+        <span>UNDER<br>CONSTRUCTION</span>
+        <div class="caution-stripe"></div>
+      </div>
+      <div style="font-size:8px;color:#666;">last updated: 12/25/2001</div>
+    </div>
+  </div>
+
+  <!-- STANDALONE PINK SCROLLBAR x3 -->
+  <div class="win95-window" style="padding:2px;">
+    <div class="win95-titlebar titlebar-pink">
+      <span>scrollbars.dll</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div style="display:flex;gap:3px;padding:4px;background:var(--win-bg);height:110px;">
+      <div class="scrollbar-v pink-scroll" style="height:100%;">
+        <div class="scroll-arrow pink-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;">
+          <div class="scroll-thumb pink-thumb"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow">▼</div>
+      </div>
+      <div class="scrollbar-v blue-scroll" style="height:100%;">
+        <div class="scroll-arrow blue-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="scroll-thumb blue-thumb"></div>
+        </div>
+        <div class="scroll-arrow blue-arrow">▼</div>
+      </div>
+      <div class="scrollbar-v pink-scroll" style="height:100%;">
+        <div class="scroll-arrow pink-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;">
+          <div class="scroll-thumb pink-thumb"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow">▼</div>
+      </div>
+      <div class="scrollbar-v" style="height:100%;">
+        <div class="scroll-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:20px;">
+          <div class="scroll-thumb"></div>
+        </div>
+        <div class="scroll-arrow">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIXEL FIRE WINDOW - Hot Pink -->
+  <div class="win95-window span-2">
+    <div class="win95-titlebar titlebar-purple">
+      <span>♡ pink_fire.exe</span>
+      <div class="titlebar-buttons">
+        <div class="titlebar-btn">_</div>
+        <div class="titlebar-btn">×</div>
+      </div>
+    </div>
+    <div class="win95-body" style="background:#000;padding:0;">
+      <canvas id="fireCanvas2" width="300" height="60" style="width:100%;height:60px;image-rendering:pixelated;"></canvas>
+    </div>
+  </div>
+
+  <!-- CURSOR WINDOW -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-cyan">
+      <span>cursors.ani</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div class="pixel-cursor-display">
+        <svg width="20" height="20" viewBox="0 0 16 16" style="image-rendering:pixelated;">
+          <path d="M0 0L0 14L4 10L7 16L9 15L6 9L11 9Z" fill="#ffb6c1" stroke="#000" stroke-width="1"/>
+        </svg>
+        <svg width="20" height="20" viewBox="0 0 16 16" style="image-rendering:pixelated;">
+          <path d="M0 0L0 14L4 10L7 16L9 15L6 9L11 9Z" fill="#89CFF0" stroke="#000" stroke-width="1"/>
+        </svg>
+        <svg width="20" height="20" viewBox="0 0 16 16" style="image-rendering:pixelated;">
+          <path d="M0 0L0 14L4 10L7 16L9 15L6 9L11 9Z" fill="#00e5ff" stroke="#000" stroke-width="1"/>
+        </svg>
+        <svg width="20" height="20" viewBox="0 0 16 16" style="image-rendering:pixelated;">
+          <path d="M0 0L0 14L4 10L7 16L9 15L6 9L11 9Z" fill="#ff1493" stroke="#000" stroke-width="1"/>
+        </svg>
+      </div>
+      <div style="font-size:8px;color:#999;">cursor collection v2.0</div>
+    </div>
+  </div>
+
+  <!-- GUESTBOOK -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-pink">
+      <span>guestbook.html</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div style="font-size:11px;font-family:'Comic Sans MS',cursive;margin-bottom:4px;">✎ Sign my guestbook!</div>
+      <button class="win95-btn pink-btn">Sign!</button>
+      <div style="font-size:8px;margin-top:4px;color:#999;">38 signatures so far</div>
+    </div>
+  </div>
+
+  <!-- EMAIL ME -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-blue">
+      <span>email.lnk</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div class="email-badge">
+        <span class="email-icon">✉</span>
+        <span style="font-family:'Comic Sans MS',cursive;">email me!!</span>
+      </div>
+      <div class="retro-link" style="font-size:9px;">xX_cYbErAnGeL_Xx@aol.com</div>
+    </div>
+  </div>
+
+  <!-- LINKS PAGE -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-purple">
+      <span>links.html</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div style="display:flex;height:100px;">
+      <div class="win95-body" style="flex:1;font-size:9px;line-height:1.6;">
+        <div class="retro-link">→ Dollz Mania</div>
+        <div class="retro-link">→ Neopets</div>
+        <div class="retro-link">→ Hamster Dance</div>
+        <div class="retro-link">→ CoolText.com</div>
+        <div class="retro-link">→ Angelfire Pages</div>
+        <div class="retro-link">→ EZBoard Forums</div>
+      </div>
+      <div class="scrollbar-v pink-scroll" style="height:100px;">
+        <div class="scroll-arrow pink-arrow">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:12px;">
+          <div class="scroll-thumb pink-thumb"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HORIZONTAL SCROLLBAR PIECE -->
+  <div class="win95-window span-2">
+    <div class="win95-titlebar titlebar-cyan">
+      <span>h_scroll_demo.exe</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="padding:4px;">
+      <div class="scrollbar-h pink-scroll">
+        <div class="scroll-arrow-h" style="background:var(--pastel-pink);">◄</div>
+        <div style="flex:1;display:flex;align-items:center;padding-left:12px;">
+          <div class="scroll-thumb-h" style="background:var(--pastel-pink);border-top:1px solid var(--win-lightest);border-left:1px solid var(--win-lightest);border-right:1px solid var(--win-darkest);border-bottom:1px solid var(--win-darkest);"></div>
+        </div>
+        <div class="scroll-arrow-h" style="background:var(--pastel-pink);">►</div>
+      </div>
+      <div style="height:3px;"></div>
+      <div class="scrollbar-h blue-scroll">
+        <div class="scroll-arrow-h" style="background:var(--pastel-blue);">◄</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="scroll-thumb-h" style="background:var(--pastel-blue);border-top:1px solid var(--win-lightest);border-left:1px solid var(--win-lightest);border-right:1px solid var(--win-darkest);border-bottom:1px solid var(--win-darkest);"></div>
+        </div>
+        <div class="scroll-arrow-h" style="background:var(--pastel-blue);">►</div>
+      </div>
+      <div style="height:3px;"></div>
+      <div class="scrollbar-h">
+        <div class="scroll-arrow-h">◄</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;padding-right:20px;">
+          <div class="scroll-thumb-h"></div>
+        </div>
+        <div class="scroll-arrow-h">►</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIM WINDOW -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-hotpink">
+      <span>buddy list</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="font-size:9px;line-height:1.5;">
+      <div style="font-weight:bold;">Buddies (3/7)</div>
+      <div>&nbsp;&nbsp;🟢 xX_dArKaNgEl_Xx</div>
+      <div>&nbsp;&nbsp;🟢 sk8rboi2002</div>
+      <div>&nbsp;&nbsp;🟢 ~*PiXiEdUsT*~</div>
+      <div style="font-weight:bold;margin-top:2px;color:#999;">Offline (4/7)</div>
+    </div>
+  </div>
+
+  <!-- AWAY MESSAGE -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-blue">
+      <span>away_msg.txt</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="away-msg">
+      <span class="screenname">xX_cYbErAnGeL_Xx</span> is away:<br>
+      <span style="font-style:italic;">~*~ dOnT mEsS wItH mE ~*~<br>bRb PhOnE ☎</span>
+    </div>
+  </div>
+
+  <!-- WEBRING -->
+  <div class="win95-window span-2">
+    <div class="win95-titlebar titlebar-purple">
+      <span>webring.html</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div style="font-size:10px;font-weight:bold;margin-bottom:2px;">✿ The Pixel Dreams WebRing ✿</div>
+      <div class="webring">
+        <a>[ ← Prev ]</a>
+        <span>|</span>
+        <a>[ Random ]</a>
+        <span>|</span>
+        <a>[ Next → ]</a>
+      </div>
+      <div style="font-size:8px;color:#999;">this site owned by xX_cYbErAnGeL_Xx</div>
+    </div>
+  </div>
+
+  <!-- PIXEL FIRE 3 - Combined blue+pink -->
+  <div class="win95-window span-3">
+    <div class="win95-titlebar titlebar-hotpink">
+      <span>★ dual_fire.exe ★</span>
+      <div class="titlebar-buttons">
+        <div class="titlebar-btn">_</div>
+        <div class="titlebar-btn">□</div>
+        <div class="titlebar-btn">×</div>
+      </div>
+    </div>
+    <div class="win95-body" style="background:#000;padding:0;">
+      <canvas id="fireCanvas3" width="500" height="70" style="width:100%;height:70px;image-rendering:pixelated;"></canvas>
+    </div>
+  </div>
+
+  <!-- RAINBOW BAR -->
+  <div class="span-2" style="padding:4px 0;">
+    <div class="rainbow-bar"></div>
+    <div style="text-align:center;font-size:8px;color:#fff;font-family:'Comic Sans MS',cursive;margin-top:2px;">
+      <span class="blink">♡</span> tHaNkS 4 ViSiTiNg <span class="blink">♡</span>
+    </div>
+    <div class="rainbow-bar"></div>
+  </div>
+
+  <!-- MIDI PLAYER -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-cyan">
+      <span>midi_player.exe</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div style="font-size:9px;">♪ Now Playing: ♪</div>
+      <div style="font-size:10px;font-weight:bold;font-family:'Comic Sans MS',cursive;">crystal_dreamz.mid</div>
+      <div style="display:flex;gap:2px;justify-content:center;margin-top:4px;">
+        <button class="win95-btn" style="padding:1px 6px;font-size:9px;">◄◄</button>
+        <button class="win95-btn blue-btn" style="padding:1px 6px;font-size:9px;">▶</button>
+        <button class="win95-btn" style="padding:1px 6px;font-size:9px;">►►</button>
+        <button class="win95-btn" style="padding:1px 6px;font-size:9px;">■</button>
+      </div>
+      <div class="midi-notice">midi auto-play enabled</div>
+    </div>
+  </div>
+
+  <!-- MORE SCROLLBARS - dense cluster -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-pink">
+      <span>scroll_v3.dll</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div style="display:flex;gap:1px;padding:2px;background:var(--win-bg);height:90px;">
+      <div class="scrollbar-v pink-scroll" style="height:100%;">
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:4px;">
+          <div class="scroll-thumb pink-thumb" style="height:16px;"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▼</div>
+      </div>
+      <div class="scrollbar-v blue-scroll" style="height:100%;">
+        <div class="scroll-arrow blue-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="scroll-thumb blue-thumb" style="height:20px;"></div>
+        </div>
+        <div class="scroll-arrow blue-arrow" style="font-size:5px;">▼</div>
+      </div>
+      <div class="scrollbar-v pink-scroll" style="height:100%;">
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;">
+          <div class="scroll-thumb pink-thumb" style="height:24px;"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▼</div>
+      </div>
+      <div class="scrollbar-v" style="height:100%;">
+        <div class="scroll-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;">
+          <div class="scroll-thumb" style="height:18px;"></div>
+        </div>
+        <div class="scroll-arrow" style="font-size:5px;">▼</div>
+      </div>
+      <div class="scrollbar-v blue-scroll" style="height:100%;">
+        <div class="scroll-arrow blue-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+          <div class="scroll-thumb blue-thumb" style="height:14px;"></div>
+        </div>
+        <div class="scroll-arrow blue-arrow" style="font-size:5px;">▼</div>
+      </div>
+      <div class="scrollbar-v pink-scroll" style="height:100%;">
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▲</div>
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:30px;">
+          <div class="scroll-thumb pink-thumb" style="height:12px;"></div>
+        </div>
+        <div class="scroll-arrow pink-arrow" style="font-size:5px;">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPINNING ICON + BLINKIES -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-hotpink">
+      <span>blinkies.gif</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;font-size:9px;">
+      <div style="margin:4px 0;"><span class="spin" style="font-size:16px;">✦</span></div>
+      <div style="background:#000;color:var(--hot-pink);padding:2px 6px;display:inline-block;font-family:'Comic Sans MS',cursive;font-size:8px;border:1px solid var(--hot-pink);margin:2px;">♡ i luv html ♡</div>
+      <div style="background:#000;color:var(--electric-blue);padding:2px 6px;display:inline-block;font-family:'Comic Sans MS',cursive;font-size:8px;border:1px solid var(--electric-blue);margin:2px;">☆ pixel queen ☆</div>
+      <div style="background:#000;color:#ff69b4;padding:2px 6px;display:inline-block;font-family:'Comic Sans MS',cursive;font-size:8px;border:1px solid #ff69b4;margin:2px;">♡ 90s kid ♡</div>
+    </div>
+  </div>
+
+  <!-- ERROR DIALOG -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-blue">
+      <span>Error</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="font-size:24px;">⚠️</div>
+        <div style="font-size:10px;text-align:left;">This page is too<br>cute to close!</div>
+      </div>
+      <div style="display:flex;gap:4px;justify-content:center;">
+        <button class="win95-btn" style="font-size:10px;">OK</button>
+        <button class="win95-btn pink-btn" style="font-size:10px;">♡ Stay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NETSCAPE NOW -->
+  <div class="win95-window">
+    <div class="win95-titlebar titlebar-cyan">
+      <span>badge.html</span>
+      <div class="titlebar-buttons"><div class="titlebar-btn">×</div></div>
+    </div>
+    <div class="win95-body" style="text-align:center;font-size:9px;">
+      <div style="border:2px solid #000;display:inline-block;padding:3px 6px;margin:4px;background:linear-gradient(180deg,#fff,#ccc);">
+        <div style="font-weight:bold;font-size:10px;">NETSCAPE</div>
+        <div style="font-size:7px;">NOW!</div>
+      </div>
+      <div style="border:2px solid #000;display:inline-block;padding:3px 6px;margin:4px;background:linear-gradient(180deg,#e0e8ff,#c0c0ff);">
+        <div style="font-weight:bold;font-size:8px;">BEST VIEWED</div>
+        <div style="font-size:7px;">800×600</div>
+      </div>
+      <div style="border:2px solid var(--hot-pink);display:inline-block;padding:3px 6px;margin:4px;background:#000;color:var(--hot-pink);">
+        <div style="font-weight:bold;font-size:8px;">GeoCities</div>
+        <div style="font-size:7px;">FOREVER</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+  <button class="start-btn">
+    <div class="start-logo"><div></div><div></div><div></div><div></div></div>
+    Start
+  </button>
+  <div class="taskbar-divider"></div>
+  <div class="taskbar-item">🌐 Netscape Nav...</div>
+  <div class="taskbar-item">📁 My Computer</div>
+  <div class="taskbar-item" style="background:#c0c0e0;">💬 AIM</div>
+  <div class="taskbar-clock" id="taskbarClock">12:00 AM</div>
+</div>
+
+<script>
+// ===== SPARKLE OVERLAY =====
+(function() {
+  const overlay = document.getElementById('sparkleOverlay');
+  const colors = ['pink', 'blue', 'white'];
+  const count = 50;
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle ' + colors[Math.floor(Math.random() * colors.length)];
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    s.style.animationDuration = (1 + Math.random() * 2) + 's';
+    const size = 5 + Math.random() * 6;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    overlay.appendChild(s);
+  }
+})();
+
+// ===== PIXEL FIRE ENGINE =====
+function createFire(canvasId, palette) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const firePixels = new Array(w * h).fill(0);
+  const maxVal = palette.length - 1;
+
+  // seed bottom
+  function seed() {
+    for (let x = 0; x < w; x++) {
+      firePixels[(h - 1) * w + x] = Math.random() > 0.4 ? maxVal : Math.floor(Math.random() * maxVal * 0.6);
+    }
+  }
+
+  function step() {
+    for (let y = 0; y < h - 1; y++) {
+      for (let x = 0; x < w; x++) {
+        const src = (y + 1) * w + x;
+        const randX = Math.round(Math.random() * 2) - 1;
+        const decay = Math.round(Math.random() * 1.5);
+        const dst = y * w + Math.min(Math.max(x + randX, 0), w - 1);
+        firePixels[dst] = Math.max(0, firePixels[src] - decay);
+      }
+    }
+  }
+
+  function draw() {
+    const img = ctx.createImageData(w, h);
+    for (let i = 0; i < firePixels.length; i++) {
+      const c = palette[firePixels[i]];
+      img.data[i * 4] = c[0];
+      img.data[i * 4 + 1] = c[1];
+      img.data[i * 4 + 2] = c[2];
+      img.data[i * 4 + 3] = c[3];
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function loop() {
+    seed();
+    step();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// Electric blue fire palette
+const bluePalette = [];
+for (let i = 0; i < 37; i++) {
+  const t = i / 36;
+  let r, g, b, a;
+  if (t < 0.3) {
+    a = Math.floor(t / 0.3 * 255);
+    r = 0; g = 0; b = Math.floor(40 * t / 0.3);
+  } else if (t < 0.6) {
+    const u = (t - 0.3) / 0.3;
+    a = 255;
+    r = 0; g = Math.floor(180 * u); b = Math.floor(40 + 215 * u);
+  } else {
+    const u = (t - 0.6) / 0.4;
+    a = 255;
+    r = Math.floor(u * 100); g = Math.floor(180 + 75 * u); b = 255;
+  }
+  bluePalette.push([r, g, b, a]);
+}
+
+// Hot pink fire palette
+const pinkPalette = [];
+for (let i = 0; i < 37; i++) {
+  const t = i / 36;
+  let r, g, b, a;
+  if (t < 0.3) {
+    a = Math.floor(t / 0.3 * 255);
+    r = Math.floor(40 * t / 0.3); g = 0; b = Math.floor(20 * t / 0.3);
+  } else if (t < 0.6) {
+    const u = (t - 0.3) / 0.3;
+    a = 255;
+    r = Math.floor(40 + 215 * u); g = Math.floor(20 * u); b = Math.floor(20 + 127 * u);
+  } else {
+    const u = (t - 0.6) / 0.4;
+    a = 255;
+    r = 255; g = Math.floor(20 + 180 * u); b = Math.floor(147 + 108 * u);
+  }
+  pinkPalette.push([r, g, b, a]);
+}
+
+// Dual palette (alternating columns)
+const dualPalette = { blue: bluePalette, pink: pinkPalette };
+
+createFire('fireCanvas1', bluePalette);
+createFire('fireCanvas2', pinkPalette);
+
+// Special dual fire for canvas 3
+(function() {
+  const canvas = document.getElementById('fireCanvas3');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const firePixels = new Array(w * h).fill(0);
+  const maxVal = 36;
+
+  function seed() {
+    for (let x = 0; x < w; x++) {
+      firePixels[(h - 1) * w + x] = Math.random() > 0.4 ? maxVal : Math.floor(Math.random() * maxVal * 0.6);
+    }
+  }
+  function step() {
+    for (let y = 0; y < h - 1; y++) {
+      for (let x = 0; x < w; x++) {
+        const src = (y + 1) * w + x;
+        const randX = Math.round(Math.random() * 2) - 1;
+        const decay = Math.round(Math.random() * 1.5);
+        const dst = y * w + Math.min(Math.max(x + randX, 0), w - 1);
+        firePixels[dst] = Math.max(0, firePixels[src] - decay);
+      }
+    }
+  }
+  function draw() {
+    const img = ctx.createImageData(w, h);
+    const half = Math.floor(w / 2);
+    for (let i = 0; i < firePixels.length; i++) {
+      const x = i % w;
+      const pal = x < half ? bluePalette : pinkPalette;
+      const c = pal[firePixels[i]];
+      img.data[i * 4] = c[0];
+      img.data[i * 4 + 1] = c[1];
+      img.data[i * 4 + 2] = c[2];
+      img.data[i * 4 + 3] = c[3];
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function loop() { seed(); step(); draw(); requestAnimationFrame(loop); }
+  loop();
+})();
+
+// ===== CLOCK =====
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  document.getElementById('taskbarClock').textContent = h + ':' + m + ' ' + ampm;
+}
+updateClock();
+setInterval(updateClock, 30000);
+</script>
+
+</body>
+</html>
