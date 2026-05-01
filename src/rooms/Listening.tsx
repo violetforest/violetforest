@@ -1005,7 +1005,7 @@ export function Listening() {
   }, [])
 
   useEffect(() => {
-    const MIN_LOADING_MS = 2200
+    const MIN_LOADING_MS = 5000
     const start = performance.now()
     const finish = (fn: () => void) => {
       const elapsed = performance.now() - start
