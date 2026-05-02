@@ -1145,17 +1145,13 @@ export function Listening() {
     if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
   }, [tracks, activeIndex])
 
-  // Sync the SoundCloud widget to whatever cover is currently in front,
-  // using the SC Widget API so we don't reload (and re-autoplay) the iframe
-  // every time the user scrolls.
+  // Sync nowPlaying with the active cover. Updating the state forces React
+  // to re-render the iframe with a new src, which is treated by SoundCloud
+  // as a fresh load — bypassing the consent overlay that widget.load() would
+  // otherwise trigger on every track switch.
   useEffect(() => {
-    const iframe = iframeRef.current
     const track = tracks[activeIndex]
-    if (!iframe || !track) return
-    const SC = (window as any).SC
-    if (!SC?.Widget) return
-    const widget = SC.Widget(iframe)
-    widget.load(track.permalink_url, { auto_play: false, color: 'b8a8e0' })
+    if (track) setNowPlaying(track.permalink_url)
   }, [activeIndex, tracks])
 
   const activeTrack = tracks[activeIndex]
