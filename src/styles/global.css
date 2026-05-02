@@ -44,11 +44,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Frosted pink-tint backdrop — same vibe as the bedroom info modal
-     (rgba(255,80,150,0.30) blurred over the room). Approximated with a
-     soft radial pink so the page-load fade reads as that pink haze. */
-  background:
-    radial-gradient(ellipse at 50% 45%, #ff7eb3 0%, #c84a85 60%, #6a1f4a 100%);
+  background: #f0eaf5;
   color: #1a1a1a;
   font-family: Georgia, 'Times New Roman', serif;
   -webkit-font-smoothing: antialiased;
