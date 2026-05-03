@@ -808,7 +808,7 @@ function Scene({
 const LOADING_PHRASES = [
   'tuning in',
   'warming up the speakers',
-  'fetching favourites',
+  'fetching favorites',
   'dusting off the records',
 ]
 
