@@ -113,23 +113,26 @@
 				basePos = camera.position.clone();
 				fwd = new THREE.Vector3().subVectors( camTarget, basePos ).normalize();
 
-				// Driven mode = parent page sends scroll progress via postMessage.
-				// Standalone mode = wheel/touch listeners drive the camera directly.
-				var DRIVEN = /[?&]driven=1/.test( window.location.search );
+				// Always listen for parent-driven progress messages. If the page
+				// is loaded standalone the listener is a no-op.
+				window.addEventListener( 'message', function ( e ) {
+					if ( e.data && e.data.type === 'lipstick2-progress' ) {
+						var v = +e.data.value;
+						if ( v < 0 ) v = 0;
+						if ( v > 1 ) v = 1;
+						scrollDollyTarget = v * SCROLL_MAX;
+					}
+				} );
+				// Notify parent we're ready (no-op if no parent).
+				try {
+					if ( window.parent && window.parent !== window ) {
+						window.parent.postMessage( { type: 'lipstick2-ready' }, '*' );
+					}
+				} catch ( e ) {}
 
-				if ( DRIVEN ) {
-					window.addEventListener( 'message', function ( e ) {
-						if ( e.data && e.data.type === 'lipstick2-progress' ) {
-							var v = +e.data.value;
-							if ( v < 0 ) v = 0;
-							if ( v > 1 ) v = 1;
-							// progress 0 → SCROLL_MIN-ish (start back), 1 → SCROLL_MAX (end forward)
-							scrollDollyTarget = v * SCROLL_MAX;
-						}
-					} );
-					// notify parent we're ready
-					try { window.parent.postMessage( { type: 'lipstick2-ready' }, '*' ); } catch ( e ) {}
-				} else {
+				// Standalone wheel/touch listeners. Skipped when in an iframe so
+				// they don't fight with the parent page's scroll.
+				if ( window.parent === window ) {
 					window.addEventListener( 'wheel', function ( e ) {
 						e.preventDefault();
 						scrollDollyTarget += e.deltaY * 0.5;
@@ -469,8 +472,9 @@
 
 			// ============ CAMERA SETTINGS PANEL ============
 			(function buildCamPanel() {
-				// Hide panel entirely when the page is driven by a parent (public-facing).
-				if ( /[?&]driven=1/.test( window.location.search ) ) {
+				// Hide panel entirely when the page is embedded in a parent
+				// (public-facing) — same intent as the old ?driven=1 check.
+				if ( window.parent !== window ) {
 					var p = document.getElementById('cam-panel');
 					if ( p ) p.style.display = 'none';
 					return;

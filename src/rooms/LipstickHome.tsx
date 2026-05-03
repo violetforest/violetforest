@@ -83,7 +83,7 @@ function LipstickTunnel({ scrollProgress }: { scrollProgress: number }) {
     <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', zIndex: 2, background: '#000' }}>
       <iframe
         ref={iframeRef}
-        src={`${import.meta.env.BASE_URL}lipstick-2/index.html?driven=1`}
+        src={`${import.meta.env.BASE_URL}lipstick-2/index.html`}
         title="lipstick-2"
         style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
       />
