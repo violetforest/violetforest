@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>leaving instagram — violet forest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  @page { size: 1080px 1350px; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; background: #000; color: #d8c5ff; font-family: 'VT323', monospace; }
+  body { font-size: 36px; line-height: 1.45; }
+
+  .slide {
+    position: relative;
+    width: 1080px;
+    height: 1350px;
+    overflow: hidden;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 90px 110px;
+    background:
+      radial-gradient(ellipse at 50% 25%, rgba(255, 126, 179, 0.35) 0%, rgba(200, 74, 133, 0.15) 35%, rgba(0,0,0,0) 70%),
+      radial-gradient(ellipse at 80% 90%, rgba(136, 68, 255, 0.30) 0%, rgba(0,0,0,0) 60%),
+      radial-gradient(ellipse at 10% 80%, rgba(136, 68, 255, 0.18) 0%, rgba(0,0,0,0) 55%),
+      #050008;
+  }
+  .slide:last-child { page-break-after: auto; }
+
+  /* twinkly star particles */
+  .star {
+    position: absolute;
+    color: #ffd1ec;
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 6px #ff7eb3, 0 0 12px rgba(255,126,179,0.6);
+    pointer-events: none;
+  }
+  .star.violet { color: #c9a8ff; text-shadow: 0 0 6px #8844ff, 0 0 14px rgba(136,68,255,0.7); }
+
+  /* CRT scanline overlay */
+  .slide::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0) 4px
+    );
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* dotted frame like old web */
+  .frame {
+    position: absolute;
+    inset: 36px;
+    border: 2px dashed rgba(216, 197, 255, 0.35);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .corner {
+    position: absolute;
+    color: #ff7eb3;
+    font-size: 26px;
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 6px rgba(255,126,179,0.8);
+    z-index: 3;
+  }
+  .corner.tl { top: 28px; left: 36px; }
+  .corner.tr { top: 28px; right: 36px; }
+  .corner.bl { bottom: 28px; left: 36px; }
+  .corner.br { bottom: 28px; right: 36px; }
+
+  .meta {
+    position: absolute;
+    top: 60px; left: 110px; right: 110px;
+    display: flex; justify-content: space-between;
+    color: #8844ff;
+    font-family: 'VT323', monospace;
+    font-size: 26px;
+    letter-spacing: 1px;
+    z-index: 4;
+  }
+  .meta .url { color: #ff7eb3; }
+
+  .pageno {
+    position: absolute;
+    bottom: 60px; left: 110px; right: 110px;
+    display: flex; justify-content: space-between;
+    color: rgba(216,197,255,0.55);
+    font-size: 24px;
+    z-index: 4;
+  }
+
+  .content { position: relative; z-index: 4; }
+
+  h1.title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 78px;
+    line-height: 1.15;
+    color: #ffffff;
+    text-shadow:
+      3px 3px 0 #8844ff,
+      6px 6px 0 #ff3aa0,
+      0 0 30px rgba(255,126,179,0.6);
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+  }
+  h1.title .small { display: block; font-size: 34px; margin-top: 18px; color: #ffd1ec; text-shadow: 2px 2px 0 #8844ff; }
+
+  h2.heading {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 38px;
+    color: #ffffff;
+    text-shadow: 2px 2px 0 #8844ff, 4px 4px 0 #ff3aa0;
+    margin-bottom: 36px;
+    line-height: 1.3;
+    letter-spacing: 1px;
+  }
+
+  .reason-num {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 120px;
+    color: transparent;
+    -webkit-text-stroke: 2px #ff7eb3;
+    text-shadow: 0 0 24px rgba(255,126,179,0.45);
+    margin-bottom: 24px;
+    letter-spacing: 4px;
+  }
+
+  p.body {
+    font-size: 42px;
+    line-height: 1.5;
+    color: #e8dcff;
+    margin-bottom: 22px;
+  }
+  p.body em { color: #ff7eb3; font-style: normal; }
+  p.body .vio { color: #c9a8ff; }
+
+  .marquee {
+    position: absolute;
+    bottom: 130px; left: 0; right: 0;
+    text-align: center;
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: rgba(255, 126, 179, 0.7);
+    z-index: 4;
+    letter-spacing: 4px;
+  }
+
+  .center { text-align: center; }
+  .center h1.title { text-align: center; }
+  .center p.body { text-align: center; }
+
+  .signature {
+    margin-top: 60px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    color: #ff7eb3;
+    text-shadow: 2px 2px 0 #8844ff;
+    letter-spacing: 2px;
+  }
+
+  .url-big {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 56px;
+    color: #ffffff;
+    text-shadow: 3px 3px 0 #8844ff, 6px 6px 0 #ff3aa0, 0 0 24px rgba(255,126,179,0.6);
+    letter-spacing: 2px;
+    margin: 30px 0;
+  }
+
+  .blink-line {
+    display: inline-block;
+    width: 18px;
+    height: 42px;
+    background: #ff7eb3;
+    vertical-align: middle;
+    margin-left: 4px;
+    box-shadow: 0 0 12px #ff7eb3;
+  }
+
+  .ascii-heart {
+    font-family: 'VT323', monospace;
+    color: #ff7eb3;
+    font-size: 28px;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(255,126,179,0.7);
+    white-space: pre;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 2px solid #8844ff;
+    border-radius: 999px;
+    color: #c9a8ff;
+    font-size: 26px;
+    margin-right: 10px;
+    box-shadow: 0 0 12px rgba(136,68,255,0.4) inset;
+  }
+
+  .grid-3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    grid-auto-rows: 110px;
+    gap: 6px;
+    margin-bottom: 28px;
+    border: 2px solid rgba(216,197,255,0.25);
+    padding: 6px;
+    width: max-content;
+  }
+  .grid-3x3 .cell {
+    background:
+      linear-gradient(135deg, rgba(255,126,179,0.4), rgba(136,68,255,0.4)),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0 6px, rgba(0,0,0,0) 6px 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.55);
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .grid-3x3 .cell::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);
+  }
+  .grid-3x3 .cell.x { background: #100018; color: #ff7eb3; font-size: 44px; }
+
+  .ribbon {
+    display: inline-block;
+    padding: 8px 22px;
+    background: #ff3aa0;
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    letter-spacing: 2px;
+    box-shadow: 4px 4px 0 #8844ff;
+    margin-bottom: 28px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1: COVER ============ -->
+<section class="slide center">
+  <div class="frame"></div>
+  <div class="corner tl">+ + + +</div>
+  <div class="corner tr">+ + + +</div>
+  <div class="corner bl">~ ~ ~ ~</div>
+  <div class="corner br">~ ~ ~ ~</div>
+
+  <div class="star" style="top:140px;left:140px;font-size:48px;">✦</div>
+  <div class="star violet" style="top:200px;right:180px;font-size:36px;">✧</div>
+  <div class="star" style="top:340px;right:120px;font-size:28px;">✦</div>
+  <div class="star violet" style="bottom:300px;left:120px;font-size:42px;">✧</div>
+  <div class="star" style="bottom:220px;right:200px;font-size:32px;">✦</div>
+  <div class="star violet" style="top:520px;left:90px;font-size:24px;">·</div>
+  <div class="star" style="top:680px;right:80px;font-size:32px;">✦</div>
+  <div class="star violet" style="bottom:420px;left:240px;font-size:28px;">✧</div>
+
+  <div class="meta">
+    <span>&gt; loading_post.exe</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content">
+    <div class="ribbon">a goodbye letter</div>
+    <h1 class="title">
+      i'm leaving<br/>instagram
+      <span class="small">(◕‿◕✿) ♡ moving home ♡</span>
+    </h1>
+    <p class="body" style="font-size:36px;color:#c9a8ff;">
+      swipe →&nbsp;&nbsp;four reasons<br/>+ where to find me
+    </p>
+  </div>
+
+  <div class="marquee">★ ・ﾟ: *✧･ﾟ:* the indie web is calling *:･ﾟ✧*:･ﾟ★</div>
+  <div class="pageno"><span>01 / 06</span><span>♡ violet forest ♡</span></div>
+</section>
+
+<!-- ============ SLIDE 2: REASON 1 ============ -->
+<section class="slide">
+  <div class="frame"></div>
+  <div class="corner tl">[ 01 ]</div>
+  <div class="corner tr">+ + + +</div>
+  <div class="corner bl">~ ~ ~ ~</div>
+  <div class="corner br">[ ※ ]</div>
+
+  <div class="star violet" style="top:160px;right:200px;font-size:40px;">✧</div>
+  <div class="star" style="top:300px;left:140px;font-size:28px;">✦</div>
+  <div class="star violet" style="bottom:340px;right:140px;font-size:36px;">✧</div>
+  <div class="star" style="bottom:480px;left:90px;font-size:24px;">·</div>
+
+  <div class="meta">
+    <span>&gt; reason_01.txt</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content" style="padding-top:30px;">
+    <div class="grid-3x3" aria-hidden="true" style="margin-bottom:20px;">
+      <div class="cell">·</div><div class="cell">·</div><div class="cell">·</div>
+      <div class="cell">·</div><div class="cell x">✕</div><div class="cell">·</div>
+      <div class="cell">·</div><div class="cell">·</div><div class="cell">·</div>
+    </div>
+    <div class="reason-num" style="font-size:90px; margin-bottom:14px;">01.</div>
+    <h2 class="heading" style="font-size:34px; margin-bottom:26px;">the perfect grid<br/>was a performance.</h2>
+    <p class="body" style="font-size:36px; margin-bottom:18px;">
+      i've always hated <em>performing</em> &mdash; feeling like i had to
+      <em>prove something</em> with a perfectly curated grid.
+    </p>
+    <p class="body" style="font-size:36px; margin-bottom:18px;">
+      <span class="vio">but</span> it was a good practice. it taught me to see how
+      my work fits together &mdash; the <em>themes that surmise</em>.
+    </p>
+    <p class="body" style="font-size:36px;">
+      i'm taking <em>that</em> with me. leaving the rest.
+    </p>
+  </div>
+
+  <div class="pageno"><span>02 / 06</span><span>♡ reason one ♡</span></div>
+</section>
+
+<!-- ============ SLIDE 3: REASON 2 ============ -->
+<section class="slide">
+  <div class="frame"></div>
+  <div class="corner tl">[ 02 ]</div>
+  <div class="corner tr">~ ~ ~ ~</div>
+  <div class="corner bl">+ + + +</div>
+  <div class="corner br">[ ✦ ]</div>
+
+  <div class="star" style="top:180px;left:160px;font-size:36px;">✦</div>
+  <div class="star violet" style="top:380px;right:120px;font-size:42px;">✧</div>
+  <div class="star" style="bottom:300px;right:240px;font-size:28px;">✦</div>
+  <div class="star violet" style="bottom:520px;left:120px;font-size:24px;">·</div>
+
+  <div class="meta">
+    <span>&gt; reason_02.txt</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content">
+    <div style="margin-bottom:30px;">
+      <span class="pill">indieweb</span>
+      <span class="pill">RSS</span>
+      <span class="pill">webmentions</span>
+    </div>
+    <div class="reason-num">02.</div>
+    <h2 class="heading">moving everything<br/>back home.</h2>
+    <p class="body">
+      i've always dreamed of bringing <em>all my data</em>
+      to my own homepage &mdash; and joining the
+      <em>"indie web."</em>
+    </p>
+    <p class="body">
+      a place, not a platform. <span class="vio">no algorithm.</span>
+      <span class="vio">no ads.</span> <span class="vio">no harvest.</span>
+    </p>
+    <p class="body">
+      the site is the gallery. the site is the art.
+    </p>
+  </div>
+
+  <div class="pageno"><span>03 / 06</span><span>♡ reason two ♡</span></div>
+</section>
+
+<!-- ============ SLIDE 4: REASON 3 ============ -->
+<section class="slide">
+  <div class="frame"></div>
+  <div class="corner tl">[ 03 ]</div>
+  <div class="corner tr">[ ♡ ]</div>
+  <div class="corner bl">~ ~ ~ ~</div>
+  <div class="corner br">+ + + +</div>
+
+  <div class="star violet" style="top:140px;right:180px;font-size:44px;">✧</div>
+  <div class="star" style="top:300px;left:120px;font-size:32px;">✦</div>
+  <div class="star violet" style="bottom:380px;right:140px;font-size:36px;">✧</div>
+  <div class="star" style="bottom:240px;left:200px;font-size:28px;">✦</div>
+
+  <div class="meta">
+    <span>&gt; reason_03.txt</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content">
+    <pre class="ascii-heart" style="margin-bottom:20px;">
+   /\\__/\\   ♡ ♡ ♡   /\\__/\\
+  ( o.o  )           (  o.o )
+   &gt; ^ &lt;     &lt;3 &lt;3    &gt; ^ &lt;
+    </pre>
+    <div class="reason-num">03.</div>
+    <h2 class="heading">i miss the<br/>old internet.</h2>
+    <p class="body">
+      i want to go back to a time when webpages
+      <em>weren't</em> &mdash;
+    </p>
+    <p class="body">
+      <span class="vio">weren't surveillance.</span><br/>
+      <span class="vio">weren't engagement engines.</span><br/>
+      <span class="vio">weren't shaped like everyone else's.</span>
+    </p>
+    <p class="body">
+      i miss handmade pages. tiled backgrounds.
+      guestbooks. <em>weird little spaces</em> built
+      by one person.
+    </p>
+  </div>
+
+  <div class="pageno"><span>04 / 06</span><span>♡ reason three ♡</span></div>
+</section>
+
+<!-- ============ SLIDE 5: REASON 4 ============ -->
+<section class="slide">
+  <div class="frame"></div>
+  <div class="corner tl">[ 04 ]</div>
+  <div class="corner tr">+ + + +</div>
+  <div class="corner bl">[ ✿ ]</div>
+  <div class="corner br">~ ~ ~ ~</div>
+
+  <div class="star" style="top:160px;left:200px;font-size:40px;">✦</div>
+  <div class="star violet" style="top:320px;right:140px;font-size:36px;">✧</div>
+  <div class="star" style="bottom:360px;left:140px;font-size:28px;">✦</div>
+  <div class="star violet" style="bottom:200px;right:200px;font-size:44px;">✧</div>
+
+  <div class="meta">
+    <span>&gt; reason_04.txt</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content">
+    <div class="reason-num">04.</div>
+    <h2 class="heading">the next step<br/>of my evolution.</h2>
+    <p class="body">
+      it's just <em>time</em>.
+    </p>
+    <p class="body">
+      art only grows when the container changes.
+      this one stopped fitting.
+    </p>
+    <p class="body">
+      <span class="vio">→ new shape.</span><br/>
+      <span class="vio">→ new rhythm.</span><br/>
+      <span class="vio">→ new home.</span>
+    </p>
+    <p class="body" style="margin-top:30px;color:#ff7eb3;">
+      thank you for being here for the last one. ♡
+    </p>
+  </div>
+
+  <div class="pageno"><span>05 / 06</span><span>♡ reason four ♡</span></div>
+</section>
+
+<!-- ============ SLIDE 6: OUTRO ============ -->
+<section class="slide center">
+  <div class="frame"></div>
+  <div class="corner tl">+ + + +</div>
+  <div class="corner tr">[ ♡ ]</div>
+  <div class="corner bl">[ ✿ ]</div>
+  <div class="corner br">~ ~ ~ ~</div>
+
+  <div class="star" style="top:140px;left:160px;font-size:48px;">✦</div>
+  <div class="star violet" style="top:220px;right:200px;font-size:40px;">✧</div>
+  <div class="star" style="top:380px;right:120px;font-size:32px;">✦</div>
+  <div class="star violet" style="bottom:340px;left:140px;font-size:42px;">✧</div>
+  <div class="star" style="bottom:200px;right:180px;font-size:36px;">✦</div>
+  <div class="star violet" style="bottom:480px;right:300px;font-size:24px;">·</div>
+
+  <div class="meta">
+    <span>&gt; come_visit.exe</span>
+    <span class="url">violetforest.com</span>
+  </div>
+
+  <div class="content">
+    <div class="ribbon">find me here ♡</div>
+    <h1 class="title" style="font-size:64px;">come visit my space</h1>
+    <div class="url-big">violetforest.com<span class="blink-line"></span></div>
+    <p class="body" style="font-size:32px; color:#c9a8ff;">
+      ♡ feed &nbsp;·&nbsp; ♡ guestbook &nbsp;·&nbsp; ♡ stories<br/>
+      ♡ ask box &nbsp;·&nbsp; ♡ DMs &nbsp;·&nbsp; ♡ graveyards<br/>
+      <span style="color:#ff7eb3;">subscribe via RSS — no account required</span>
+    </p>
+    <div class="signature">— violet ♡</div>
+  </div>
+
+  <div class="marquee">★ ・ﾟ: *✧･ﾟ:* see you on the indie web *:･ﾟ✧*:･ﾟ★</div>
+  <div class="pageno"><span>06 / 06</span><span>♡ thank you ♡</span></div>
+</section>
+
+</body>
+</html>
