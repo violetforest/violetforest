@@ -1663,26 +1663,33 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-// --- Mobile: tap-and-hold the canvas to walk forward toward the chair ---
+// --- Mobile: tap anywhere (including the 3D monitor) to walk + auto-sit ---
 const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
 if (_isMobile) {
   // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
   const hint = document.getElementById('controls-hint');
   if (hint) hint.style.display = 'none';
-  const canvas = renderer.domElement;
   const isUI = (el) => {
     if (!el) return false;
-    if (el.closest && (el.closest('#about-btn') || el.closest('#about-modal') || el.closest('#desktop-overlay') || el.closest('#exit-sit'))) return true;
+    if (el.closest && (el.closest('#about-btn') || el.closest('#about-modal') || el.closest('#exit-sit'))) return true;
     return false;
   };
+  // Listen on window in capture phase so taps on the CSS3D monitor iframe
+  // (or any other transparent overlay element) still latch the walk.
   // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
-  canvas.addEventListener('touchstart', (e) => {
+  const onTap = (e) => {
     if (state !== 'walking') return;
     if (isUI(e.target)) return;
     e.preventDefault();
     touchDown = true;
-  }, { passive: false });
+  };
+  window.addEventListener('touchstart', onTap, { passive: false, capture: true });
+  // Fallback for environments that report PointerEvent but not TouchEvent.
+  window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'touch') return;
+    onTap(e);
+  }, { capture: true });
 }
 
 exitBtn.addEventListener('click', () => {
