@@ -309,13 +309,13 @@
   #about-btn {
     position: fixed; top: 14px; right: 14px; z-index: 200;
     background: linear-gradient(180deg, #ffe8f3, #ffc9e0);
-    border: 1px solid rgba(255, 110, 170, 0.9);
-    border-radius: 4px;
+    border: 2px solid rgba(255, 110, 170, 0.9);
+    border-radius: 8px;
     font-family: "Segoe UI", Tahoma, sans-serif;
-    font-size: 11px;
+    font-size: 22px;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 2px 6px;
+    letter-spacing: 1px;
+    padding: 4px 12px;
     cursor: pointer;
     pointer-events: auto;
     color: #4a1a36;
@@ -443,32 +443,7 @@
     <div class="about-inner">
       <h2>angel.html</h2>
       <div class="meta">by Violet Forest<br>2026<br>Browser, Three.js</div>
-      <p>Webcore is an internet aesthetic that grew up mostly on Tumblr in the late 2010s and early 2020s. Specific communities and archives there pulled early-web gifs and assets from the Internet Archive Wayback Machine, GeoCities, Angelfire, and Xanga, and started mashing them into dreamy, surreal compositions. Tumblr's reblog culture let the aesthetic spread fast through moodboards and themed blogs.</p>
-      <p>Webcore uses the visual and auditory language of the early internet (approximately 1995&ndash;2005) to evoke a sense of nostalgia&mdash;pixelated graphics, dated user interfaces, and the sounds of obsolete technology such as system notifications and dial-up modems. The aesthetic is predicated on the appropriation of obsolete internet artifacts&mdash;early-era animated GIFs, high-contrast browser windows, system-level error dialogues&mdash;placed into abstract voids or dreamlike contexts. Although it draws from historical sources, Webcore functions as a surrealist deconstruction of digital nostalgia.</p>
-      <p>Webcore developed as a reaction to the highly curated, centralized, and corporate nature of the modern internet. Its ethos is a nostalgic yearning for the perceived freedom and amateur creativity of the early web, before it was dominated by a few large social media platforms and algorithmic content feeds. The aesthetic romanticizes the period&rsquo;s utopian vision of the internet as a decentralized space for individual expression.</p>
-      <p>The visual style celebrates the rough-around-the-edges quality of early web design&mdash;clunky animations, low-resolution pixel art, glitter graphics, and the sharp-edged windows of dated operating systems. It embraces what was once considered poor design as a form of authentic, unfiltered creativity.</p>
-      <p style="font-size:10px;color:#884466;">Source: <a href="https://aesthetics.fandom.com/wiki/Webcore" target="_blank">Aesthetics Wiki &mdash; Webcore</a></p>
-      <div class="related">
-        <div class="related-title">Related aesthetics</div>
-        <ul class="related-list">
-          <li>2010s Meme Maximalism</li>
-          <li>Cybercore</li>
-          <li>Demoscene</li>
-          <li>Dreamcore</li>
-          <li>Frutiger Aero</li>
-          <li>Glitch Art</li>
-          <li>Glitchcore</li>
-          <li>Old Web</li>
-          <li>Silicon Dreams</li>
-          <li>TechnoNeko2000</li>
-          <li>Vaporwave</li>
-          <li>Weirdcore</li>
-          <li>Xpiritualism</li>
-          <li>Y2K Futurism</li>
-          <li>Yabujincore</li>
-        </ul>
-      </div>
-      <div class="credit">GIF collection sourced from <a href="https://oldwww.tumblr.com/" target="_blank">oldwww.tumblr.com</a>, a Tumblr dedicated to preserving early internet graphics and culture.</div>
+      <p>This artwork is about early-2000s girly web culture, and my own days on the internet as a preteen making dollz, blinkies, and eventually hand-coding my own MySpace profile.</p>
     </div>
   </div>
 </div>
@@ -727,37 +702,6 @@ function makePosterTex() {
       ctx.stroke();
     }
   }
-  drawHeart(128, 200, 56, '#ff66aa', '#ffffff');
-  // heart highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.beginPath();
-  ctx.ellipse(108, 175, 14, 8, -0.4, 0, Math.PI * 2);
-  ctx.fill();
-  // tiny smiley on the heart
-  ctx.fillStyle = '#3a0a24';
-  ctx.beginPath(); ctx.arc(118, 195, 2.2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(140, 195, 2.2, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#3a0a24';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(129, 205, 6, 0.1, Math.PI - 0.1); ctx.stroke();
-  // blush dots
-  ctx.fillStyle = 'rgba(255, 130, 170, 0.8)';
-  ctx.beginPath(); ctx.arc(112, 207, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(146, 207, 3, 0, Math.PI * 2); ctx.fill();
-
-  // bow on top of the heart
-  ctx.fillStyle = '#ff99cc';
-  ctx.beginPath();
-  ctx.ellipse(110, 138, 14, 10, -0.4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(146, 138, 14, 10, 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#cc4488';
-  ctx.beginPath();
-  ctx.arc(128, 142, 5, 0, Math.PI * 2);
-  ctx.fill();
-
   // mini hearts scattered
   drawHeart(40, 100, 10, '#ff8fc6', null);
   drawHeart(216, 90, 10, '#ff8fc6', null);
@@ -785,15 +729,6 @@ function makePosterTex() {
   drawSparkle(195, 290, 9, '#ffffff');
   drawSparkle(50, 200, 6, '#ffffff');
   drawSparkle(208, 215, 6, '#ffffff');
-
-  // title text — handwritten-ish
-  ctx.fillStyle = '#cc3380';
-  ctx.font = 'italic bold 24px "Comic Sans MS", "Chalkboard SE", cursive';
-  ctx.textAlign = 'center';
-  ctx.fillText('♡ princess ♡', 128, 50);
-  ctx.font = 'italic 11px "Comic Sans MS", "Chalkboard SE", cursive';
-  ctx.fillStyle = '#aa3366';
-  ctx.fillText('- sweet dreams -', 128, 70);
 
   // outer border (scalloped doubled line)
   ctx.strokeStyle = '#ffffff';
