@@ -180,7 +180,12 @@
     top: 50%;
     transform: translate(-50%, -50%);
     width: min(88vw, 1180px);
+    /* Use svh (small viewport height) so iOS Safari's URL bar doesn't push
+       the monitor up off-screen. Fallback to vh on older browsers. */
     height: min(74vh, 760px);
+    height: min(74svh, 760px);
+    max-height: calc(100vh - 80px);
+    max-height: calc(100svh - 80px);
     background: linear-gradient(180deg, #ffe8f3 0%, #ffc9e0 50%, #ff9fcc 100%);
     border-radius: 14px;
     padding: 22px 22px 52px 22px;
@@ -191,6 +196,17 @@
       0 0 80px rgba(255, 102, 204, 0.45),
       inset 0 1px 0 rgba(255,255,255,0.85),
       inset 0 -3px 8px rgba(180, 40, 100, 0.15);
+  }
+  @media (max-width: 640px) {
+    .monitor-frame {
+      width: 94vw;
+      height: min(80vh, 700px);
+      height: min(80svh, 700px);
+      max-height: calc(100vh - 60px);
+      max-height: calc(100svh - 60px);
+      padding: 14px 14px 36px 14px;
+      border-radius: 10px;
+    }
   }
   .monitor-frame::before {
     content: "";
