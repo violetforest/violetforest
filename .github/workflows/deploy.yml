@@ -24,7 +24,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: VITE_BUILD_ID="${GITHUB_SHA::8}" npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -3,6 +3,11 @@ import { motion } from 'framer-motion'
 import { NextRandomLink } from './NextRandomLink'
 import { NetArtInfo } from './NetArtInfo'
 
+// Cache-bust each iframe src so updated public/*.html files get re-fetched
+// instead of being served from the browser's HTTP cache. Computed once at
+// module load so all instances share the same value within a session.
+const CACHE_BUST = (import.meta.env.VITE_BUILD_ID as string | undefined) || Date.now().toString()
+
 export function NetArtIframe({
   src,
   title,
@@ -35,7 +40,7 @@ export function NetArtIframe({
       }}
     >
       <iframe
-        src={src}
+        src={src + (src.includes('?') ? '&' : '?') + 'v=' + CACHE_BUST}
         title={title}
         style={{
           position: 'absolute',
