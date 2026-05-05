@@ -1135,7 +1135,7 @@ const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
 const _isMobileSpawn = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _spawnZ = _isMobileSpawn ? -380 : -280;
+const _spawnZ = (_isMobileSpawn ? -380 : -280) - 10;
 camera.position.set(0, 8, _spawnZ);
 camera.lookAt(0, 12, -210);
 
@@ -3582,9 +3582,9 @@ const CHAT_PERSONAS = [
     name: "xX_dArKaNgEl_Xx",
     greet: "~*~ hEyYy ~*~",
     responses: {
-      default: ["wHaTcHa DoInG ?", "iM cOdInG mY hOmEpAgE LaYoUt RnNn", "ThE cSs Iz BrEaKiNg In My BrOwSeR uGh", "~*~ bRb pHoNe ☎ ~*~", "u WaNnA sIgN mY gUeStBoOk", "u In My ToP 8 ??", "i HiD tHe MaInStReAm ToP w/ A cOnTaInEr DiV ;)"],
+      default: ["wHaTcHa DoInG ?", "iM cOdInG mY hOmEpAgE LaYoUt RnNn", "ThE cSs Iz BrEaKiNg In My BrOwSeR uGh", "~*~ bRb pHoNe ☎ ~*~", "u WaNnA sIgN mY gUeStBoOk", "u In My ToP 8 ??"],
       hi: ["~*~ hIiI ~*~", "hEyY :)"],
-      default_mid: ["mY pAgE hAz ThE bEsT gLiTtEr", "wHaTs Ur ScReEn NaMe ?", "iM mAkInG a NeW bLiNkIe In MS pAiNt 💕", "i ToTaLlY sToLe ThIs ProFiLe CoDe FrOm A tUtOrIaL sItE"],
+      default_mid: ["mY pAgE hAz ThE bEsT gLiTtEr", "i ToTaLlY sToLe ThIs ProFiLe CoDe FrOm A tUtOrIaL sItE"],
     }
   },
   {
@@ -3600,18 +3600,18 @@ const CHAT_PERSONAS = [
     name: "~*PiXiEdUsT*~",
     greet: "✨ hIiIiI ✨",
     responses: {
-      default: ["✨💖✨💖✨", "u LiKe My GlItTeR gIfS ??", "mY bG mUsIc Iz A .mIdI fIlE", "iM mAkInG a BlInKiE iN pHoToShOp 💖", "AdD mE tO uR tOp FrIeNdS !!", "hElP mE pIcK a PrOfIlE SoNg Pls"],
+      default: ["✨💖✨💖✨", "u LiKe My GlItTeR gIfS ??", "mY bG mUsIc Iz A .mIdI fIlE", "iM mAkInG a NeW bLiNkIe RnNn 💖", "AdD mE tO uR tOp FrIeNdS !!", "hElP mE pIcK a PrOfIlE SoNg Pls"],
       hi: ["💖✨ hIiIi ✨💖", "oH hAi :3"],
-      default_mid: ["i CoLlEcT mY tInY pEtS", "I jOiNeD a CuTeNeSs WeBrInG ✨", "mY mY pIxEl PeTs R sTaRvInG", "i LoVe U 💕"],
+      default_mid: ["I jOiNeD a CuTeNeSs WeBrInG ✨", "i LoVe U 💕"],
     }
   },
   {
     name: "xX_cYbErAnGeL_Xx",
     greet: "♡ hIiI bAbE ♡",
     responses: {
-      default: ["i JuSt PaInTeD mY nAiLs PiNk 💅", "uR sO pReTtY oMg", "lIsTeNiNg To My GiRl PoP qUeEn rN ♡", "wAnNa SwAp JoUrNaL pAsSwOrDs ??", "wHaTs Ur AsL", "I cAnT gEt My PrOfIlE DiV oVeRlAy To StIcK uGh 😩"],
+      default: ["uR sO pReTtY oMg", "lIsTeNiNg To My GiRl PoP qUeEn rN ♡", "wHaTs Ur AsL", "I cAnT gEt My PrOfIlE DiV oVeRlAy To StIcK uGh 😩"],
       hi: ["♡ hEyYy GiRlIeE ♡", "oMg HiIi"],
-      default_mid: ["mY rOoM iZ aLl PiNk NoW ✨", "iM mAkInG a HeArT bLiNkIe FoR uS 💞", "i FiNiShEd My PiNk FuR sCrUnChIe CoLlEcTiOn 🎀"],
+      default_mid: ["iM mAkInG a HeArT bLiNkIe FoR uS 💞"],
     }
   },
   {
@@ -3629,41 +3629,41 @@ const CHAT_PERSONAS = [
     responses: {
       default: ["i WaTcHeD My MaGiCaL gIrL aNiMe aLl NiGhT 🌙", "wHy DoEs mAgIc WaNd mAkE-uP nOt WoRk On Me 😭", "i WaNt ThE pInK pOrTaBlE cOnSoLe pLs", "mY pOcKeT pEt iZ dEaD aGaIn 😭"],
       hi: ["🌸 hAi HaI 🌸", "kAwAiI hI ✨"],
-      default_mid: ["my PlUsHiE CoLlEcTiOn Iz HuGe", "i HaVe GlItTeR pAsTeL eVeRyThInG", "wAnT pOcKy ?? 🍡"],
+      default_mid: ["i HaVe GlItTeR pAsTeL eVeRyThInG"],
     }
   },
   {
     name: "GLiTtErGiRl_07",
     greet: "*~* hEyYy GuRlIe *~*",
     responses: {
-      default: ["i PuT gLiTtEr On EvErYtHiNg ✨", "mY rOoM iZ sO pInK", "I jUsT mAdE a NeW hOmEpAgE", "u ShOuLd ToTaLlY sIgN mY gUeStBoOk", "iM mAkInG a SpArKlY bLiNkIe FoR mY tOp FrIeNdS"],
+      default: ["i PuT gLiTtEr On EvErYtHiNg ✨", "I jUsT mAdE a NeW hOmEpAgE", "u ShOuLd ToTaLlY sIgN mY gUeStBoOk", "iM mAkInG a SpArKlY bLiNkIe FoR mY tOp FrIeNdS"],
       hi: ["*~* hI bBy *~*", "OmGgGg HiIiI"],
-      default_mid: ["i GoT fRuItY lIp GlOsS 💄", "mY hAiR iZ iN sPaCe BuNs ToDaY", "tEaCh Me HoW tO eMbEd MidI iN mY pAgE PlS 🙏", "wAtChInG My GiRl GrOuP MoViE aGaIn"],
+      default_mid: ["tEaCh Me HoW tO eMbEd MidI iN mY pAgE PlS 🙏"],
     }
   },
   {
     name: "BaByGiRl_xOxO",
     greet: "hii cuti pi ♡♡♡",
     responses: {
-      default: ["wE pAsSeD nOtEs In ClAsS aGaIn", "uR mY bEsTeSt FrIeNd 4 lYf", "wAnNa Be My MaTcHiNg AvI tWiNs ??", "I mAdE u In ThE dOlLz MaKeR cAn I sEnD ?? 💌", "iM dEcOrAtInG mY bInDeR w/ StIcKeRs RnNn"],
+      default: ["I mAdE u In ThE dOlLz MaKeR cAn I sEnD ?? 💌"],
       hi: ["♡ hI bAbY ♡", "hElLOoO!!"],
-      default_mid: ["i WrOtE uR nAmE aLl OvEr My JoUrNaL ✨", "wEaRiNg HeArT eArRiNgS tDy", "iM cOdInG a MaTcHiNg LaYoUt FoR uS 💕", "i StIlL hAvEnT gOt My BeLlY pIeRcInG 😭"],
+      default_mid: ["iM cOdInG a MaTcHiNg LaYoUt FoR uS 💕"],
     }
   },
   {
     name: "~*FaIrYqUeEn*~",
     greet: "🧚‍♀️ hElLo lItTlE oNe 🧚‍♀️",
     responses: {
-      default: ["i ReAd My HoRoScOpE eVeRy DaY ♓", "I hAvE 12 cRyStAlS oN mY dEsK", "do U bElIeVe In FaIrIeS ??", "iM mAkInG fRiEnDsHiP bRaCeLeTs", "i CoDeD a TwInKlInG sTaR cUrSoR fOr My PaGe ✨"],
-      hi: ["✨ bLeSsEd Be ✨", "hI sWeEt ThInG"],
-      default_mid: ["mY tArOt CaRdS sAiD u WeRe CoMiNg", "iM wEaRiNg PiXiE wInGs 2dAy", "iM mAkInG a FaIrY-sIgIl BlInKiE 🧚‍♀️", "ButTeRfLy ClIp MiSsInG :("],
+      default: ["i ReAd My HoRoScOpE eVeRy DaY ♓", "I hAvE 12 cRyStAlS oN mY dEsK", "do U bElIeVe In FaIrIeS ??", "i CoDeD a TwInKlInG sTaR cUrSoR fOr My PaGe ✨"],
+      hi: ["hI sWeEt ThInG"],
+      default_mid: ["mY tArOt CaRdS sAiD u WeRe CoMiNg", "iM mAkInG a FaIrY-sIgIl BlInKiE 🧚‍♀️"],
     }
   },
   {
     name: "ChErRyBoMb_xX",
     greet: "yO yO ♡",
     responses: {
-      default: ["mY sCrUnChIe ToOk My HaIr OuT", "i CaNt FiNd My rHiNeStOnE tRaCkSuIt", "I bEdAzZlEd My PhOnE oMg", "iM rEbRaNdInG mY pAgE ALl ChErRy ReD 🍒", "JuSt PaInTeD mY nAiLs ChErRy ReD 🍒"],
+      default: ["i CaNt FiNd My rHiNeStOnE tRaCkSuIt", "I bEdAzZlEd My PhOnE oMg", "iM rEbRaNdInG mY pAgE ALl ChErRy ReD 🍒"],
       hi: ["yOoOO HiI", "wHaT uP gOrG"],
       default_mid: ["iM lIsTeNiNg To My FaV pOp PuNk on RePeAt", "i WaNt ThE sLiM fLiP pHoNe SoOo BaD 📱", "i WrOtE 6 ParAgRaPhS oN mY bLoG LaSt NiGhT", "i WaS oN mY bLoG ALL nIgHt OoPs"],
     }
@@ -3672,9 +3672,9 @@ const CHAT_PERSONAS = [
     name: "luV_LeXi_06",
     greet: "hEyYyY!! ☆",
     responses: {
-      default: ["i StAyEd Up Til 4aM oN cHaT 💖", "wRoTe A pOeM aBoUt PiNk SkIeS oN mY JoUrNaL", "wAnNa MaRaThOn MoViEs FrI ??", "I cHaNgEd My AwAy MsG 2 a PoP LyRiC AgAiN 🥺", "iM rEdEcOrAtInG mY rOoM aLl PiNk 💕"],
+      default: ["i StAyEd Up Til 4aM oN cHaT 💖", "wAnNa MaRaThOn MoViEs FrI ??", "I cHaNgEd My AwAy MsG 2 a PoP LyRiC AgAiN 🥺"],
       hi: ["☆ hIiI ☆", "hEyYy"],
-      default_mid: ["pUt Me On Ur ToP fRiEnDs PlS", "lEt Me PaInT uR nAiLs SoMeTiMe ✨", "I mAdE u A bLiNkIe ThAt SaYz BeStIeS 4 lYf 💖", "wAtChInG My FaV cOmEdY FoR tHe 100tH tImE"],
+      default_mid: ["pUt Me On Ur ToP fRiEnDs PlS", "wAtChInG My FaV cOmEdY FoR tHe 100tH tImE"],
     }
   },
   {
@@ -3682,24 +3682,24 @@ const CHAT_PERSONAS = [
     greet: "lOl HiI",
     responses: {
       default: ["i ToTaLlY uPdAtEd My ToP 8", "u GoT bUmPeD oFf SoRrY nOt SoRrY 🙄", "mY gUeStBoOk HaS 200 sIgNaTuReS oMg", "I oNlY tAlK tO cUtIeS"],
-      hi: ["hIiI ;)", "hEy BaByY"],
-      default_mid: ["i'M sO oVeR tHaT pArTy AlReAdY", "lOl Ok WhAtEvA", "mY pRoFiLe SoNg Iz My ToP rApPeR"],
+      hi: ["hIiI ;)"],
+      default_mid: ["lOl Ok WhAtEvA"],
     }
   },
   {
     name: "~*sParkLeBuNn*~",
     greet: "🐰 hI hI 🐰",
     responses: {
-      default: ["i NaMeD aLl My PlUsHiEs ToDaY", "mY sHeLf HaS 47 sTuFfIeS", "wEnT tO tHe MaLl AnD bOuGhT eVeRyThInG ✨", "i HaVe MaTcHiNg PjS w/ My BeStIe"],
+      default: ["iM hOpPiNg ArOuNd My RoOm 🐰", "mAdE a TiNy CaRrOt DrAwInG ✿", "i WrOtE a LiL pOeM aBoUt CloUdS ☁", "tHe SuN iZ sO sOfT tOdAy ✨"],
       hi: ["🐰💕 hElLo 💕🐰", "hEy CuTiE pIe"],
-      default_mid: ["jUsT pIcKeD mY nEw PiXeL pEt 🐾", "i BoUgHt PiNk RoLlEr SkAtEs", "lEtS dO oUr PaGeS tOgEtHeR"],
+      default_mid: ["jUsT pIcKeD mY nEw PiXeL pEt 🐾", "lEtS dO oUr PaGeS tOgEtHeR"],
     }
   },
   {
     name: "MsG_aDdIcT_99",
     greet: "uR oNlInE :3",
     responses: {
-      default: ["mY aWaY mSg Iz A pOp LyRiC <3", "iVe BeEn OnLiNe AlL dAy 💻", "u WaNnA tRaDe ScReEnNaMeS w/ uR bEsTiE ?", "iM sO bOrEd RiGhT nOw 😴"],
+      default: ["iVe BeEn OnLiNe AlL dAy 💻", "iM sO bOrEd RiGhT nOw 😴"],
       hi: ["yEsSs HeYyY", "u BeAt Me To It HiIi"],
       default_mid: ["mY pRoFiLe PiC iZ gLiTtEr", "u GeT mY mEsSaGe ??", "i MaDe A nEw AwAy MsG bRb"],
     }
@@ -3708,9 +3708,9 @@ const CHAT_PERSONAS = [
     name: "DiVa_StArR_xX",
     greet: "💎 hEyYy DoLl 💎",
     responses: {
-      default: ["i'M tOtAlLy ThE iT gIrL", "MaKeUp ApPoInTmEnT @ MaC tMrW", "lOl Ur So MeAn To Me 😭", "u WaNnA cOmE tO mY bIrThDaY"],
+      default: ["lOl Ur So MeAn To Me 😭"],
       hi: ["hEyY dOlL", "♡ hI bAbE ♡"],
-      default_mid: ["i'M bUyInG tHe NeW rHiNeStOnE bAg", "i'M dYeInG mY hAiR pInK tHiS wEeK 💕", "i NeEd YoU tO bRaId My HaIr"],
+      default_mid: ["dId U sEe HoW tHeY lOoKeD aT mE 💅", "iM tHe MaIn ChArAcTeR oBvI ✨", "eVeRyOnE iZ cOpYiNg My LaYoUt UgH"],
     }
   },
 ];
@@ -3789,13 +3789,8 @@ function showChatPopup() {
   theyReply(persona.greet);
 
   const AWAY_MESSAGES = [
-    "~*~ aWaY fRoM kEyBoArD ~*~ painting my nails 💅 brb",
-    "♡ bRb ♡ at the mall w/ my bestie ✨",
-    "💖 in the bath singing to my fav cd 💖",
-    "~*~ in class don't tell ms. peters i'm online ~*~",
     "✨ glitter emergency, cleaning up 🧹✨",
     "🌸 napping in a sunbeam 🌸 bbl",
-    "doing my hair !! ribbons everywhere 🎀",
     "💌 writing my journal entry ✿ shhh",
     "🐰 feeding my pixel pet brb 🐰",
     "watching my fav show !! don't im me 🚫",
@@ -5422,7 +5417,7 @@ function renderEmailList() {
 }
 
 // Schedule emails — faster on mobile
-const _firstEmailDelay = _isMobileDevice ? 15000 : 40000;
+const _firstEmailDelay = _isMobileDevice ? 15000 : 75000;
 const _emailMinDelay   = _isMobileDevice ? 20000 : 40000;
 const _emailRandRange  = _isMobileDevice ? 30000 : 80000;
 setTimeout(() => {
@@ -5490,10 +5485,10 @@ bsodEl.addEventListener('click', dismissBSOD);
 window.addEventListener('keyup', (e) => {
   if (bsodActive && Date.now() >= bsodDismissableAt) { dismissBSOD(); e.preventDefault(); }
 });
-// Skip BSOD on mobile
-if (!_isMobileCheck) {
-  setTimeout(showBSOD, 120000); // 2 minutes
-}
+// Pink screen of death disabled.
+// if (!_isMobileCheck) {
+//   setTimeout(showBSOD, 120000);
+// }
 
 // Use raw requestAnimationFrame for 60fps — setAnimationLoop caps to 30 with XR
 function animateLoop() {
