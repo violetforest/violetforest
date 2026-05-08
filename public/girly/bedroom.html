@@ -1884,14 +1884,14 @@ function animate() {
     // Walk straight toward the chair (chairGroup at z = -2.9, x = 0).
     const dx = chairGroup.position.x - camera.position.x;
     const dz = chairGroup.position.z - camera.position.z;
-    const len = Math.hypot(dx, dz) || 1;
+    const dist = Math.hypot(dx, dz) || 1;
     const speed = 2.0;
-    camera.position.x += (dx / len) * speed * dt;
-    camera.position.z += (dz / len) * speed * dt;
+    camera.position.x += (dx / dist) * speed * dt;
+    camera.position.z += (dz / dist) * speed * dt;
     clampToRoom(camera.position);
-    // Auto-sit once close enough — same trigger as the E-key
-    checkInteraction();
-    if (currentInteraction === 'sit') {
+    // Auto-sit once close enough — distance-based, since on mobile there's no
+    // mouse-look so the raycast in checkInteraction() may not be aimed at the chair.
+    if (dist < 1.4) {
       touchDown = false;
       sitDown();
     }

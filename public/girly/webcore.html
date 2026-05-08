@@ -259,6 +259,15 @@
   .sparkle-popup .body {
     overflow-y: scroll !important;
     max-height: 150px;
+    /* Fallback so the popup is never plain white if the glitter gif fails. */
+    background-color: #ffd6ea;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.9) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.8) 0 1.5px, transparent 2.5px),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,0.85) 0 2px, transparent 3px),
+      radial-gradient(circle at 85% 20%, rgba(255,255,255,0.75) 0 1.5px, transparent 2.5px),
+      linear-gradient(135deg, #ffe6f3 0%, #ffc1dd 50%, #f8b6e6 100%);
+    background-size: 40px 40px, 30px 30px, 50px 50px, 35px 35px, 100% 100%;
   }
   .sparkle-popup .body::after {
     /* invisible spacer so the scrollbar always has content to scroll */
@@ -3353,12 +3362,14 @@ function showSparklePopup() {
 }
 
 function scheduleNextSparklePopup() {
-  // No-op — sparkle popups don't recur, just show once on load (see below)
+  // Recur on a relaxed cadence — sparkle popups are a flavor accent, not the main event
+  const delay = (_isMobileDevice ? 25000 : 60000) + Math.random() * (_isMobileDevice ? 25000 : 60000);
+  setTimeout(showSparklePopup, delay);
 }
 
-// Sparkle popup disabled — its glitter background often failed to load,
-// leaving a plain white alert.
-// setTimeout(showSparklePopup, 4000);
+// First sparkle popup shortly after load. The body has a CSS fallback background
+// so even if the glitter gif fails to load, the popup still looks sparkly.
+setTimeout(showSparklePopup, _isMobileDevice ? 9000 : 20000);
 
 // =====================================================
 // Notepad popups — handwritten/typewritten sweet notes,
