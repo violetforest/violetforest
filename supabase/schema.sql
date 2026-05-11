@@ -6,11 +6,13 @@ create table posts (
   image_url text, -- legacy: single image (kept for backward compat)
   media jsonb,    -- array of { url: string, type: 'image' | 'video' }
   link_url text,
+  tags text[] default '{}',
   created_at timestamptz default now()
 );
 
--- Migration for existing dbs:
+-- Migrations for existing dbs:
 --   alter table posts add column if not exists media jsonb;
+--   alter table posts add column if not exists tags text[] default '{}';
 
 alter table posts enable row level security;
 create policy "public read" on posts for select using (true);

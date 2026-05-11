@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { ScrollableRoomLayout } from '../components/ScrollableRoomLayout'
@@ -15,6 +15,7 @@ interface Post {
   image_url: string | null
   media: MediaItem[] | null
   link_url: string | null
+  tags: string[] | null
   created_at: string
 }
 
@@ -30,7 +31,7 @@ function timeAgo(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) => void }) {
   const share = async () => {
     if (navigator.share) {
       await navigator.share({
@@ -164,6 +165,30 @@ function PostCard({ post }: { post: Post }) {
         </p>
       )}
 
+      {post.tags && post.tags.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+          {post.tags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => onTagClick(tag)}
+              className="p-category"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontSize: '1.13rem',
+                fontStyle: 'italic',
+                opacity: 0.55,
+                cursor: 'pointer',
+                fontFamily: 'Georgia, serif',
+              }}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div
         style={{
           display: 'flex',
@@ -198,17 +223,25 @@ function PostCard({ post }: { post: Post }) {
 export function Feed() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTag = searchParams.get('tag')
 
   useEffect(() => {
-    supabase
+    let query = supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setPosts(data || [])
-        setLoading(false)
-      })
-  }, [])
+    if (activeTag) query = query.contains('tags', [activeTag])
+    query.then(({ data }) => {
+      setPosts(data || [])
+      setLoading(false)
+    })
+  }, [activeTag])
+
+  const setTag = (tag: string | null) => {
+    if (tag) setSearchParams({ tag })
+    else setSearchParams({})
+  }
 
   return (
     <ScrollableRoomLayout>
@@ -234,6 +267,40 @@ export function Feed() {
           <div style={{ width: '2rem' }} />
         </div>
 
+        {activeTag && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0.5rem 0.75rem',
+              marginBottom: '1.5rem',
+              background: 'rgba(0,0,0,0.04)',
+              borderRadius: '4px',
+              fontSize: '1.2rem',
+              fontFamily: 'Georgia, serif',
+            }}
+          >
+            <span style={{ fontStyle: 'italic', opacity: 0.7 }}>
+              filtering by #{activeTag}
+            </span>
+            <button
+              onClick={() => setTag(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.13rem',
+                opacity: 0.55,
+                cursor: 'pointer',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic',
+              }}
+            >
+              clear
+            </button>
+          </div>
+        )}
+
         {loading && (
           <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic' }}>
             loading...
@@ -247,7 +314,7 @@ export function Feed() {
         )}
 
         {posts.map(post => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.id} post={post} onTagClick={setTag} />
         ))}
       </div>
     </ScrollableRoomLayout>

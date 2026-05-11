@@ -48,10 +48,24 @@ function LoginForm({ onLogin }: { onLogin: (session: Session) => void }) {
 
 type MediaItem = { url: string; type: 'image' | 'video' }
 
+// Parse a free-form tag string into a clean array.
+// Accepts comma- or space-separated, with or without leading '#'.
+function parseTags(input: string): string[] {
+  return Array.from(
+    new Set(
+      input
+        .split(/[,\s]+/)
+        .map(t => t.trim().replace(/^#/, '').toLowerCase())
+        .filter(Boolean)
+    )
+  )
+}
+
 function PostComposer({ onPost }: { onPost: () => void }) {
   const [body, setBody] = useState('')
   const [type, setType] = useState('text')
   const [linkUrl, setLinkUrl] = useState('')
+  const [tagsInput, setTagsInput] = useState('')
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [posting, setPosting] = useState(false)
 
@@ -85,17 +99,20 @@ function PostComposer({ onPost }: { onPost: () => void }) {
       })
     } else {
       const hasMedia = media.length > 0
+      const tags = parseTags(tagsInput)
       await supabase.from('posts').insert({
         type: hasMedia ? 'photo' : type,
         body: body || null,
         image_url,
         media: hasMedia ? media : null,
         link_url: type === 'link' ? linkUrl || null : null,
+        tags: tags.length > 0 ? tags : null,
       })
     }
 
     setBody('')
     setLinkUrl('')
+    setTagsInput('')
     setMediaFiles([])
     setType('text')
     setPosting(false)
@@ -173,6 +190,16 @@ function PostComposer({ onPost }: { onPost: () => void }) {
           placeholder="link url"
           value={linkUrl}
           onChange={e => setLinkUrl(e.target.value)}
+          style={{ ...inputStyle, marginTop: '0.75rem' }}
+        />
+      )}
+
+      {!isStory && (
+        <input
+          type="text"
+          placeholder="tags (e.g. girly, dollz, blinkies)"
+          value={tagsInput}
+          onChange={e => setTagsInput(e.target.value)}
           style={{ ...inputStyle, marginTop: '0.75rem' }}
         />
       )}
@@ -332,6 +359,19 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
   }
 
+  // Edit tags on an existing post via a quick prompt.
+  const editTags = async (post: any) => {
+    const current: string[] = post.tags || []
+    const next = window.prompt('Tags (comma separated):', current.join(', '))
+    if (next === null) return
+    const tags = parseTags(next)
+    await supabase
+      .from('posts')
+      .update({ tags: tags.length > 0 ? tags : null })
+      .eq('id', post.id)
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, tags } : p)))
+  }
+
   return (
     <div style={{ width: '100%', marginTop: '2rem' }}>
       {stories.length > 0 && (
@@ -425,6 +465,28 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                     ))}
                   </div>
                 )}
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4rem', marginTop: '0.35rem' }}>
+                  {(post.tags || []).map((t: string) => (
+                    <span
+                      key={t}
+                      style={{
+                        fontSize: '0.95rem',
+                        opacity: 0.55,
+                        fontStyle: 'italic',
+                        fontFamily: 'Georgia, serif',
+                      }}
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => editTags(post)}
+                    style={{ ...deleteStyle, opacity: 0.5 }}
+                  >
+                    {(post.tags || []).length > 0 ? 'edit tags' : '+ add tags'}
+                  </button>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
                   <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
                   <DeleteButton onDelete={() => deletePost(post.id)} />
