@@ -3,10 +3,14 @@ create table posts (
   id uuid primary key default gen_random_uuid(),
   type text not null default 'text',
   body text,
-  image_url text,
+  image_url text, -- legacy: single image (kept for backward compat)
+  media jsonb,    -- array of { url: string, type: 'image' | 'video' }
   link_url text,
   created_at timestamptz default now()
 );
+
+-- Migration for existing dbs:
+--   alter table posts add column if not exists media jsonb;
 
 alter table posts enable row level security;
 create policy "public read" on posts for select using (true);

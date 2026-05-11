@@ -3,11 +3,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { ScrollableRoomLayout } from '../components/ScrollableRoomLayout'
 
+interface MediaItem {
+  url: string
+  type: 'image' | 'video'
+}
+
 interface Post {
   id: string
   type: string
   body: string | null
   image_url: string | null
+  media: MediaItem[] | null
   link_url: string | null
   created_at: string
 }
@@ -44,18 +50,56 @@ function PostCard({ post }: { post: Post }) {
       }}
     >
       <data className="p-author h-card" value="violet forest" style={{ display: 'none' }} />
-      {post.type === 'photo' && post.image_url && (
-        <img
-          className="u-photo"
-          src={post.image_url}
-          alt=""
-          style={{
-            width: '100%',
-            borderRadius: '4px',
-            marginBottom: '0.75rem',
-          }}
-        />
-      )}
+      {post.type === 'photo' && (() => {
+        // Prefer the multi-media array; fall back to legacy single image_url
+        const items: MediaItem[] = post.media && post.media.length > 0
+          ? post.media
+          : post.image_url
+            ? [{ url: post.image_url, type: 'image' }]
+            : []
+        if (items.length === 0) return null
+        const single = items.length === 1
+        return (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: single ? '1fr' : 'repeat(2, 1fr)',
+              gap: '0.5rem',
+              marginBottom: '0.75rem',
+            }}
+          >
+            {items.map((m, i) => {
+              // If odd count and >1, let the first item span both columns
+              const span = !single && items.length % 2 === 1 && i === 0 ? 2 : 1
+              const style: React.CSSProperties = {
+                width: '100%',
+                borderRadius: '4px',
+                display: 'block',
+                gridColumn: span === 2 ? 'span 2' : undefined,
+                objectFit: 'cover',
+                maxHeight: single ? undefined : '320px',
+              }
+              return m.type === 'video' ? (
+                <video
+                  key={i}
+                  src={m.url}
+                  controls
+                  playsInline
+                  style={style}
+                />
+              ) : (
+                <img
+                  key={i}
+                  className={i === 0 ? 'u-photo' : undefined}
+                  src={m.url}
+                  alt=""
+                  style={style}
+                />
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {post.type === 'quote' && post.body && (
         <blockquote

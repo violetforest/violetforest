@@ -46,27 +46,35 @@ function LoginForm({ onLogin }: { onLogin: (session: Session) => void }) {
   )
 }
 
+type MediaItem = { url: string; type: 'image' | 'video' }
+
 function PostComposer({ onPost }: { onPost: () => void }) {
   const [body, setBody] = useState('')
   const [type, setType] = useState('text')
   const [linkUrl, setLinkUrl] = useState('')
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [posting, setPosting] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!body && !imageFile) return
+    if (!body && mediaFiles.length === 0) return
     setPosting(true)
 
     let image_url: string | null = null
+    const media: MediaItem[] = []
 
-    if (imageFile) {
-      const ext = imageFile.name.split('.').pop()
-      const path = `posts/${Date.now()}.${ext}`
-      const { error } = await supabase.storage.from('media').upload(path, imageFile)
+    // Upload each attached file in order
+    for (let i = 0; i < mediaFiles.length; i++) {
+      const file = mediaFiles[i]
+      const ext = file.name.split('.').pop()
+      const path = `posts/${Date.now()}-${i}.${ext}`
+      const { error } = await supabase.storage.from('media').upload(path, file)
       if (!error) {
         const { data } = supabase.storage.from('media').getPublicUrl(path)
-        image_url = data.publicUrl
+        const kind: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image'
+        media.push({ url: data.publicUrl, type: kind })
+        // Mirror first image into legacy image_url for stories + back-compat
+        if (image_url === null && kind === 'image') image_url = data.publicUrl
       }
     }
 
@@ -76,17 +84,19 @@ function PostComposer({ onPost }: { onPost: () => void }) {
         image_url,
       })
     } else {
+      const hasMedia = media.length > 0
       await supabase.from('posts').insert({
-        type: imageFile ? 'photo' : type,
+        type: hasMedia ? 'photo' : type,
         body: body || null,
         image_url,
+        media: hasMedia ? media : null,
         link_url: type === 'link' ? linkUrl || null : null,
       })
     }
 
     setBody('')
     setLinkUrl('')
-    setImageFile(null)
+    setMediaFiles([])
     setType('text')
     setPosting(false)
     onPost()
@@ -176,24 +186,55 @@ function PostComposer({ onPost }: { onPost: () => void }) {
             fontFamily: 'Georgia, serif',
           }}
         >
-          {imageFile ? imageFile.name : 'attach image'}
+          {mediaFiles.length === 0
+            ? 'attach images / videos'
+            : `${mediaFiles.length} file${mediaFiles.length === 1 ? '' : 's'} attached`}
           <input
             type="file"
-            accept="image/*"
-            onChange={e => setImageFile(e.target.files?.[0] || null)}
+            accept="image/*,video/*"
+            multiple
+            onChange={e => setMediaFiles(Array.from(e.target.files || []))}
             style={{ display: 'none' }}
           />
         </label>
+        {mediaFiles.length > 0 && (
+          <ul style={{ margin: '0.5rem 0 0', padding: 0, listStyle: 'none' }}>
+            {mediaFiles.map((f, i) => (
+              <li
+                key={i}
+                style={{
+                  fontSize: '1rem',
+                  opacity: 0.55,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.15rem 0',
+                }}
+              >
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {f.type.startsWith('video/') ? '▶ ' : '🖼 '}{f.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMediaFiles(mediaFiles.filter((_, j) => j !== i))}
+                  style={{ ...deleteStyle, marginLeft: '0.5rem' }}
+                >
+                  remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <button
         type="submit"
-        disabled={posting || (!body && !imageFile)}
+        disabled={posting || (!body && mediaFiles.length === 0)}
         style={{
           ...buttonStyle,
           marginTop: '1rem',
           width: '100%',
-          opacity: posting || (!body && !imageFile) ? 0.3 : 0.7,
+          opacity: posting || (!body && mediaFiles.length === 0) ? 0.3 : 0.7,
         }}
       >
         {posting ? 'posting...' : 'post'}
