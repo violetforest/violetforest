@@ -291,6 +291,47 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setStories(stories.filter(s => s.id !== id))
   }
 
+  // Extract the storage path from a Supabase public URL so we can delete the file.
+  // URLs look like: <root>/storage/v1/object/public/media/posts/123.jpg
+  const storagePathFromUrl = (url: string): string | null => {
+    const m = url.match(/\/storage\/v1\/object\/public\/media\/(.+)$/)
+    return m ? m[1] : null
+  }
+
+  // Remove a single media item from a post (and try to delete the storage file).
+  const removeMediaItem = async (post: any, index: number) => {
+    const current: { url: string; type: 'image' | 'video' }[] =
+      post.media && post.media.length > 0
+        ? post.media
+        : post.image_url
+          ? [{ url: post.image_url, type: 'image' }]
+          : []
+
+    const removed = current[index]
+    const next = current.filter((_, i) => i !== index)
+
+    // Mirror the first remaining image into image_url for back-compat.
+    const firstImage = next.find(m => m.type === 'image')
+    const updates: Record<string, any> = {
+      media: next.length > 0 ? next : null,
+      image_url: firstImage ? firstImage.url : null,
+    }
+    // If nothing left, drop back to a plain text post.
+    if (next.length === 0 && post.type === 'photo') {
+      updates.type = post.body ? 'text' : 'photo'
+    }
+
+    await supabase.from('posts').update(updates).eq('id', post.id)
+
+    // Best-effort storage cleanup — ignore failures.
+    if (removed) {
+      const path = storagePathFromUrl(removed.url)
+      if (path) await supabase.storage.from('media').remove([path])
+    }
+
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
+  }
+
   return (
     <div style={{ width: '100%', marginTop: '2rem' }}>
       {stories.length > 0 && (
@@ -315,15 +356,82 @@ function PostList({ refreshKey }: { refreshKey: number }) {
           <p style={{ fontSize: '1.2rem', opacity: 0.55, fontStyle: 'italic', marginBottom: '1rem', marginTop: '1.5rem' }}>
             posts ({posts.length})
           </p>
-          {posts.map(post => (
-            <div key={post.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-              <p style={{ fontSize: '1.13rem', lineHeight: 1.5, opacity: 0.7 }}>{post.body || '(image)'}</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
-                <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
-                <DeleteButton onDelete={() => deletePost(post.id)} />
+          {posts.map(post => {
+            const items: { url: string; type: 'image' | 'video' }[] =
+              post.media && post.media.length > 0
+                ? post.media
+                : post.image_url
+                  ? [{ url: post.image_url, type: 'image' }]
+                  : []
+            return (
+              <div key={post.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                <p style={{ fontSize: '1.13rem', lineHeight: 1.5, opacity: 0.7 }}>{post.body || '(image)'}</p>
+                {items.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.4rem' }}>
+                    {items.map((m, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          position: 'relative',
+                          width: 64,
+                          height: 64,
+                          borderRadius: 4,
+                          overflow: 'hidden',
+                          border: '1px solid rgba(0,0,0,0.08)',
+                          background: '#000',
+                        }}
+                      >
+                        {m.type === 'video' ? (
+                          <video
+                            src={m.url}
+                            muted
+                            playsInline
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <img
+                            src={m.url}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        )}
+                        <button
+                          type="button"
+                          title="remove this photo"
+                          onClick={() => {
+                            if (window.confirm('Remove this photo from the post?')) {
+                              removeMediaItem(post, i)
+                            }
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            width: 18,
+                            height: 18,
+                            borderRadius: '50%',
+                            border: 'none',
+                            background: 'rgba(0,0,0,0.65)',
+                            color: '#fff',
+                            fontSize: 12,
+                            lineHeight: '18px',
+                            padding: 0,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
+                  <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
+                  <DeleteButton onDelete={() => deletePost(post.id)} />
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </>
       )}
     </div>
