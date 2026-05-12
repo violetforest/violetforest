@@ -12,6 +12,7 @@
 		<div id="container"></div>
 		</div>
 
+		<!-- Hidden in iframe context; parent page renders its own slider panel -->
 		<div id="cam-panel" style="position:fixed;top:1rem;left:1rem;z-index:100;background:rgba(0,0,0,0.7);color:#fff;padding:10px 12px;border-radius:6px;font-family:monospace;font-size:11px;max-width:230px;">
 			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;cursor:pointer;" onclick="document.getElementById('cam-rows').style.display = document.getElementById('cam-rows').style.display === 'none' ? 'block' : 'none';">
 				<strong>camera</strong><span style="opacity:.6;">⇅</span>
@@ -69,7 +70,12 @@
 			var camera, scene, renderer, models = [];
 			var camTarget = new THREE.Vector3( 0, 100, 0 );
 			var scrollDolly = 0, scrollDollyTarget = 0, basePos, fwd;
-			var SCROLL_MIN = -600, SCROLL_MAX = 250;
+			// Light exposed to the parent-page slider panel.
+			var mainPurpleLight2;
+			// Loaded props, keyed by id, exposed to the parent-page slider panel.
+			var props = {};
+			// Walk: (660, 100, 0) → (0, 100, 0) as parent scroll goes 0 → 1.
+			var SCROLL_MIN = -600, SCROLL_MAX = 660;
 
 			var clock = new THREE.Clock();
     	var shader = THREE.FresnelShader;
@@ -106,7 +112,7 @@
 				// Stationary camera — no OrbitControls. Position + lookAt
 				// frozen, sliders below let you nudge values live.
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-				camera.position.set( 295, 100, 0 );
+				camera.position.set( 660, 100, 0 );
 				camera.lookAt( camTarget );
 
 				// Scroll = dolly along the camera's forward axis
@@ -116,17 +122,49 @@
 				// Always listen for parent-driven progress messages. If the page
 				// is loaded standalone the listener is a no-op.
 				window.addEventListener( 'message', function ( e ) {
-					if ( e.data && e.data.type === 'lipstick2-progress' ) {
+					if ( ! e.data ) return;
+					if ( e.data.type === 'home-progress' ) {
 						var v = +e.data.value;
 						if ( v < 0 ) v = 0;
 						if ( v > 1 ) v = 1;
 						scrollDollyTarget = v * SCROLL_MAX;
+					} else if ( e.data.type === 'home-camera' ) {
+						if ( typeof e.data.x === 'number' ) basePos.x = e.data.x;
+						if ( typeof e.data.y === 'number' ) basePos.y = e.data.y;
+						if ( typeof e.data.z === 'number' ) basePos.z = e.data.z;
+						fwd = new THREE.Vector3().subVectors( camTarget, basePos ).normalize();
+					} else if ( e.data.type === 'home-light' ) {
+						var light = null;
+						if ( e.data.id === 'purple2' ) light = mainPurpleLight2;
+						if ( light ) {
+							if ( typeof e.data.x === 'number' ) light.position.x = e.data.x;
+							if ( typeof e.data.y === 'number' ) light.position.y = e.data.y;
+							if ( typeof e.data.z === 'number' ) light.position.z = e.data.z;
+						}
+					} else if ( e.data.type === 'home-prop' ) {
+						var p = props[ e.data.id ];
+						if ( p ) {
+							if ( typeof e.data.x === 'number' ) {
+								p.position.x = e.data.x;
+								// Spinning props (in models[]) get their x overwritten each
+								// frame in animate(); store the slider value as the
+								// oscillation base.
+								p.userData.baseX = e.data.x;
+							}
+							if ( typeof e.data.y === 'number' ) p.position.y = e.data.y;
+							if ( typeof e.data.z === 'number' ) p.position.z = e.data.z;
+						}
 					}
 				} );
+				// In iframe context, the parent draws its own controls. Hide ours.
+				if ( window.parent !== window ) {
+					var panel = document.getElementById( 'cam-panel' );
+					if ( panel ) panel.style.display = 'none';
+				}
 				// Notify parent we're ready (no-op if no parent).
 				try {
 					if ( window.parent && window.parent !== window ) {
-						window.parent.postMessage( { type: 'lipstick2-ready' }, '*' );
+						window.parent.postMessage( { type: 'home-ready' }, '*' );
 					}
 				} catch ( e ) {}
 
@@ -204,7 +242,7 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = ((Math.random() * window.innerWidth)-window.innerWidth) % 1000;
+		    		object.position.x = 0;
 		    		object.position.y = (Math.random() * 150) + 20;
 						object.position.z = (Math.random() * 60) - 60;
 
@@ -216,6 +254,7 @@
 				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
+				    props['lipstick1'] = obj;
 				  });
 		  	}
 
@@ -228,7 +267,7 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
-		    		object.position.x = ((Math.random() * window.innerWidth) - window.innerWidth);
+		    		object.position.x = 0;
 		    		object.position.y = (Math.random() * 150) + 20;
 						object.position.z = (Math.random() * 60) - 60;
 
@@ -238,6 +277,7 @@
 				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
+				    props['clutch1'] = obj;
 				  });
 		  	}
 
@@ -257,24 +297,7 @@
 
 				    obj = object;
 				    scene.add(obj);
-				  });
-		  	}
-
-	      for ( var i = 0; i < 1; i ++ ) {
-		  		loader.load("obj/plant.obj", function(object) {
-		    		object.traverse(function(child) {
-		      		if (child instanceof THREE.Mesh) {
-		            child.material.map = texture;
-		    				child.material = materialNormal;
-		            materialNormal.side = THREE.DoubleSide;
-			      }
-				  });
-				    object.scale.x = object.scale.y = object.scale.z = 40;
-				    object.position.x = 150;
-				    object.position.z = -300;
-				    object.position.y = 25;
-				    obj = object;
-				    scene.add(obj);
+				    props['plant1'] = obj;
 				  });
 		  	}
 
@@ -287,6 +310,7 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				  });
+		    		object.position.x = 0;
 		    		object.position.y = (Math.random() * 150) + 20;
 						object.position.z = (Math.random() * 60) - 60;
 
@@ -296,51 +320,10 @@
 				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
+				    props['rose1'] = obj;
 				  });
 		  	}
 
-
-	      for ( var i = 0; i < 3; i ++ ) {
-		  		loader.load("obj/heart.obj", function(object) {
-		    		object.traverse(function(child) {
-		      		if (child instanceof THREE.Mesh) {
-		            child.material.map = texture;
-		    				child.material = materialGlow;
-		            materialGlow.side = THREE.DoubleSide;
-			      }
-				   });
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
-
-				    object.rotation.x = Math.random() * 90 - 0;
-				    object.rotation.z = Math.random() * 90 - 0;
-				    object.scale.x = object.scale.y = object.scale.z = 15;
-				    obj = object;
-				    scene.add(obj);
-				    models.push(obj);
-				  });
-		  	}
-
-	      for ( var i = 0; i < 1; i ++ ) {
-		  		loader.load("obj/lighter.obj", function(object) {
-		    		object.traverse(function(child) {
-		      		if (child instanceof THREE.Mesh) {
-		            child.material.map = texture;
-		    				child.material = materialGlow;
-		            materialGlow.side = THREE.DoubleSide;
-			      }
-				   });
-		    		object.position.y = (Math.random() * 150) + 20;
-						object.position.z = (Math.random() * 60) - 60;
-
-				    object.rotation.x = Math.random() * 90 - 0;
-				    object.rotation.z = Math.random() * 90 - 0;
-				    object.scale.x = object.scale.y = object.scale.z = 12;
-				    obj = object;
-				    scene.add(obj);
-				    models.push(obj);
-				  });
-		  	}
 
 				for ( var i = 0; i < 1; i ++ ) {
 		  		loader.load("obj/cellphone.obj", function(object) {
@@ -351,7 +334,7 @@
 		            materialNormal.side = THREE.DoubleSide;
 			      }
 				   });
-		    		object.position.x = ((Math.random() * 100-100));
+		    		object.position.x = 0;
 		    		object.position.y = (Math.random() * 150) + 20;
 						object.position.z = (Math.random() * 60) - 60;
 
@@ -362,9 +345,55 @@
 				    obj = object;
 				    scene.add(obj);
 				    models.push(obj);
+				    props['cellphone1'] = obj;
 				  });
 		  	}
-				//
+
+	      // Duplicate props at x=100 (mirrors the originals on the +x side)
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/plant.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+				    object.scale.x = object.scale.y = object.scale.z = 40;
+				    object.position.x = 100;
+				    object.position.z = -300;
+				    object.position.y = 25;
+
+				    obj = object;
+				    scene.add(obj);
+				    props['plant3'] = obj;
+				  });
+		  	}
+
+	      for ( var i = 0; i < 1; i ++ ) {
+		  		loader.load("obj/rose.obj", function(object) {
+		    		object.traverse(function(child) {
+		      		if (child instanceof THREE.Mesh) {
+		            child.material.map = texture;
+		    				child.material = materialNormal;
+		            materialNormal.side = THREE.DoubleSide;
+			      }
+				  });
+		    		object.position.x = 100;
+		    		object.position.y = (Math.random() * 150) + 20;
+						object.position.z = (Math.random() * 60) - 60;
+
+				    object.rotation.x = Math.random() * 90 - 0;
+				    object.rotation.z = Math.random() * 100 - 50;
+				    object.scale.x = object.scale.y = object.scale.z = 20;
+				    obj = object;
+				    scene.add(obj);
+				    models.push(obj);
+				    props['rose2'] = obj;
+				  });
+		  	}
+
+					//
 
 				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
 
@@ -423,6 +452,14 @@
 				mainPurpleLight.position.y = 120;
 				scene.add( mainPurpleLight );
 
+				mainPurpleLight2 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight2.position.set( 0, 120, 0 );
+				scene.add( mainPurpleLight2 );
+
+				var mainPurpleLight3 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight3.position.set( 352, 120, 0 );
+				scene.add( mainPurpleLight3 );
+
 				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 50 );
 				hotPinkLight.position.set( 550, 100, 0 );
 				scene.add( hotPinkLight );
@@ -455,7 +492,11 @@
 					if (usePointLights) {
 						models[i].rotation.x += delta * 0.3 * ( i % 2 ? 1 : -1 );
 					}
-          models[i].position.x = 50 * Math.sin( timer + i );
+					// Oscillate ±50 around the slider-controlled base position.
+					var baseX = ( models[i].userData && typeof models[i].userData.baseX === 'number' )
+						? models[i].userData.baseX
+						: 0;
+					models[i].position.x = baseX + 50 * Math.sin( timer + i );
 				}
 
 				// Smooth dolly along forward axis

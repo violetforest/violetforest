@@ -87,7 +87,7 @@ export default function App() {
             <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
             <Route path="/classic-hallway" element={<NetArtIframe src={`${import.meta.env.BASE_URL}classic-hallway/index.html`} title="classic-hallway" showNext={false} />} />
-            <Route path="/lipstick-2" element={<LipstickHome />} />
+            <Route path="/home" element={<LipstickHome />} />
             <Route path="/lipstick-stationary" element={<NetArtIframe src={`${import.meta.env.BASE_URL}lipstick-stationary/index.html`} title="lipstick-stationary" showNext={false} />} />
             <Route path="/webcore" element={<NetArtIframe src={`${import.meta.env.BASE_URL}webcore/index.html`} title="webcore" showNext={false} />} />
             <Route path="/girly" element={<NetArtIframe src={`${import.meta.env.BASE_URL}girly/bedroom.html`} title="girly" showNext={false} />} />

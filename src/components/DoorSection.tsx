@@ -3,9 +3,10 @@ import { ReactNode } from 'react'
 interface Props {
   children: ReactNode
   showThreshold?: boolean
+  light?: boolean
 }
 
-export function DoorSection({ children, showThreshold = true }: Props) {
+export function DoorSection({ children, showThreshold = true, light = false }: Props) {
   return (
     <section
       style={{
@@ -40,7 +41,7 @@ export function DoorSection({ children, showThreshold = true }: Props) {
             transform: 'translateX(-50%)',
             width: '40px',
             height: '1px',
-            background: 'rgba(0,0,0,0.12)',
+            background: light ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)',
           }}
         />
       )}
