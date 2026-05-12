@@ -396,7 +396,7 @@ function AlbumCover({
 
     if (materialRef.current) {
       const targetOpacity = c.opacity * wrapFade.current * ease
-      materialRef.current.opacity = isActive ? 1 : THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
+      materialRef.current.opacity = isActive ? ease * wrapFade.current : THREE.MathUtils.lerp(materialRef.current.opacity, targetOpacity, 0.08)
       materialRef.current.roughness = c.roughness
       materialRef.current.metalness = c.metalness
       materialRef.current.clearcoat = c.clearcoat
@@ -494,6 +494,40 @@ function EnvironmentMap({ enabled }: { enabled: boolean }) {
   }, [scene, enabled])
 
   return null
+}
+
+// ── Fade-in wrapper: ramps every descendant material's opacity 0→1 ─
+function FadeInGroup({ active, children, duration = 1.5 }: {
+  active: boolean
+  children: React.ReactNode
+  duration?: number
+}) {
+  const groupRef = useRef<THREE.Group>(null)
+  const progress = useRef(0)
+  const originalOpacity = useMemo(() => new WeakMap<THREE.Material, number>(), [])
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return
+    const target = active ? 1 : 0
+    if (Math.abs(progress.current - target) > 0.001) {
+      progress.current = active
+        ? Math.min(1, progress.current + delta / duration)
+        : Math.max(0, progress.current - delta / duration)
+    }
+    const eased = active
+      ? 1 - Math.pow(1 - progress.current, 3)
+      : progress.current
+    groupRef.current.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      const mat = mesh.material as THREE.Material & { opacity?: number; transparent?: boolean }
+      if (!mat || typeof mat.opacity !== 'number') return
+      if (!originalOpacity.has(mat)) originalOpacity.set(mat, mat.opacity)
+      mat.transparent = true
+      mat.opacity = (originalOpacity.get(mat) ?? 1) * eased
+    })
+  })
+
+  return <group ref={groupRef}>{children}</group>
 }
 
 // ── Reflection floor ─────────────────────────────────────────
@@ -778,6 +812,7 @@ function Scene({
       <DprController config={config} />
       <CameraRig config={config} />
       {c.showClouds && <PastelClouds config={config} />}
+      {c.showReflection && <ReflectionFloor config={config} />}
       {!loading && <ScrollGlitter scrollOffset={scrollOffset} />}
 
       {!loading && (
@@ -799,7 +834,6 @@ function Scene({
           {c.showGlow && <ActiveGlow tracks={tracks} activeIndex={activeIndex} scrollOffset={scrollOffset} config={config} />}
         </StackGroup>
       )}
-      {c.showReflection && <ReflectionFloor config={config} />}
     </>
   )
 }
@@ -1159,7 +1193,7 @@ export function Listening() {
   return (
     <motion.div
       ref={containerRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fae6f0' }}
       initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }}
     >
       <style>{`
@@ -1167,7 +1201,20 @@ export function Listening() {
           .listening-controls-wrapper { display: none !important; }
         }
       `}</style>
-      {loading && <ListeningLoader />}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="listening-loader"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
+            style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none' }}
+          >
+            <ListeningLoader />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div style={{ position: 'absolute', inset: 0 }}>
         <Canvas
