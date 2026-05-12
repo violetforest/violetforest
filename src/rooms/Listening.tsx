@@ -496,40 +496,6 @@ function EnvironmentMap({ enabled }: { enabled: boolean }) {
   return null
 }
 
-// ── Fade-in wrapper: ramps every descendant material's opacity 0→1 ─
-function FadeInGroup({ active, children, duration = 1.5 }: {
-  active: boolean
-  children: React.ReactNode
-  duration?: number
-}) {
-  const groupRef = useRef<THREE.Group>(null)
-  const progress = useRef(0)
-  const originalOpacity = useMemo(() => new WeakMap<THREE.Material, number>(), [])
-
-  useFrame((_, delta) => {
-    if (!groupRef.current) return
-    const target = active ? 1 : 0
-    if (Math.abs(progress.current - target) > 0.001) {
-      progress.current = active
-        ? Math.min(1, progress.current + delta / duration)
-        : Math.max(0, progress.current - delta / duration)
-    }
-    const eased = active
-      ? 1 - Math.pow(1 - progress.current, 3)
-      : progress.current
-    groupRef.current.traverse((obj) => {
-      const mesh = obj as THREE.Mesh
-      const mat = mesh.material as THREE.Material & { opacity?: number; transparent?: boolean }
-      if (!mat || typeof mat.opacity !== 'number') return
-      if (!originalOpacity.has(mat)) originalOpacity.set(mat, mat.opacity)
-      mat.transparent = true
-      mat.opacity = (originalOpacity.get(mat) ?? 1) * eased
-    })
-  })
-
-  return <group ref={groupRef}>{children}</group>
-}
-
 // ── Reflection floor ─────────────────────────────────────────
 function ReflectionFloor({ config }: { config: React.MutableRefObject<Config> }) {
   const c = config.current
