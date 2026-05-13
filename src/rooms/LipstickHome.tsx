@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useSpaceStore } from '../store'
 import { DoorSection } from '../components/DoorSection'
@@ -302,7 +302,6 @@ export function LipstickHome() {
   const [latestPost, setLatestPost] = useState<Post | null>(null)
   const [guestbookEntries, setGuestbookEntries] = useState<GuestbookEntry[]>([])
   const [hallwayProgress, setHallwayProgress] = useState(0)
-  const [exiting, setExiting] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const exitedRef = useRef(false)
 
@@ -314,13 +313,12 @@ export function LipstickHome() {
     const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
 
-    // End of scroll → fade and slide into /listening.
+    // End of scroll → navigate into /listening; Listening slides up from below.
     if (!exitedRef.current) {
       const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
       if (distFromBottom < 4) {
         exitedRef.current = true
-        setExiting(true)
-        setTimeout(() => navigate('/listening'), 900)
+        navigate('/listening')
       }
     }
   }, [navigate])
@@ -355,35 +353,6 @@ export function LipstickHome() {
       animate="animate"
       exit="exit"
     >
-      <AnimatePresence>
-        {exiting && (
-          <motion.div
-            key="exit-fade"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 50, background: '#000',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'none',
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 4, opacity: [0, 1, 0] }}
-              transition={{ duration: 0.9, ease: 'easeIn' }}
-              style={{
-                color: 'rgb(136, 68, 255)', fontFamily: 'monospace', fontSize: 14,
-                letterSpacing: '0.3em', textTransform: 'lowercase',
-              }}
-            >
-              listening
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div style={{ height: '300vh', position: 'relative' }}>
         <LipstickTunnel scrollProgress={hallwayProgress} />
       </div>

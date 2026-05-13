@@ -54,6 +54,10 @@ export default function App() {
     location.pathname === '/ask' ||
     location.pathname === '/dm'
 
+  const pinkBgRoute =
+    location.pathname === '/home' ||
+    location.pathname === '/listening'
+
   return (
     <>
       {blackBgRoute && (
@@ -62,6 +66,17 @@ export default function App() {
             position: 'fixed',
             inset: 0,
             background: '#000',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        />
+      )}
+      {pinkBgRoute && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#fae6f0',
             pointerEvents: 'none',
             zIndex: 0,
           }}
