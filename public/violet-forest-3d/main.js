@@ -659,12 +659,12 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ============ ENTER LINK → LISTENING ============
+// ============ ENTER LINK → HOME ============
 
 const enterLink = document.getElementById('enter-link');
 if (enterLink) {
     enterLink.addEventListener('click', (event) => {
-        const dest = enterLink.getAttribute('href') || '/listening';
+        const dest = enterLink.getAttribute('href') || '/home';
         if (window.parent && window.parent !== window) {
             event.preventDefault();
             window.parent.postMessage({ type: 'navigate', to: dest }, '*');
