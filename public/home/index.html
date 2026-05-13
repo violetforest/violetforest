@@ -194,6 +194,86 @@
 					}, { passive: false } );
 				}
 
+				// walls / mirrors / lights — add first so they paint on the first
+				// frame, before any (async) OBJ load resolves.
+
+				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
+
+				// MIRROR planes
+
+				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
+					clipBias: 0.003,
+					textureWidth: WIDTH * window.devicePixelRatio,
+					textureHeight: HEIGHT * window.devicePixelRatio,
+					color: 0x777777
+				} );
+
+				groundMirror.rotateX( - Math.PI / 2 );
+				scene.add( groundMirror );
+
+				var verticalMirror = new THREE.Mirror( 120, 120, {
+					clipBias: 0.003,
+					textureWidth: WIDTH * window.devicePixelRatio,
+					textureHeight: HEIGHT * window.devicePixelRatio,
+					color: 0x777777
+				} );
+
+				verticalMirror.position.y = 95;
+				verticalMirror.position.z = -85;
+				scene.add( verticalMirror );
+
+				// walls
+
+				var wallMaterial;
+				if (usePointLights) {
+					wallMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
+					wallMaterialTop = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
+				} else {
+					wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5b23aa} );
+					wallMaterialTop = new THREE.MeshBasicMaterial( { color: 0x3e0c71} );
+				}
+
+				var planeTop =  new THREE.Mesh( planeGeo, wallMaterialTop );
+				planeTop.position.y = 200;
+				planeTop.rotateX( Math.PI / 2 );
+				scene.add( planeTop );
+
+				var planeBack = new THREE.Mesh( planeGeo, wallMaterial );
+				planeBack.position.z = -100;
+				planeBack.position.y = 100;
+				scene.add( planeBack );
+
+				var planeFront =  new THREE.Mesh( planeGeo, wallMaterial );
+				planeFront.position.z = 100;
+				planeFront.position.y = 100;
+				planeFront.rotateY( Math.PI );
+				scene.add( planeFront );
+
+				// lights
+				var mainPurpleLight = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight.position.y = 120;
+				scene.add( mainPurpleLight );
+
+				mainPurpleLight2 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight2.position.set( 0, 120, 0 );
+				scene.add( mainPurpleLight2 );
+
+				var mainPurpleLight3 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
+				mainPurpleLight3.position.set( 352, 120, 0 );
+				scene.add( mainPurpleLight3 );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 50 );
+				hotPinkLight.position.set( 550, 100, 0 );
+				scene.add( hotPinkLight );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 500 );
+				hotPinkLight.position.set( - 550, 100, 0 );
+				scene.add( hotPinkLight );
+
+				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 1000 );
+				hotPinkLight.position.set( 0, 100, 550 );
+				scene.add( hotPinkLight );
+
 				// model
 			  var texture = new THREE.Texture();
 
@@ -230,6 +310,10 @@
 						console.log( Math.round(percentComplete, 2) + '% downloaded' );
 					}
 				};
+
+				// Defer OBJ fetches until after the first paint so the walls/mirrors
+				// render before the network starts pulling down the heavier props.
+				requestAnimationFrame( function () { requestAnimationFrame( function () {
 
 		  	var loader = new THREE.OBJLoader(manager);
 
@@ -393,84 +477,7 @@
 				  });
 		  	}
 
-					//
-
-				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
-
-				// MIRROR planes
-
-				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
-					clipBias: 0.003,
-					textureWidth: WIDTH * window.devicePixelRatio,
-					textureHeight: HEIGHT * window.devicePixelRatio,
-					color: 0x777777
-				} );
-
-				groundMirror.rotateX( - Math.PI / 2 );
-				scene.add( groundMirror );
-
-				var verticalMirror = new THREE.Mirror( 120, 120, {
-					clipBias: 0.003,
-					textureWidth: WIDTH * window.devicePixelRatio,
-					textureHeight: HEIGHT * window.devicePixelRatio,
-					color: 0x777777
-				} );
-
-				verticalMirror.position.y = 95;
-				verticalMirror.position.z = -85;
-				scene.add( verticalMirror );
-
-				// walls
-
-				var wallMaterial;
-				if (usePointLights) {
-					wallMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
-					wallMaterialTop = new THREE.MeshPhongMaterial( { color: 0xffffff, shininess: 100 } );
-				} else {
-					wallMaterial = new THREE.MeshBasicMaterial( { color: 0x5b23aa} );
-					wallMaterialTop = new THREE.MeshBasicMaterial( { color: 0x3e0c71} );
-				}
-
-				var planeTop =  new THREE.Mesh( planeGeo, wallMaterialTop );
-				planeTop.position.y = 200;
-				planeTop.rotateX( Math.PI / 2 );
-				scene.add( planeTop );
-
-				var planeBack = new THREE.Mesh( planeGeo, wallMaterial );
-				planeBack.position.z = -100;
-				planeBack.position.y = 100;
-				scene.add( planeBack );
-
-				var planeFront =  new THREE.Mesh( planeGeo, wallMaterial );
-				planeFront.position.z = 100;
-				planeFront.position.y = 100;
-				planeFront.rotateY( Math.PI );
-				scene.add( planeFront );
-
-				// lights
-				var mainPurpleLight = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
-				mainPurpleLight.position.y = 120;
-				scene.add( mainPurpleLight );
-
-				mainPurpleLight2 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
-				mainPurpleLight2.position.set( 0, 120, 0 );
-				scene.add( mainPurpleLight2 );
-
-				var mainPurpleLight3 = new THREE.PointLight( 0x7F00FF, 1.5, 200 );
-				mainPurpleLight3.position.set( 352, 120, 0 );
-				scene.add( mainPurpleLight3 );
-
-				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 50 );
-				hotPinkLight.position.set( 550, 100, 0 );
-				scene.add( hotPinkLight );
-
-				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 500 );
-				hotPinkLight.position.set( - 550, 100, 0 );
-				scene.add( hotPinkLight );
-
-				var hotPinkLight = new THREE.PointLight( 0xFF1493, 0.5, 1000 );
-				hotPinkLight.position.set( 0, 100, 550 );
-				scene.add( hotPinkLight );
+				}); }); // end deferred OBJ loads
 
 				window.addEventListener( 'resize', onWindowResize, false );
 			}
