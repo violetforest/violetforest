@@ -1160,7 +1160,7 @@ export function Listening() {
     <motion.div
       ref={containerRef}
       style={{ position: 'fixed', inset: 0, zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fae6f0' }}
-      initial={{ y: '100vh' }} animate={{ y: 0 }} exit={{ opacity: 0 }} transition={{ y: { duration: 0.9, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.5 } }}
+      initial={false}
     >
       <style>{`
         @media (max-width: 768px) {
