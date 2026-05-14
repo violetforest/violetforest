@@ -533,9 +533,18 @@ function DprController({ config }: { config: React.MutableRefObject<Config> }) {
 function CameraRig({ config }: { config: React.MutableRefObject<Config> }) {
   const { camera } = useThree()
   const target = useMemo(() => new THREE.Vector3(0, 0, 0), [])
+  const initialized = useRef(false)
 
   useFrame(() => {
     const c = config.current
+    if (!initialized.current) {
+      // Snap on first frame so the camera doesn't swing in from origin
+      target.x = c.vanishX
+      target.y = c.vanishY
+      camera.lookAt(target)
+      initialized.current = true
+      return
+    }
     target.x = THREE.MathUtils.lerp(target.x, c.vanishX, 0.08)
     target.y = THREE.MathUtils.lerp(target.y, c.vanishY, 0.08)
     camera.lookAt(target)
