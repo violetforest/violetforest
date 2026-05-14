@@ -1205,12 +1205,7 @@ export function Listening() {
           camera={{ fov: 45, near: 0.1, far: 100, position: [0, 0, 6] }}
           dpr={[1, configState.dpr]}
           style={{ background: 'transparent' }}
-          gl={{ antialias: true, alpha: true, premultipliedAlpha: false, toneMapping: THREE.ACESFilmicToneMapping }}
-          onCreated={({ gl }) => {
-            // Default clear is opaque black even with alpha:true. Make it
-            // transparent so we don't paint a black frame before scene renders.
-            gl.setClearColor(0x000000, 0)
-          }}
+          gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping }}
         >
           <FpsTracker fpsRef={fpsRef} />
           <Scene tracks={tracks} scrollOffset={scrollOffset} targetOffset={targetOffset} activeIndex={activeIndex} onSelect={selectTrack} loaded={loaded} loading={loading} config={configRef} />
