@@ -1020,7 +1020,15 @@ export function InstagramExe() {
                               <li><strong>{FOLLOWERS.toLocaleString()}</strong><span>followers</span></li>
                               <li><strong>{FOLLOWING.toLocaleString()}</strong><span>following</span></li>
                               <li className="follow-row">
-                                <button className="igexe-btn wide">Follow</button>
+                                <a
+                                  className="igexe-btn wide"
+                                  href={`https://instagram.com/${USERNAME}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ textDecoration: 'none' }}
+                                >
+                                  Follow
+                                </a>
                                 <button className="igexe-btn menu-arrow" />
                               </li>
                             </ul>
