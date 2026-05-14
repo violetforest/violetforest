@@ -309,8 +309,10 @@ export function LipstickHome() {
       <div
         className="lipstick-feed"
         style={{
-          background: `#000 url(${import.meta.env.BASE_URL}home/stars.webp) repeat`,
-          backgroundSize: '10%',
+          backgroundColor: '#000',
+          backgroundImage: `url(${import.meta.env.BASE_URL}home/stars.webp)`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: 'auto',
           color: 'rgb(136, 68, 255)',
           fontFamily: 'monospace',
         }}
