@@ -978,7 +978,7 @@ export function InstagramExe() {
             <nav className="igexe-menu">
               <ul>
                 <li><a href="/" target="_top">Home</a></li>
-                <li><a href="/feed" target="_top">Feed</a></li>
+                <li><a href="#" onClick={e => { e.preventDefault(); setTab('home') }}>Feed</a></li>
                 <li><a href="https://violetforest.com" target="_blank" rel="noreferrer">Portfolio</a></li>
               </ul>
             </nav>
@@ -986,12 +986,12 @@ export function InstagramExe() {
               <div className="igexe-content">
                 {tab === 'home' && (
                   <div className="igexe-section">
-                    <div className="igexe-feed">
-                      <div className="igexe-scroll igexe-home">
-                        {posts.map((p, idx) => (
-                          <FeedItem key={p.folder + '-' + p.media[0].name + '-' + idx} post={p} />
-                        ))}
-                      </div>
+                    <div className="igexe-feed" style={{ padding: 0 }}>
+                      <iframe
+                        src={`${base}feed`}
+                        title="feed"
+                        style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#000' }}
+                      />
                     </div>
                   </div>
                 )}
