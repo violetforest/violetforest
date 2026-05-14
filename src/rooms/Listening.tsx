@@ -649,10 +649,19 @@ function PastelClouds({ config }: { config: React.MutableRefObject<Config> }) {
 // ── Stack group (applies rotation to whole stack) ───────────
 function StackGroup({ config, children }: { config: React.MutableRefObject<Config>; children: React.ReactNode }) {
   const groupRef = useRef<THREE.Group>(null)
+  const initialized = useRef(false)
 
   useFrame(() => {
     if (!groupRef.current) return
     const c = config.current
+    if (!initialized.current) {
+      // Snap to target on first frame so the stack doesn't swing in on load
+      groupRef.current.rotation.x = c.stackRotX
+      groupRef.current.rotation.y = c.stackRotY
+      groupRef.current.rotation.z = c.stackRotZ
+      initialized.current = true
+      return
+    }
     groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, c.stackRotX, 0.08)
     groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, c.stackRotY, 0.08)
     groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, c.stackRotZ, 0.08)
