@@ -1072,7 +1072,7 @@ export function InstagramExe() {
                   className={`igexe-tab ${tab === 'profile' ? 'active' : ''}`}
                   onClick={() => setTab('profile')}
                 >
-                  Profile
+                  Archive
                 </button>
               </div>
             </div>
