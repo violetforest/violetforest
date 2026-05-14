@@ -963,7 +963,6 @@ export function InstagramExe() {
   return (
     <div className="igexe">
       <style>{STYLES}</style>
-      <Link to="/" className="igexe-home-link">home</Link>
       <div className="igexe-stage">
         <div className="igexe-window">
           <div className="igexe-inner">
