@@ -1063,7 +1063,7 @@ export function InstagramExe() {
                   className={`igexe-tab ${tab === 'home' ? 'active' : ''}`}
                   onClick={() => setTab('home')}
                 >
-                  Home
+                  Feed
                 </button>
                 <button className="igexe-tab" disabled>Explore</button>
                 <button className="igexe-tab" disabled>Camera</button>
