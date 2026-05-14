@@ -9,6 +9,23 @@
     <link href="/cara/css/styles.css" rel="stylesheet">
 	</head>
 	<body style="cursor: move">
+		<style>
+			#loading {
+				position: fixed;
+				inset: 0;
+				background: #000;
+				z-index: 1000;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #8844ff;
+				font-family: monospace;
+				font-size: 14px;
+				transition: opacity 0.4s ease;
+			}
+			#loading.hidden { opacity: 0; pointer-events: none; }
+		</style>
+		<div id="loading">Loading...</div>
 		<div id="container"></div>
 		</div>
 
@@ -309,6 +326,15 @@
 				manager.onProgress = function ( item, loaded, total ) {
 					console.log( item, loaded, total );
 				};
+				manager.onLoad = function () {
+					var el = document.getElementById( 'loading' );
+					if ( el ) el.classList.add( 'hidden' );
+				};
+				// Safety fallback: hide loader after 8s even if some asset stalls
+				setTimeout( function () {
+					var el = document.getElementById( 'loading' );
+					if ( el ) el.classList.add( 'hidden' );
+				}, 8000 );
 
 				var onProgress = function ( xhr ) {
 					if ( xhr.lengthComputable ) {
