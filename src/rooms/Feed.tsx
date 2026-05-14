@@ -223,12 +223,12 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
 const IG_EMBED_STYLES = `
   .ig-embed, .ig-embed * {
     font-family: Tahoma, Helvetica, Arial, sans-serif !important;
-    color: rgb(136, 68, 255) !important;
+    color: #d4c1ff !important;
     border-color: #221655 !important;
     opacity: 1 !important;
   }
   .ig-embed time, .ig-embed .dt-published {
-    color: rgb(136, 68, 255) !important;
+    color: #9988cc !important;
   }
   .ig-embed {
     background: #000 !important;
@@ -238,19 +238,18 @@ const IG_EMBED_STYLES = `
     padding: 0 !important;
   }
   .ig-embed a {
-    color: rgb(136, 68, 255) !important;
+    color: #8844ff !important;
     text-shadow: 0 0 4px rgba(136, 68, 255, 0.5);
   }
   .ig-embed a:hover {
-    color: rgb(136, 68, 255) !important;
-    text-shadow: 0 0 8px rgba(136, 68, 255, 0.9);
+    color: #b599ff !important;
   }
   .ig-embed article {
     border-bottom: 1px solid #221655 !important;
     padding: 12px 10px !important;
   }
   .ig-embed h1, .ig-embed h2, .ig-embed h3, .ig-embed h4 {
-    color: rgb(136, 68, 255) !important;
+    color: #fff !important;
     text-shadow: 0 0 4px rgba(136, 68, 255, 0.6);
   }
   .ig-embed p, .ig-embed span, .ig-embed div, .ig-embed time {
@@ -262,13 +261,13 @@ const IG_EMBED_STYLES = `
     font-style: italic !important;
   }
   .ig-embed blockquote {
-    border-left: 2px solid rgb(136, 68, 255) !important;
+    border-left: 2px solid #8844ff !important;
     padding-left: 10px !important;
-    color: rgb(136, 68, 255) !important;
+    color: #d4c1ff !important;
   }
   .ig-embed button {
     background: #0a0418 !important;
-    color: rgb(136, 68, 255) !important;
+    color: #d4c1ff !important;
     border: 0 !important;
     box-shadow:
       inset -1px -1px 0 0 #8844ff,
@@ -281,8 +280,8 @@ const IG_EMBED_STYLES = `
   .ig-embed button:hover {
     background: #1a1144 !important;
     box-shadow:
-      inset -1px -1px 0 0 rgb(136, 68, 255),
-      inset 1px 1px 0 0 rgb(136, 68, 255),
+      inset -1px -1px 0 0 #b599ff,
+      inset 1px 1px 0 0 #b599ff,
       0 0 6px rgba(136, 68, 255, 0.5) !important;
   }
   .ig-embed img, .ig-embed video {
