@@ -31,7 +31,21 @@
       "Bash(grep -o 'class [A-Za-z_$]* extends[^{]*{[^}]*isSpotLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isDirectionalLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isRectAreaLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isHemisphereLight\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isAmbientLight' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
       "Bash(grep -o 'new [A-Za-z_$]*Light\\\\|new Ta\\\\|new rh\\\\|new ul\\\\|new ih\\\\|new Rs' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
       "Bash(grep -oE 'const [a-zA-Z_$]+=new \\(rh|ul|ih|Ta\\)\\\\\\([^\\)]*\\\\\\)[^;]*;[^;]*position[^;]*;' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
-      "Bash(grep -o 'class [A-Za-z_$]* extends[^{]*{[^}]*isPlaneGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMesh[^S][^t]\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshBasicMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isGroup\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isBufferGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isShaderMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshPhongMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshStandardMaterial' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)"
+      "Bash(grep -o 'class [A-Za-z_$]* extends[^{]*{[^}]*isPlaneGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMesh[^S][^t]\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshBasicMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isGroup\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isBufferGeometry\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isShaderMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshPhongMaterial\\\\|class [A-Za-z_$]* extends[^{]*{[^}]*isMeshStandardMaterial' /Users/violetforest/Documents/dev/violetforest/public/3d/assets/index-B_x_FyjI.js)",
+      "Read(//Users/violetforest/Documents/dev/violetforest/**)",
+      "Read(//Users/violetforest/**)",
+      "Bash(node -e \"const d = require\\('./public/graveyard/ig/data.json'\\); console.log\\('keys:', Object.keys\\(d\\)\\); console.log\\('posts:', d.posts ? d.posts.length : 'none'\\); if\\(d.posts\\) console.log\\('sample:', JSON.stringify\\(d.posts[0], null, 2\\)\\);\")",
+      "Bash(node -e \"const d = require\\('./public/graveyard/ig/data.json'\\); console.log\\('first 3 posts:', JSON.stringify\\(d.posts.slice\\(0,3\\), null, 2\\)\\);\")",
+      "Bash(node -e ' *)",
+      "Bash(cp \"/Users/violetforest/Documents/instagram-violetforest.js-2026-01-25-gEBhWaBv/media/profile/202408/17934302585870938.jpg\" public/graveyard/ig/avatar.jpg && ls -la public/graveyard/ig/avatar.jpg)",
+      "Bash(lsof -ti:5173)",
+      "Bash(lsof -ti:5174)",
+      "Bash(ps -p 29608 -o command=)",
+      "Bash(ps -p 56947 -o command=)",
+      "Bash(ps -p 76056 -o command=)",
+      "Bash(kill 29608)",
+      "Bash(npx tsx *)",
+      "Bash(grep -oE \"<h2[^>]*>[^<]+</h2>|<td[^>]*>[^<]{2,50}</td>\" \"/Users/violetforest/Documents/instagram-violetforest.js-2026-01-25-gEBhWaBv/your_instagram_activity/saved/saved_posts.html\")"
     ]
   }
 }

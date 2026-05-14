@@ -22,6 +22,7 @@ const Stories = lazy(() => import('./rooms/Stories').then(m => ({ default: m.Sto
 const SendDM = lazy(() => import('./rooms/SendDM').then(m => ({ default: m.SendDM })))
 const PhotoPile = lazy(() => import('./rooms/PhotoPile').then(m => ({ default: m.PhotoPile })))
 const InstagramGraveyard = lazy(() => import('./rooms/InstagramGraveyard').then(m => ({ default: m.InstagramGraveyard })))
+const InstagramExe = lazy(() => import('./rooms/InstagramExe').then(m => ({ default: m.InstagramExe })))
 // const InstagramGraveyard3D = lazy(() => import('./rooms/InstagramGraveyard3D').then(m => ({ default: m.InstagramGraveyard3D })))
 
 export default function App() {
@@ -99,6 +100,7 @@ export default function App() {
             <Route path="/stories" element={<Stories />} />
             <Route path="/dm" element={<SendDM />} />
             <Route path="/graveyard/instagram" element={<InstagramGraveyard />} />
+            <Route path="/instagram" element={<InstagramExe />} />
             <Route path="/photos" element={<PhotoPile />} />
             <Route path="/lipstick" element={<LipstickHallway />} />
             <Route path="/classic-hallway" element={<NetArtIframe src={`${import.meta.env.BASE_URL}classic-hallway/index.html`} title="classic-hallway" showNext={false} />} />
