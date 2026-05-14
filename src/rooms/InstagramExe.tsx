@@ -988,7 +988,7 @@ export function InstagramExe() {
                   <div className="igexe-section">
                     <div className="igexe-feed" style={{ padding: 0 }}>
                       <iframe
-                        src={`${base}feed`}
+                        src={`${base}feed?embed=ig`}
                         title="feed"
                         style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#000' }}
                       />

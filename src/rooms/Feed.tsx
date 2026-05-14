@@ -220,11 +220,87 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
   )
 }
 
+const IG_EMBED_STYLES = `
+  .ig-embed, .ig-embed * {
+    font-family: Tahoma, Helvetica, Arial, sans-serif !important;
+    color: #d4c1ff !important;
+    border-color: #221655 !important;
+    opacity: 1 !important;
+  }
+  .ig-embed time, .ig-embed .dt-published {
+    color: #9988cc !important;
+  }
+  .ig-embed {
+    background: #000 !important;
+  }
+  .ig-embed .h-feed {
+    background: #000;
+    padding: 0 !important;
+  }
+  .ig-embed a {
+    color: #8844ff !important;
+    text-shadow: 0 0 4px rgba(136, 68, 255, 0.5);
+  }
+  .ig-embed a:hover {
+    color: #b599ff !important;
+  }
+  .ig-embed article {
+    border-bottom: 1px solid #221655 !important;
+    padding: 12px 10px !important;
+  }
+  .ig-embed h1, .ig-embed h2, .ig-embed h3, .ig-embed h4 {
+    color: #fff !important;
+    text-shadow: 0 0 4px rgba(136, 68, 255, 0.6);
+  }
+  .ig-embed p, .ig-embed span, .ig-embed div, .ig-embed time {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    font-style: normal !important;
+  }
+  .ig-embed em, .ig-embed i {
+    font-style: italic !important;
+  }
+  .ig-embed blockquote {
+    border-left: 2px solid #8844ff !important;
+    padding-left: 10px !important;
+    color: #d4c1ff !important;
+  }
+  .ig-embed button {
+    background: #0a0418 !important;
+    color: #d4c1ff !important;
+    border: 0 !important;
+    box-shadow:
+      inset -1px -1px 0 0 #8844ff,
+      inset 1px 1px 0 0 #8844ff !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    font-family: Tahoma, sans-serif !important;
+    cursor: pointer;
+  }
+  .ig-embed button:hover {
+    background: #1a1144 !important;
+    box-shadow:
+      inset -1px -1px 0 0 #b599ff,
+      inset 1px 1px 0 0 #b599ff,
+      0 0 6px rgba(136, 68, 255, 0.5) !important;
+  }
+  .ig-embed img, .ig-embed video {
+    border: 1px solid #221655;
+  }
+  .ig-embed ::-webkit-scrollbar { width: 14px; }
+  .ig-embed ::-webkit-scrollbar-track { background: #000; border-left: 1px solid #221655; }
+  .ig-embed ::-webkit-scrollbar-thumb {
+    background-color: #1a1144;
+    box-shadow: inset -1px -1px 0 0 #8844ff, inset 1px 1px 0 0 #8844ff;
+  }
+`
+
 export function Feed() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
+  const igEmbed = searchParams.get('embed') === 'ig'
 
   useEffect(() => {
     let query = supabase
@@ -243,29 +319,32 @@ export function Feed() {
     else setSearchParams({})
   }
 
-  return (
-    <ScrollableRoomLayout>
-      <div className="h-feed" style={{ width: '100%' }}>
+  const inner = (
+    <>
+      {igEmbed && <style>{IG_EMBED_STYLES}</style>}
+      <div className={`h-feed ${igEmbed ? 'ig-embed' : ''}`} style={{ width: '100%' }}>
         <data className="p-name" value="violet's space" style={{ display: 'none' }} />
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '2rem',
-          }}
-        >
-          <Link
-            to="/"
-            style={{ fontSize: '1.28rem', opacity: 0.5, fontFamily: 'Georgia, serif' }}
+        {!igEmbed && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '2rem',
+            }}
           >
-            home
-          </Link>
-          <p style={{ fontSize: '1.2rem', fontStyle: 'italic', opacity: 0.55 }}>
-            feed
-          </p>
-          <div style={{ width: '2rem' }} />
-        </div>
+            <Link
+              to="/"
+              style={{ fontSize: '1.28rem', opacity: 0.5, fontFamily: 'Georgia, serif' }}
+            >
+              home
+            </Link>
+            <p style={{ fontSize: '1.2rem', fontStyle: 'italic', opacity: 0.55 }}>
+              feed
+            </p>
+            <div style={{ width: '2rem' }} />
+          </div>
+        )}
 
         {activeTag && (
           <div
@@ -317,6 +396,29 @@ export function Feed() {
           <PostCard key={post.id} post={post} onTagClick={setTag} />
         ))}
       </div>
+    </>
+  )
+
+  if (igEmbed) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#000',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          padding: '8px 10px',
+        }}
+      >
+        {inner}
+      </div>
+    )
+  }
+
+  return (
+    <ScrollableRoomLayout>
+      {inner}
     </ScrollableRoomLayout>
   )
 }
