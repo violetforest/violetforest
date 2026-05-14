@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 interface MediaItem {
   name: string
@@ -697,73 +696,6 @@ function Thumb({ post }: { post: Post }) {
       {post.media.length > 1 && <div className="igexe-multi">{post.media.length}</div>}
       {first.type === 'video' && post.media.length === 1 && <div className="igexe-vid-badge">▶</div>}
     </div>
-  )
-}
-
-function FeedItem({ post }: { post: Post }) {
-  const first = post.media[0]
-  const [loaded, setLoaded] = useState(false)
-  const [inView, setInView] = useState(false)
-  const ref = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect() } },
-      { rootMargin: '600px' }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
-  const dateLabel = useMemo(() => {
-    const [y, m] = post.date.split('-')
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return `${months[parseInt(m) - 1]} ${y}`
-  }, [post.date])
-
-  return (
-    <figure ref={ref}>
-      <header>
-        <a className="av" href="#">
-          <img src={AVATAR} alt={USERNAME} />
-        </a>
-        <a className="name" href="#">{USERNAME}</a>
-      </header>
-      <div className="media">
-        {inView && (first.type === 'video' ? (
-          <video
-            src={first.url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            onLoadedData={() => setLoaded(true)}
-            style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.6s' }}
-          />
-        ) : (
-          <img
-            src={first.url}
-            alt=""
-            loading="lazy"
-            onLoad={() => setLoaded(true)}
-            style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.6s' }}
-          />
-        ))}
-      </div>
-      <figcaption>
-        <div className="row">
-          <button className="igexe-btn">Like</button>
-          <button className="igexe-btn">Comment</button>
-          <button className="igexe-btn">Share</button>
-        </div>
-        <div className="row">
-          <button className="igexe-btn">Bookmark</button>
-        </div>
-        <time>{dateLabel}</time>
-      </figcaption>
-    </figure>
   )
 }
 
