@@ -910,7 +910,7 @@ export function InstagramExe() {
               <ul>
                 <li><a href="/" target="_top">Home</a></li>
                 <li><a href="/listening" target="_blank" rel="noreferrer">CD Player</a></li>
-                <li><a href="https://violetforest.com" target="_blank" rel="noreferrer">Portfolio</a></li>
+                <li><a href="https://portfolio.violetforest.com" target="_blank" rel="noreferrer">Portfolio</a></li>
               </ul>
             </nav>
             <div className="igexe-container">
