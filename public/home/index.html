@@ -99,8 +99,14 @@
         // scene
 				scene = new THREE.Scene()
 
+				// Hallway length runs along the X axis. Camera spawns at x=660
+				// (desktop) or x=350 (mobile) and dollies forward to x=0.
+				// Make sure walls, floor, ceiling, and the cube bg extend past
+				// the spawn point so the player is always enclosed.
+				var HALL_LENGTH = 2000;
+
 				// cube bg
-				var cube = new THREE.BoxBufferGeometry( 1000, 1000, 1000 );
+				var cube = new THREE.BoxBufferGeometry( HALL_LENGTH, 1000, 1000 );
 				// invert the geometry on the x-axis so that all of the faces point inward
 				cube.scale( - 1, 1, 1 );
 				var gridMaterial = new THREE.MeshBasicMaterial( {
@@ -197,11 +203,11 @@
 				// walls / mirrors / lights — add first so they paint on the first
 				// frame, before any (async) OBJ load resolves.
 
-				var planeGeo = new THREE.PlaneBufferGeometry( window.innerWidth / 1.5, window.innerHeight / 2);
+				var planeGeo = new THREE.PlaneBufferGeometry( HALL_LENGTH, window.innerHeight / 2);
 
 				// MIRROR planes
 
-				var groundMirror = new THREE.Mirror( window.innerWidth, window.innerHeight / 2, {
+				var groundMirror = new THREE.Mirror( HALL_LENGTH, window.innerHeight / 2, {
 					clipBias: 0.003,
 					textureWidth: WIDTH * window.devicePixelRatio,
 					textureHeight: HEIGHT * window.devicePixelRatio,
