@@ -978,7 +978,7 @@ export function InstagramExe() {
             <nav className="igexe-menu">
               <ul>
                 <li><a href="/" target="_top">Home</a></li>
-                <li><Link to="/home">Feed</Link></li>
+                <li><a href="/feed" target="_top">Feed</a></li>
                 <li><a href="https://violetforest.com" target="_blank" rel="noreferrer">Portfolio</a></li>
               </ul>
             </nav>
