@@ -25,7 +25,12 @@ const POSITION_RANGES = {
   z: { min: -800, max: 800, step: 1 },
 }
 
-const CAMERA_DEFAULTS: XYZ = { x: 660, y: 100, z: 0 }
+const CAMERA_DEFAULTS_DESKTOP: XYZ = { x: 660, y: 100, z: 0 }
+const CAMERA_DEFAULTS_MOBILE: XYZ = { x: 350, y: 100, z: 0 }
+const CAMERA_DEFAULTS: XYZ =
+  typeof window !== 'undefined' && window.innerWidth < 768
+    ? CAMERA_DEFAULTS_MOBILE
+    : CAMERA_DEFAULTS_DESKTOP
 const PURPLE_LIGHT_DEFAULTS: XYZ = { x: 175, y: 120, z: 0 }
 
 type PropId =
