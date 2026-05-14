@@ -188,6 +188,7 @@ function LipstickTunnel({ scrollProgress }: { scrollProgress: number }) {
           borderRadius: 6, fontFamily: 'monospace', fontSize: 11,
           width: panelOpen ? 260 : 'auto',
           maxHeight: 'calc(100vh - 2rem)', overflowY: 'auto',
+          display: 'none',
         }}
       >
         <div
