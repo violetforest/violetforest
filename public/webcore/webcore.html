@@ -1915,14 +1915,30 @@ for (const b of bobbers) {
 
 // Clamp a placed gif so its entire visible footprint stays inside the
 // boundary walls (POPUP_EDGE_X / POPUP_EDGE_Z) — i.e., before/inside the
-// dead-ends of the map. Called after the collision-nudge step has finished.
+// dead-ends of the map — AND inside the skydome sphere (radius 800) so no
+// billboard pokes through the sky. Called after the collision-nudge step
+// has finished. Operates on { x, [y], z } and mutates in place.
+const SKYDOME_R = 800;
 function clampGifInsideBoundary(pos, effectiveR) {
+  // 1) Per-axis clamp to the playable area
   const marginX = POPUP_EDGE_X - effectiveR - 4;
   const marginZ = POPUP_EDGE_Z - effectiveR - 4;
   if (pos.x >  marginX) pos.x =  marginX;
   if (pos.x < -marginX) pos.x = -marginX;
   if (pos.z >  marginZ) pos.z =  marginZ;
   if (pos.z < -marginZ) pos.z = -marginZ;
+  // 2) Sphere clamp — keep the gif (including its rendered radius) inside
+  //    the skydome. If pos.y is not supplied, assume 0 for the test.
+  const safeR = SKYDOME_R - effectiveR - 6;
+  const y = (typeof pos.y === 'number') ? pos.y : 0;
+  const dist2 = pos.x * pos.x + y * y + pos.z * pos.z;
+  if (dist2 > safeR * safeR) {
+    const dist = Math.sqrt(dist2);
+    const k = safeR / dist;
+    pos.x *= k;
+    pos.z *= k;
+    if (typeof pos.y === 'number') pos.y *= k;
+  }
 }
 
 function placeGifs(manifest) {
@@ -2014,10 +2030,11 @@ function placeGifs(manifest) {
         if (!collision) break;
       }
       fy = Math.max(80, fy); // never below 80
-      // Clamp inside the boundary walls so no alert gif spills past the dead-ends.
-      const p = { x: fx, z: fz };
+      // Clamp inside the boundary walls AND inside the skydome so no alert
+      // gif spills past the dead-ends or pokes through the sky.
+      const p = { x: fx, y: fy, z: fz };
       clampGifInsideBoundary(p, effectiveR);
-      fx = p.x; fz = p.z;
+      fx = p.x; fy = p.y; fz = p.z;
       occupied.push({ x: fx, y: fy, z: fz, r: effectiveR });
       const sprite = makeGifSprite(url, scale);
       sprite.sprite.position.set(fx, fy, fz);
@@ -2082,10 +2099,11 @@ function placeGifs(manifest) {
       if (!collision) break;
     }
 
-    // Clamp inside the boundary walls so this gif sits inside the dead-ends.
-    const _p = { x, z };
+    // Clamp inside the boundary walls AND inside the skydome so this gif
+    // sits inside the dead-ends and never pokes through the sky.
+    const _p = { x, y, z };
     clampGifInsideBoundary(_p, effectiveR);
-    x = _p.x; z = _p.z;
+    x = _p.x; y = _p.y; z = _p.z;
 
     // Re-clamp ground clearance after nudging — use full rendered height
     const finalGroundY = hillHeight(x, z) + HILL_Y_OFFSET;
@@ -3099,16 +3117,21 @@ const CHAT_PERSONAS = [
 // Shared "last alert timestamp" so chats and emails don't pile on top of each other
 // on mobile — they should feel like a steady drip, not simultaneous pings.
 window._lastAlertTime = 0;
-const MOBILE_ALERT_GAP_MS = 18000;   // minimum gap between any two alerts on mobile
+// Minimum gap between any two alerts (chat IM or email) on any device, so an
+// IM and an email never appear at the same instant. Mobile gets a tighter
+// cadence; desktop has more room to space them out.
+const MOBILE_ALERT_GAP_MS = 18000;
+const ALERT_GAP_MS = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? MOBILE_ALERT_GAP_MS : 25000;
 
 function showChatPopup() {
   if (document.body.classList.contains('freeze-active') || (typeof bsodActive !== 'undefined' && bsodActive)) { setTimeout(showChatPopup, 5000); return; }
   // Only one IM window at a time — if one's already open, try again later
   if (document.querySelector('.chat-popup')) { setTimeout(showChatPopup, 8000); return; }
-  // Mobile: enforce an even spacing between this alert and the previous one (chat or email)
-  if (_isMobileDevice) {
+  // Enforce a minimum gap between this alert and the previous one (chat or
+  // email) on every device, so an IM and a mail icon never pop up together.
+  {
     const since = Date.now() - window._lastAlertTime;
-    if (since < MOBILE_ALERT_GAP_MS) { setTimeout(showChatPopup, MOBILE_ALERT_GAP_MS - since); return; }
+    if (since < ALERT_GAP_MS) { setTimeout(showChatPopup, ALERT_GAP_MS - since); return; }
     window._lastAlertTime = Date.now();
   }
   const persona = CHAT_PERSONAS[Math.floor(Math.random() * CHAT_PERSONAS.length)];
@@ -3167,22 +3190,29 @@ function showChatPopup() {
   }
 
   // Track lines this bot has already used in this chat so we don't repeat
-  // ourselves. If we exhaust the pool we reset and start cycling again.
+  // ourselves. When the pool is fully exhausted, pickUnused returns null —
+  // the caller uses that signal to set an away message.
   const usedLines = new Set();
   function pickUnused(pool) {
     const fresh = pool.filter(l => !usedLines.has(l));
-    if (fresh.length === 0) {
-      // Pool exhausted — clear history and start fresh so the bot still says
-      // something rather than going silent.
-      usedLines.clear();
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      usedLines.add(pick);
-      return pick;
-    }
+    if (fresh.length === 0) return null;
     const pick = fresh[Math.floor(Math.random() * fresh.length)];
     usedLines.add(pick);
     return pick;
   }
+
+  // Away messages used once the bot runs out of fresh lines.
+  const AWAY_MESSAGES = [
+    "brb — making a sandwich 🥪",
+    "afk, dial-up acting up again ☎",
+    "talking to mom irl, brb",
+    "g2g, my favorite show is on",
+    "homework break, bbl",
+    "feeding the dog ✿ brb",
+    "phone ☎ — gimme a sec",
+    "auto: not at keyboard, leave a msg",
+  ];
+  let awayMode = false;
 
   // Initial greeting
   usedLines.add(persona.greet);
@@ -3195,6 +3225,18 @@ function showChatPopup() {
     input.value = '';
     msgCount++;
 
+    // If they've gone away, every further message gets the same auto-response.
+    if (awayMode) {
+      const typing = appendMsg('typing', persona.name, 'auto-response...');
+      setTimeout(() => {
+        typing.remove();
+        const div = appendMsg('them', persona.name, '');
+        div.innerHTML = `<span class="who">${persona.name}:</span> <i>Auto-response: ${awayMode}</i>`;
+        body.scrollTop = body.scrollHeight;
+      }, 500 + Math.random() * 700);
+      return;
+    }
+
     // Pick a response based on content
     const lower = text.toLowerCase();
     let pool = persona.responses.default;
@@ -3203,6 +3245,17 @@ function showChatPopup() {
       pool = [...pool, ...persona.responses.default_mid];
     }
     const reply = pickUnused(pool);
+    if (reply === null) {
+      // Pool exhausted — bot has nothing fresh left. Set an away message and
+      // switch into away mode so every further message gets the auto-response.
+      const away = AWAY_MESSAGES[Math.floor(Math.random() * AWAY_MESSAGES.length)];
+      setTimeout(() => {
+        const note = appendMsg('them', persona.name, '');
+        note.innerHTML = `<i>${persona.name} has set an away message: "${away}"</i>`;
+        awayMode = away;
+      }, 1500 + Math.random() * 1200);
+      return;
+    }
     theyReply(reply);
   }
 
@@ -3623,7 +3676,16 @@ function initAudio() {
   fb.connect(delay);
   delay.connect(audioCtx.destination);
 
-  // Music does not auto-start; user presses play button to begin.
+  // Autoplay a random track on the very first audio init. Browsers require a
+  // user gesture before audio can start; initAudio() is only ever called from
+  // such a gesture, so this is safe. currentTrackIdx was already randomized
+  // at module load.
+  try {
+    currentTrackIdx = Math.floor(Math.random() * TRACKS.length);
+    startMusicSystem();
+  } catch (e) {
+    console.warn('autoplay failed:', e);
+  }
 }
 
 function playNote(freq, type, vol, start, dur, dest) {
@@ -4553,11 +4615,11 @@ let _firstEmailSent = false;
 const FIRST_EMAIL_BLOCKLIST = ["FWD: PLEASE HELP FIND LITTLE TIMMY"];
 function addEmail() {
   if (document.body.classList.contains('freeze-active') || (typeof bsodActive !== 'undefined' && bsodActive)) return;
-  // Mobile: enforce spacing between alerts — if a chat or email just fired,
-  // delay this one so notifications feel evenly paced.
-  if (_isMobileDevice) {
+  // Enforce spacing between alerts — if a chat or email just fired, delay this
+  // one so notifications never collide. Applies on every device.
+  {
     const since = Date.now() - window._lastAlertTime;
-    if (since < MOBILE_ALERT_GAP_MS) { setTimeout(addEmail, MOBILE_ALERT_GAP_MS - since); return; }
+    if (since < ALERT_GAP_MS) { setTimeout(addEmail, ALERT_GAP_MS - since); return; }
   }
   let pool = EMAIL_TEMPLATES;
   if (!_firstEmailSent) {
@@ -4573,7 +4635,8 @@ function addEmail() {
   const minute = Math.floor(Math.random() * 60);
   emailInbox.push({ ...tpl, read: false, time: new Date(year, month, day, hour, minute) });
   _firstEmailSent = true;
-  if (_isMobileDevice) window._lastAlertTime = Date.now();
+  // Mark this as the last alert for both chat and email schedulers.
+  window._lastAlertTime = Date.now();
   playIncomingMsg();
   showEmailIcon();
 }
@@ -4749,8 +4812,11 @@ function renderEmailList() {
   requestAnimationFrame(() => { list.scrollTop = 0; });
 }
 
-// Schedule emails — faster on mobile
-const _firstEmailDelay = _isMobileDevice ? 15000 : 40000;
+// Schedule emails — faster on mobile. First email is offset from the first IM
+// so they don't land on the same instant (IM first-show is at 12s mobile / 40s
+// desktop). The runtime ALERT_GAP_MS check in addEmail() will still re-defer
+// if they ever drift back into each other.
+const _firstEmailDelay = _isMobileDevice ? 35000 : 75000;
 const _emailMinDelay   = _isMobileDevice ? 20000 : 40000;
 const _emailRandRange  = _isMobileDevice ? 30000 : 80000;
 setTimeout(() => {

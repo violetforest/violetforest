@@ -3799,14 +3799,11 @@ function showChatPopup() {
   // Track lines this bot has already used in this chat so we don't repeat
   // ourselves. If we exhaust the pool we reset and start cycling again.
   const usedLines = new Set();
+  // Returns the next line, or null when the pool is fully exhausted — the
+  // caller uses null as the signal to set an away message and stop replying.
   function pickUnused(pool) {
     const fresh = pool.filter(l => !usedLines.has(l));
-    if (fresh.length === 0) {
-      usedLines.clear();
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      usedLines.add(pick);
-      return pick;
-    }
+    if (fresh.length === 0) return null;
     const pick = fresh[Math.floor(Math.random() * fresh.length)];
     usedLines.add(pick);
     return pick;
@@ -3852,17 +3849,19 @@ function showChatPopup() {
       pool = [...pool, ...persona.responses.default_mid];
     }
     const reply = pickUnused(pool);
-    theyReply(reply);
-
-    // After a couple exchanges, ~35% chance the bot sets an away message and stops replying.
-    if (msgCount >= 2 && Math.random() < 0.35) {
+    if (reply === null) {
+      // Pool exhausted — the bot has nothing fresh left to say. Set an away
+      // message and switch into away mode so every further message gets the
+      // auto-response.
       const away = AWAY_MESSAGES[Math.floor(Math.random() * AWAY_MESSAGES.length)];
       setTimeout(() => {
         const note = appendMsg('them', persona.name, '');
         note.innerHTML = `<i>${persona.name} has set an away message: "${away}"</i>`;
         awayMode = away;
-      }, 2200 + Math.random() * 1500);
+      }, 1500 + Math.random() * 1200);
+      return;
     }
+    theyReply(reply);
   }
 
   sendBtn.addEventListener('click', send);
