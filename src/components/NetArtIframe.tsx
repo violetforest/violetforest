@@ -69,9 +69,10 @@ export function NetArtIframe({
       style={{
         position: 'fixed',
         inset: 0,
-        // Pink-tint frosted vibe matching the bedroom info-modal backdrop.
+        // Windows XP Luna blue backdrop — bright sky-blue center fading out to
+        // a deep navy edge, echoing the classic XP title-bar / Bliss palette.
         background:
-          'radial-gradient(ellipse at 50% 45%, #ff7eb3 0%, #c84a85 60%, #6a1f4a 100%)',
+          'radial-gradient(ellipse at 50% 45%, #6cb6ff 0%, #2566c8 55%, #0a2a6b 100%)',
       }}
     >
       <iframe
@@ -83,9 +84,10 @@ export function NetArtIframe({
           width: '100%',
           height: '100%',
           border: 'none',
-          // Match the webcore route-fader so the brief load gap reads as the
-          // gradient fading in, not a black flash.
-          background: 'linear-gradient(30deg, #6a00ef, #ff4aab, #000fff)',
+          // Windows XP Luna title-bar gradient — the iconic deep→bright→deep
+          // blue ramp. Used as the iframe's load-time backdrop so the gap
+          // reads as XP chrome fading in, not a black flash.
+          background: 'linear-gradient(30deg, #0058ed, #2490f9, #1b75e0)',
         }}
       />
       {info && (

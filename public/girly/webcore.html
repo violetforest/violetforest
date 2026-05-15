@@ -3796,7 +3796,24 @@ function showChatPopup() {
     }, 1200 + Math.random() * 1500);
   }
 
+  // Track lines this bot has already used in this chat so we don't repeat
+  // ourselves. If we exhaust the pool we reset and start cycling again.
+  const usedLines = new Set();
+  function pickUnused(pool) {
+    const fresh = pool.filter(l => !usedLines.has(l));
+    if (fresh.length === 0) {
+      usedLines.clear();
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      usedLines.add(pick);
+      return pick;
+    }
+    const pick = fresh[Math.floor(Math.random() * fresh.length)];
+    usedLines.add(pick);
+    return pick;
+  }
+
   // Initial greeting
+  usedLines.add(persona.greet);
   theyReply(persona.greet);
 
   const AWAY_MESSAGES = [
@@ -3834,7 +3851,7 @@ function showChatPopup() {
     if (msgCount > 2 && persona.responses.default_mid) {
       pool = [...pool, ...persona.responses.default_mid];
     }
-    const reply = pool[Math.floor(Math.random() * pool.length)];
+    const reply = pickUnused(pool);
     theyReply(reply);
 
     // After a couple exchanges, ~35% chance the bot sets an away message and stops replying.

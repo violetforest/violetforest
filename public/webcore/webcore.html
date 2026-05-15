@@ -1012,7 +1012,9 @@ for (let i = 0; i < CLOUD_COUNT; i++) {
 }
 
 // --- Checkerboard floor ---
-const floorSize = 1200;
+// Checker floor extends past the 800-radius skydome on every axis so the
+// valley meets the horizon from any walkable position.
+const floorSize = 1800;
 const checkSize = 10;
 const floorCanvas = document.createElement('canvas');
 floorCanvas.width = 1024;
@@ -1892,9 +1894,11 @@ function randRange(a, b) { return a + Math.random() * (b - a); }
 
 let gifMaxY = 8000;
 let gifScale = 5;
-let gifMapX = 1200;
-let gifMapZ = 1200;
-let gifZStart = -600;
+// GIF grid extents — kept just inside the player boundary walls (±525 X,
+// ±595 Z) so every billboard sits before / inside the dead-ends of the map.
+let gifMapX = 1000;
+let gifMapZ = 1180;
+let gifZStart = -590;
 let gifGroupY = 10;
 let lastDiscovered = null;
 
@@ -1907,6 +1911,18 @@ scene.add(gifGroup);
 for (const b of bobbers) {
   scene.remove(b.mesh);
   gifGroup.add(b.mesh);
+}
+
+// Clamp a placed gif so its entire visible footprint stays inside the
+// boundary walls (POPUP_EDGE_X / POPUP_EDGE_Z) — i.e., before/inside the
+// dead-ends of the map. Called after the collision-nudge step has finished.
+function clampGifInsideBoundary(pos, effectiveR) {
+  const marginX = POPUP_EDGE_X - effectiveR - 4;
+  const marginZ = POPUP_EDGE_Z - effectiveR - 4;
+  if (pos.x >  marginX) pos.x =  marginX;
+  if (pos.x < -marginX) pos.x = -marginX;
+  if (pos.z >  marginZ) pos.z =  marginZ;
+  if (pos.z < -marginZ) pos.z = -marginZ;
 }
 
 function placeGifs(manifest) {
@@ -1998,6 +2014,10 @@ function placeGifs(manifest) {
         if (!collision) break;
       }
       fy = Math.max(80, fy); // never below 80
+      // Clamp inside the boundary walls so no alert gif spills past the dead-ends.
+      const p = { x: fx, z: fz };
+      clampGifInsideBoundary(p, effectiveR);
+      fx = p.x; fz = p.z;
       occupied.push({ x: fx, y: fy, z: fz, r: effectiveR });
       const sprite = makeGifSprite(url, scale);
       sprite.sprite.position.set(fx, fy, fz);
@@ -2033,7 +2053,12 @@ function placeGifs(manifest) {
     const halfHeight = scale * gifScale * 0.55;
     const groundMin = groundY + halfHeight + 5;
     const minY = Math.max(groundMin, g.yMin);
-    let y = randRange(minY, Math.max(minY + 5, g.yMax));
+    // ~50% of gifs are lifted up to the alert-tier max (y up to 200) and the
+    // other ~50% stay in their category's low band — an even split between
+    // ground-hugging and sky-floating pieces.
+    const lifted = Math.random() < 0.50;
+    const yMax = lifted ? 200 : g.yMax;
+    let y = randRange(minY, Math.max(minY + 5, yMax));
 
     // Effective radius of this gif after scaling (generous padding)
     const effectiveR = scale * gifScale * 0.6 + 3;
@@ -2056,6 +2081,11 @@ function placeGifs(manifest) {
       }
       if (!collision) break;
     }
+
+    // Clamp inside the boundary walls so this gif sits inside the dead-ends.
+    const _p = { x, z };
+    clampGifInsideBoundary(_p, effectiveR);
+    x = _p.x; z = _p.z;
 
     // Re-clamp ground clearance after nudging — use full rendered height
     const finalGroundY = hillHeight(x, z) + HILL_Y_OFFSET;
@@ -2763,6 +2793,12 @@ function playFreezeChime() {
 
 function spawn2DPopup() {
   if (typeof bsodActive !== 'undefined' && bsodActive) return;
+  // Only one freeze popup may be on screen at a time. If the previous one is
+  // still up, retry in 15s instead of stacking another on top.
+  if (activeModalPopups > 0 || document.body.classList.contains('freeze-active')) {
+    setTimeout(spawn2DPopup, 15000);
+    return;
+  }
   activeModalPopups++;
   document.body.classList.add('freeze-active');
   // Freeze chime — plays direct to output so the mute below doesn't silence it
@@ -3130,7 +3166,26 @@ function showChatPopup() {
     }, 1200 + Math.random() * 1500);
   }
 
+  // Track lines this bot has already used in this chat so we don't repeat
+  // ourselves. If we exhaust the pool we reset and start cycling again.
+  const usedLines = new Set();
+  function pickUnused(pool) {
+    const fresh = pool.filter(l => !usedLines.has(l));
+    if (fresh.length === 0) {
+      // Pool exhausted — clear history and start fresh so the bot still says
+      // something rather than going silent.
+      usedLines.clear();
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      usedLines.add(pick);
+      return pick;
+    }
+    const pick = fresh[Math.floor(Math.random() * fresh.length)];
+    usedLines.add(pick);
+    return pick;
+  }
+
   // Initial greeting
+  usedLines.add(persona.greet);
   theyReply(persona.greet);
 
   function send() {
@@ -3147,7 +3202,7 @@ function showChatPopup() {
     if (msgCount > 2 && persona.responses.default_mid) {
       pool = [...pool, ...persona.responses.default_mid];
     }
-    const reply = pool[Math.floor(Math.random() * pool.length)];
+    const reply = pickUnused(pool);
     theyReply(reply);
   }
 
@@ -4509,7 +4564,14 @@ function addEmail() {
     pool = EMAIL_TEMPLATES.filter(t => !FIRST_EMAIL_BLOCKLIST.includes(t.subject));
   }
   const tpl = pool[Math.floor(Math.random() * pool.length)];
-  emailInbox.push({ ...tpl, read: false, time: new Date() });
+  // Stamp the email with a random late-90s date instead of "right now" so the
+  // whole inbox feels like it was archived from a 1996–1999 mail client.
+  const year   = 1996 + Math.floor(Math.random() * 4);   // 1996..1999
+  const month  = Math.floor(Math.random() * 12);         // 0..11
+  const day    = 1 + Math.floor(Math.random() * 28);     // 1..28 (safe for any month)
+  const hour   = Math.floor(Math.random() * 24);
+  const minute = Math.floor(Math.random() * 60);
+  emailInbox.push({ ...tpl, read: false, time: new Date(year, month, day, hour, minute) });
   _firstEmailSent = true;
   if (_isMobileDevice) window._lastAlertTime = Date.now();
   playIncomingMsg();
