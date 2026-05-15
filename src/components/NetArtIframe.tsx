@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { NextRandomLink } from './NextRandomLink'
 import { NetArtInfo } from './NetArtInfo'
@@ -16,6 +16,7 @@ export function NetArtIframe({
   infoLabel,
   infoPosition,
   infoRainbow,
+  favicon,
 }: {
   src: string
   title: string
@@ -24,7 +25,41 @@ export function NetArtIframe({
   infoLabel?: string
   infoPosition?: 'top-right' | 'bottom-right'
   infoRainbow?: boolean
+  /**
+   * Optional URL to swap into the document's favicon for the duration of this
+   * route. The browser ignores `<link rel="icon">` inside iframed pages, so
+   * iframe-based net-art routes that want their own favicon have to set it on
+   * the top-level document. Original favicons are restored on unmount.
+   */
+  favicon?: string
 }) {
+  useEffect(() => {
+    if (!favicon) return
+    const head = document.head
+    // Snapshot the existing icon links so we can restore them when leaving.
+    const existing = Array.from(
+      head.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]')
+    ) as HTMLLinkElement[]
+    const prevHrefs = existing.map((el) => el.getAttribute('href'))
+    // Point every icon link at the route-specific favicon.
+    existing.forEach((el) => el.setAttribute('href', favicon))
+    // If there were no icon links at all, add one.
+    let added: HTMLLinkElement | null = null
+    if (existing.length === 0) {
+      added = document.createElement('link')
+      added.rel = 'icon'
+      added.href = favicon
+      head.appendChild(added)
+    }
+    return () => {
+      existing.forEach((el, i) => {
+        const prev = prevHrefs[i]
+        if (prev != null) el.setAttribute('href', prev)
+      })
+      if (added) added.remove()
+    }
+  }, [favicon])
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

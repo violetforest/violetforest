@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/x-icon" href="webcore.ico" />
 <title>Webcore by Violet Forest</title>
 <style>
   * { margin: 0; padding: 0; }
@@ -827,7 +828,16 @@ function groundY(x, z) {
 
 // --- Movement freeze for modal popups ---
 let activeModalPopups = 0;
-const POPUP_EDGE_THRESHOLD = 400;
+// Boundary follows the actual terrain extent on all sides:
+//   • X: hills extend out to VALLEY_HALF + HILL_EXTENT = 28 + 500 = 528
+//   • Z: hills span HILL_LEN = 1200 (so ±600), matching the checker floor extent
+// Keep a small inner margin so the camera never sits exactly on the geometry edge.
+const POPUP_EDGE_X = 525;
+const POPUP_EDGE_Z = 595;
+// Back-compat alias for code that still reads a single value (used by the edge
+// popup-trigger logic below). Use the smaller of the two so triggers fire on
+// either axis before clipping geometry.
+const POPUP_EDGE_THRESHOLD = Math.min(POPUP_EDGE_X, POPUP_EDGE_Z);
 
 // --- WASD fly with height cap ---
 const PLAYER_HEIGHT = 4;
@@ -886,18 +896,18 @@ function updateWalk(dt) {
     controls.target.y -= push;
   }
 
-  // Edge wall + 3D popups
+  // Edge wall + 3D popups — clamp at the actual terrain edge per axis
   const prevX = camera.position.x, prevZ = camera.position.z;
   let blocked = false;
-  if (Math.abs(camera.position.x) > POPUP_EDGE_THRESHOLD) {
+  if (Math.abs(camera.position.x) > POPUP_EDGE_X) {
     const sign = camera.position.x > 0 ? 1 : -1;
-    camera.position.x = sign * POPUP_EDGE_THRESHOLD;
+    camera.position.x = sign * POPUP_EDGE_X;
     controls.target.x += (camera.position.x - prevX);
     blocked = true;
   }
-  if (Math.abs(camera.position.z) > POPUP_EDGE_THRESHOLD) {
+  if (Math.abs(camera.position.z) > POPUP_EDGE_Z) {
     const sign = camera.position.z > 0 ? 1 : -1;
-    camera.position.z = sign * POPUP_EDGE_THRESHOLD;
+    camera.position.z = sign * POPUP_EDGE_Z;
     controls.target.z += (camera.position.z - prevZ);
     blocked = true;
   }
@@ -1039,8 +1049,11 @@ scene.add(floor);
 // --- Rolling grass hills on the sides of the valley ---
 const VALLEY_HALF = 28;       // half-width of the flat checker valley (along X)
 const HILL_BLEND = 70;        // long, gentle ramp out of the valley
-const HILL_EXTENT = 500;      // how far hills extend out from center along X
-const HILL_LEN = 1200;        // length of hills along Z
+// Hills extend past the skydome radius (800) so the grass meets the horizon
+// from any direction inside the boundary — no visible void between terrain
+// edge and sky.
+const HILL_EXTENT = 900;      // how far hills extend out from center along X
+const HILL_LEN = 1800;        // length of hills along Z
 
 function hillMask(x) {
   const ax = Math.abs(x);
@@ -1137,8 +1150,17 @@ const chromeMat = _isMobileDevice
 
 // --- Scatter individual bobbing spheres ---
 const bobbers = [];
+// Grass / terrain bounds — anything outside these is past the hills and
+// would float over the void. Spheres that fall outside are skipped entirely.
+const SPHERE_BOUND_X = VALLEY_HALF + HILL_EXTENT;   // 28 + 900 = 928
+const SPHERE_BOUND_Z = HILL_LEN / 2;                // 900
 function addSphere(x, z, r) {
   r *= 8;
+  // Reject spheres whose center (with a half-radius safety margin) would sit
+  // outside the grass — keeps every metallic ball inside the terrain.
+  const margin = r * 0.5;
+  if (Math.abs(x) > SPHERE_BOUND_X - margin) return;
+  if (Math.abs(z) > SPHERE_BOUND_Z - margin) return;
   const padding = 1.5;
   // Nudge the sphere away from any existing one it would overlap with.
   // Up to 12 iterations — each pass walks this sphere out along the overlap axis.
@@ -1223,10 +1245,12 @@ addSphere(0,   -590, 0.6);
 let __seed = (Math.random() * 2147483647) | 0;
 function rnd() { __seed = (__seed * 9301 + 49297) % 233280; return __seed / 233280; }
 
-// Scatter spheres across the entire map — valley, hills, everywhere
+// Scatter spheres across the entire map — valley, hills, everywhere.
+// Ranges stay strictly inside SPHERE_BOUND_X / SPHERE_BOUND_Z so no sphere
+// can land past the grass.
 for (let i = 0; i < 50; i++) {
-  const x = (rnd() - 0.5) * 800;
-  const z = -400 + rnd() * 2800;
+  const x = (rnd() - 0.5) * 2 * (SPHERE_BOUND_X - 20);   // ±508
+  const z = (rnd() - 0.5) * 2 * (SPHERE_BOUND_Z - 20);   // ±580
   let tooClose = false;
   for (const b of bobbers) {
     const dx = b.mesh.position.x - x, dz = b.mesh.position.z - z;
@@ -1241,7 +1265,7 @@ for (let i = 0; i < 50; i++) {
 for (let i = 0; i < 38; i++) {
   const side = rnd() < 0.5 ? -1 : 1;
   const x = side * (VALLEY_HALF + 10 + rnd() * 450);
-  const z = -400 + rnd() * 2800;
+  const z = (rnd() - 0.5) * 2 * (SPHERE_BOUND_Z - 20);   // ±580 — stays on the hills
   let tooClose = false;
   for (const b of bobbers) {
     const dx = b.mesh.position.x - x, dz = b.mesh.position.z - z;
@@ -2140,19 +2164,19 @@ function updateMobileWalkSimple(dt) {
   const nextY = camera.position.y + fwd.y * speed;
 
   // Edge wall — clamp but don't trigger popups. Give a slight bounce toward center.
-  const WALL = POPUP_EDGE_THRESHOLD;
+  // Per-axis walls follow the actual terrain extent.
   const bufferZone = 50;
   let dx = fwd.x * speed;
   let dy = fwd.y * speed;
   let dz = fwd.z * speed;
   // Slow down near the wall, stop at it
-  if (Math.abs(nextX) > WALL) {
+  if (Math.abs(nextX) > POPUP_EDGE_X) {
     dx = 0;
     // Turn the player's view toward center over time
     const nudgeAmt = Math.sign(camera.position.x) * -2 * dt;
     controls.target.x += nudgeAmt * 10;
   }
-  if (Math.abs(nextZ) > WALL) {
+  if (Math.abs(nextZ) > POPUP_EDGE_Z) {
     dz = 0;
     const nudgeAmt = Math.sign(camera.position.z) * -2 * dt;
     controls.target.z += nudgeAmt * 10;
@@ -4732,10 +4756,11 @@ bsodEl.addEventListener('click', dismissBSOD);
 window.addEventListener('keyup', (e) => {
   if (bsodActive && Date.now() >= bsodDismissableAt) { dismissBSOD(); e.preventDefault(); }
 });
-// Skip BSOD on mobile
-if (!_isMobileCheck) {
-  setTimeout(showBSOD, 120000); // 2 minutes
-}
+// BSOD disabled — kept the dismiss/animation code intact in case it's ever
+// re-enabled, but the 2-minute auto-trigger no longer fires on any device.
+// if (!_isMobileCheck) {
+//   setTimeout(showBSOD, 120000); // 2 minutes
+// }
 
 // Use raw requestAnimationFrame for 60fps — setAnimationLoop caps to 30 with XR
 function animateLoop() {
