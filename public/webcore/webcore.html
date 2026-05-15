@@ -148,6 +148,36 @@
     75% { transform: rotate(1.5deg); }
   }
 
+  /* Drag hint shown inside a "Not Responding" freeze popup until it's been dragged enough to unlock */
+  .xp-popup .drag-hint {
+    margin-top: 10px;
+    font-size: 11px; color: #555; font-style: italic;
+    display: flex; align-items: center; gap: 6px;
+    animation: dragHintPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dragHintPulse {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+  }
+  /* Big, attention-grabbing Close button that appears after the user has dragged far enough */
+  .xp-popup .xp-btn.unlocked-close {
+    background: linear-gradient(180deg, #ff6b6b 0%, #c8302e 100%);
+    color: #fff; font-weight: bold;
+    padding: 8px 26px; font-size: 14px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #c8302e, 0 0 14px 4px rgba(255, 80, 80, 0.7);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    animation: closeBtnPulse 0.9s ease-in-out infinite;
+  }
+  .xp-popup .xp-btn.unlocked-close:hover {
+    background: linear-gradient(180deg, #ff8888 0%, #e04040 100%);
+    border-color: #fff;
+  }
+  @keyframes closeBtnPulse {
+    0%, 100% { transform: scale(1);    box-shadow: 0 0 0 2px #c8302e, 0 0 14px 4px rgba(255, 80, 80, 0.7); }
+    50%      { transform: scale(1.08); box-shadow: 0 0 0 2px #c8302e, 0 0 22px 8px rgba(255, 120, 120, 0.9); }
+  }
+
   /* --- Winner popup --- */
   .winner-popup {
     position: fixed; z-index: 20500;
@@ -522,12 +552,51 @@
     position: absolute; bottom: 30px; right: 40px;
     color: #666; font-size: 11px; font-family: 'Courier New', monospace;
   }
+
+  /* --- Controls hint (carried over from index.html) --- */
+  #hint {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(232, 244, 255, 0.55);
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 6;
+    transition: opacity 0.5s ease;
+  }
+  #hint.hidden { opacity: 0; }
+  #hint kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 4px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    margin: 0 2px;
+  }
 </style>
 </head>
 <body>
 <div id="popup-layer">
   <canvas id="popup-trail-canvas"></canvas>
 </div>
+
+<!-- Controls hint (carried over from index.html) -->
+<div id="hint" style="display:none;">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk &nbsp;·&nbsp; <kbd>shift</kbd> run &nbsp;·&nbsp; <kbd>mouse</kbd> look &nbsp;·&nbsp; <kbd>esc</kbd> release
+</div>
+<script>
+  // Only show controls on desktop, not mobile/touch
+  (function() {
+    const isDesktop = window.innerWidth > 1024 && !(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    if (isDesktop) document.getElementById('hint').style.display = '';
+  })();
+</script>
 <div id="bsod">
   <div class="bsod-inner">
     <div class="bsod-title">System</div>
@@ -2683,8 +2752,9 @@ function spawn2DPopup() {
   spawnPopup(true); // always forced drag (defragment)
 }
 
-// Spawn defragment popups on a timer
-const popup2DSchedule = [30000, 90000, 180000, 300000];
+// Spawn defragment popups on a timer — kept sparse so they feel like a rare
+// system hiccup, not a constant interruption.
+const popup2DSchedule = [120000, 360000, 720000];
 // Skip freeze popups on mobile
 const _isMobileCheck = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 if (!_isMobileCheck) {
@@ -3141,7 +3211,9 @@ function spawnPopup(forceNoDismiss) {
         <div>${msg.msg}</div>
       </div>
       <div class="btn-row">
-        ${forceNoDismiss ? '' : '<button class="xp-btn popup-close">OK</button>'}
+        ${forceNoDismiss
+          ? '<div class="drag-hint">↔ drag this window to unfreeze your system</div>'
+          : '<button class="xp-btn popup-close">OK</button>'}
       </div>
     </div>`;
 
@@ -3169,13 +3241,15 @@ function spawnPopup(forceNoDismiss) {
     el.style.left = newX + 'px';
     el.style.top = newY + 'px';
 
-    if (forceNoDismiss && totalDragDist > 600 && !el.dataset.unlocked) {
+    if (forceNoDismiss && totalDragDist > 300 && !el.dataset.unlocked) {
       el.dataset.unlocked = 'true';
       const btnRow = el.querySelector('.btn-row');
+      // Replace the drag-hint with a big, glowing, pulsing Close button so the
+      // user can't miss how to dismiss the popup once dragging has unfrozen it.
+      btnRow.innerHTML = '';
       const closeBtn = document.createElement('button');
-      closeBtn.className = 'xp-btn';
-      closeBtn.textContent = 'Close';
-      closeBtn.style.animation = 'bsodBlink 0.5s step-end 3';
+      closeBtn.className = 'xp-btn unlocked-close';
+      closeBtn.textContent = '✓  Close window';
       closeBtn.addEventListener('click', closePopup);
       btnRow.appendChild(closeBtn);
     }
@@ -3517,7 +3591,7 @@ const TRACKS = [
     melodyVol: 0.05, bassVol: 0.06,
   },
   {
-    name: "404.wav",
+    name: "404.mp3",
     // Sparse, eerie, glitchy
     melody: [
       0, 659.25, 0, 523.25, 0, 0, 440, 0,
@@ -3531,7 +3605,7 @@ const TRACKS = [
     melodyVol: 0.04, bassVol: 0.05,
   },
   {
-    name: "bluescreen.midi",
+    name: "bluescreen.wav",
     // A minor — shifted up an octave, sharp & crystalline
     melody: [
       1760, 1567.98, 1318.5, 1174.66, 1046.5, 987.77, 880, 830.61,
@@ -3545,7 +3619,7 @@ const TRACKS = [
     melodyVol: 0.03, bassVol: 0.05,
   },
   {
-    name: "sunset.midi",
+    name: "sunset.mp3",
     // D major — shifted up an octave, airy & bright
     melody: [
       1174.66, 987.77, 880, 739.98, 659.26, 587.32, 659.26, 739.98,
