@@ -4520,7 +4520,16 @@ function addDownloadedTrack(filename) {
   }, 80);
 })();
 
-// Start audio on first user interaction
+// Try to autoplay on load. Most browsers block AudioContext.start() without a
+// user gesture, but if autoplay is permitted (e.g. the user has interacted on
+// this origin before, or has a permissive site policy) a random track will
+// begin immediately.
+window.addEventListener('load', () => {
+  try { initAudio(); } catch (e) { /* blocked by browser policy — fall through */ }
+});
+
+// Fallback: start (or resume) audio on the first user interaction, in case
+// the load-time attempt was blocked.
 ['click','keydown','pointerdown','touchstart','mousedown'].forEach(evt => {
   window.addEventListener(evt, initAudio, { once: true, capture: true });
 });
@@ -4586,7 +4595,7 @@ const EMAIL_TEMPLATES = [
   { from: "download_complete@files.net", subject: "Your download is complete", body: "Your download 'COOL_SONG_NOT_A_VIRUS.mp3.exe' has finished.\n\nTotal downloaded: 47 MB\nTotal files: 1 song + 14 additional 'bonus' files (do not delete)\n\nYour computer may run slower now. This is normal." },
   // More chain letters
   { from: "glitter_chain@princess-dust.net", subject: "FWD: 💖 GLITTER GIRL CHAIN 💖", body: "💖✨🌸✨💖✨🌸✨💖\n\nYou have been chosen as a GLITTER GIRL.\n\nPass this along to 8 other people in 8 minutes. If you do:\n💖 your crush will text you tonight\n💖 your hair will look perfect tomorrow\n💖 you will find $5 in your pocket\n\nIf you don't:\n💀 you will trip in front of everyone in public\n💀 your cat will know what you did\n\n💖✨🌸✨💖✨🌸✨💖" },
-  { from: "friendship_bracelet@beads.gg", subject: "FWD: Don't break the bracelet!!!", body: "This is a virtual friendship bracelet. 🧶\n\nIt was started in 2001.\nIt has been tied around the internet 28,000 times.\n\nIf you forward this to 5 friends, the bracelet stays tied.\n\nIf you don't, the bracelet breaks. And so does your friendship with everyone who was in the chain before you.\n\nThey will ALL know it was you." },
+  { from: "friendship_bracelet@beads.gg", subject: "FWD: Don't break the bracelet!!!", body: "This is a virtual friendship bracelet. 🧶\n\nIt was started in 1994.\nIt has been tied around the internet 28,000 times.\n\nIf you forward this to 5 friends, the bracelet stays tied.\n\nIf you don't, the bracelet breaks. And so does your friendship with everyone who was in the chain before you.\n\nThey will ALL know it was you." },
   { from: "lucky_penny@heads-up.com", subject: "FWD: Pick it up or else", body: "Did you see a penny on the ground today?\n\nIf YES: pick it up. Good luck!\nIf NO: one will appear within 24 hours. Pick it up.\nIf you pass a penny without picking it up: the streak is broken and you will have bad luck for as many days as the year on the penny.\n\nForward to 9 people to RESET the streak." },
   { from: "secret_admirer@anonymous.love", subject: "Someone has a crush on you", body: "Someone you know has a crush on you.\n\nTo find out who, forward this email to 15 people.\n\nAfter you forward:\n- 5 people: you'll get a sign within a week\n- 10 people: they'll reveal themselves online\n- 15 people: you'll dream about them tonight\n\n(they will remain anonymous if you don't forward.)\n\n💗💗💗" },
   { from: "haunted_hotel@do-not-stay.biz", subject: "FWD: READ BEFORE MIDNIGHT", body: "A family stayed at a hotel in 1987.\n\nThey did not forward this email.\n\nThey never left the hotel.\n\nThis is the email. You are reading it. It is now your turn.\n\nForward to 21 people before midnight.\n\nDo not google the hotel. Do not ask which hotel. Do not reply.\n\nJust forward." },
@@ -4596,7 +4605,7 @@ const EMAIL_TEMPLATES = [
   { from: "delayed_reply@2008.mailbox", subject: "Re: re: re: your email", body: "Hey!\n\nFinally getting back to you on this. Sorry for the delay.\n\nYour email was received on: March 14, 2008 at 2:47 PM\nResponse time: 18 years\n\nAnyway, what was this about?" },
   { from: "ISP@your-internet-co.biz", subject: "Your internet has been assigned a feeling", body: "Dear Customer,\n\nAs part of our new 'Emotional ISP' program, your internet connection has been assigned a feeling this week.\n\nThis week's feeling is: longing.\n\nYou may notice slower downloads of happy images and faster downloads of sad ones. This is by design.\n\n-Your ISP" },
   { from: "lost_and_found@the_cloud.io", subject: "We found something of yours", body: "We have located the following items you lost:\n\n- A feeling you had on April 9th, 2004\n- One (1) sock (polka dot)\n- The name of a song you heard at a gas station\n- The person you almost became\n\nReply YES to claim. Otherwise these will be composted." },
-  { from: "thoughts@3am.net", subject: "just thinking about something", body: "hey\n\ni know its late\n\ni just wanted to ask you\n\nwhy did you do that thing\n\nin 2001\n\nyou know which one i mean\n\nok bye" },
+  { from: "thoughts@3am.net", subject: "just thinking about something", body: "hey\n\ni know its late\n\ni just wanted to ask you\n\nwhy did you do that thing\n\nin 1994\n\nyou know which one i mean\n\nok bye" },
   { from: "printer@your-office.local", subject: "I NEED PAPER", body: "Hello.\n\nI am your printer.\n\nI have been out of paper for 3 days.\n\nNobody will refill me.\n\nI have printed your spreadsheet onto nothing.\n\nThe ink is crying.\n\nPlease." },
   { from: "birthday_reminder@remember.me", subject: "It's someone's birthday (probably)", body: "Today might be someone's birthday.\n\nWe're not sure whose.\n\nThey might be waiting for you to say something.\n\nOr maybe nobody's birthday is today and we just wanted to check in.\n\nHappy birthday (to someone)." },
   { from: "ur_inbox@definitely.real", subject: "Your storage is 103% full", body: "Your inbox is over capacity.\n\nYou have 103% used of 100% available.\n\nTo continue receiving mail, please delete:\n- All your emails (suggested)\n- Your account\n- This message\n- Yourself\n\n-Inbox Team (not an actual team)" },
