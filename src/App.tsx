@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { NetArtIframe } from './components/NetArtIframe'
@@ -108,8 +108,6 @@ export default function App() {
             <Route path="/lipstick-stationary" element={<NetArtIframe src={`${import.meta.env.BASE_URL}lipstick-stationary/index.html`} title="lipstick-stationary" showNext={false} />} />
             <Route path="/webcore" element={<NetArtIframe src={`${import.meta.env.BASE_URL}webcore/index.html`} title="webcore" showNext={false} favicon={`${import.meta.env.BASE_URL}webcore/webcore.ico`} />} />
             <Route path="/mcblingee" element={<NetArtIframe src={`${import.meta.env.BASE_URL}mcblingee/index.html`} title="mcblingee" showNext={false} favicon={`${import.meta.env.BASE_URL}mcblingee/favicon.ico`} docTitle="McBlingee by Violet Forest" />} />
-            {/* Old route — redirect so existing /girly links still work */}
-            <Route path="/girly" element={<Navigate to="/mcblingee" replace />} />
             <Route path="/scroll-spiral" element={<NetArtIframe src={`${import.meta.env.BASE_URL}scroll-spiral/index.html`} title="scroll-spiral" />} />
             <Route path="/sludge-flower" element={<NetArtIframe src={`${import.meta.env.BASE_URL}sludge-flower/index.html`} title="sludge-flower" />} />
             <Route path="/tones" element={<NetArtIframe src={`${import.meta.env.BASE_URL}tones/index.html`} title="tones" />} />

@@ -516,6 +516,10 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0418);
 scene.fog = new THREE.FogExp2(0x15051c, 0.045);
 
+// Single shared mobile flag — used by the click handler, tap-to-walk setup,
+// and the walk loop. Declared up here so every handler sees the same value.
+const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
 const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 60);
 camera.position.set(0, 1.6, 3.2);
 
@@ -1655,7 +1659,7 @@ document.addEventListener('click', (e) => {
   if (state !== 'walking') return;
   if (controls.isLocked) return;
   if (overlayEl && overlayEl.contains(e.target)) return;
-  if (typeof _isMobile !== 'undefined' && _isMobile) return;
+  if (isMobile) return;
   attemptLock();
 });
 
@@ -1683,9 +1687,8 @@ addEventListener('keydown', (e) => {
 addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 // --- Mobile: tap anywhere (including the 3D monitor) to walk + auto-sit ---
-const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
-if (_isMobile) {
+if (isMobile) {
   // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
   const hint = document.getElementById('controls-hint');
   if (hint) hint.style.display = 'none';
@@ -1883,7 +1886,7 @@ function animate() {
   }
 
   // Mobile: tap-to-walk forward toward the chair, auto-sit when close.
-  if (_isMobile && touchDown && state === 'walking' && !controls.isLocked) {
+  if (isMobile && touchDown && state === 'walking' && !controls.isLocked) {
     // Walk straight toward the chair (chairGroup at z = -2.9, x = 0).
     const dx = chairGroup.position.x - camera.position.x;
     const dz = chairGroup.position.z - camera.position.z;
