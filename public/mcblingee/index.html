@@ -516,6 +516,10 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0418);
 scene.fog = new THREE.FogExp2(0x15051c, 0.045);
 
+// Mobile browsers don't render iframes inside CSS3D transforms reliably, so
+// the CSS3D live-desktop layer is skipped on mobile (see monitor setup below).
+const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
 const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 60);
 camera.position.set(0, 1.6, 3.2);
 
@@ -1220,20 +1224,25 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
   monitorGroup.userData.screenMesh = screen;
   monitorGroup.userData.screenMat = screenMat;
 
-  // Live desktop iframe rendered onto the 3D monitor screen via CSS3D
-  const SCREEN_W = 1.22, SCREEN_H = 0.88;
-  const PX_W = 1024, PX_H = Math.round(PX_W * (SCREEN_H / SCREEN_W));
-  const screenIframe = document.createElement('iframe');
-  screenIframe.src = 'desktop.html';
-  screenIframe.style.width = PX_W + 'px';
-  screenIframe.style.height = PX_H + 'px';
-  screenIframe.style.border = '0';
-  screenIframe.style.background = '#fff5fa';
-  screenIframe.style.pointerEvents = 'none';
-  const cssScreen = new CSS3DObject(screenIframe);
-  cssScreen.scale.setScalar(SCREEN_W / PX_W);
-  cssScene.add(cssScreen);
-  monitorGroup.userData.cssScreen = cssScreen;
+  // Live desktop iframe rendered onto the 3D monitor screen via CSS3D.
+  // Skipped on mobile: mobile browsers fail to apply the 3D transform to
+  // iframes, leaving the raw 1024px desktop dumped over the top of the page.
+  // The screen mesh keeps its static desktop texture either way.
+  if (!_isMobile) {
+    const SCREEN_W = 1.22, SCREEN_H = 0.88;
+    const PX_W = 1024, PX_H = Math.round(PX_W * (SCREEN_H / SCREEN_W));
+    const screenIframe = document.createElement('iframe');
+    screenIframe.src = 'desktop.html';
+    screenIframe.style.width = PX_W + 'px';
+    screenIframe.style.height = PX_H + 'px';
+    screenIframe.style.border = '0';
+    screenIframe.style.background = '#fff5fa';
+    screenIframe.style.pointerEvents = 'none';
+    const cssScreen = new CSS3DObject(screenIframe);
+    cssScreen.scale.setScalar(SCREEN_W / PX_W);
+    cssScene.add(cssScreen);
+    monitorGroup.userData.cssScreen = cssScreen;
+  }
   // power led
   const led = new THREE.Mesh(
     new THREE.SphereGeometry(0.012, 8, 8),
@@ -1683,7 +1692,6 @@ addEventListener('keydown', (e) => {
 addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 // --- Mobile: tap anywhere (including the 3D monitor) to walk + auto-sit ---
-const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
 if (_isMobile) {
   // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
@@ -1709,6 +1717,10 @@ if (_isMobile) {
     if (e.pointerType !== 'touch') return;
     onTap(e);
   }, { capture: true });
+  // Mobile has no mouse-look or WASD, so walking around isn't meaningful.
+  // Latch the walk-in immediately on load — the player auto-walks to the
+  // chair and auto-sits without needing a tap first.
+  touchDown = true;
 }
 
 exitBtn.addEventListener('click', () => {
