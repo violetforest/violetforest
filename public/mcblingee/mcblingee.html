@@ -2781,7 +2781,7 @@ let envReady = false;
 const clock = new THREE.Clock();
 
 // --- High-res screenshot export (desktop) ---
-// Shift+E exports two PNGs at exact specs, WITH cursor trails composited on top:
+// Shift+C exports two PNGs at exact specs, WITH cursor trails composited on top:
 //   webcore-full-card.png  — 1630 x 2220 (9:12 portrait, 5% bleed included)
 //   webcore-square.png     — 1600 x 1600 (1:1)
 function _downloadDataURL(dataUrl, filename) {
@@ -2867,7 +2867,7 @@ async function exportScreenshots() {
 }
 window.exportScreenshots = exportScreenshots;
 window.addEventListener('keydown', (e) => {
-  if (e.shiftKey && (e.key === 'E' || e.code === 'KeyE')) {
+  if (e.shiftKey && (e.key === 'C' || e.code === 'KeyC')) {
     const t = e.target;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
     exportScreenshots();
