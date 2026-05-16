@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pink Y2K Desktop — Three.js</title>
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #ff66aa; font-family: "Segoe UI", sans-serif;
+    cursor: url("cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp") 4 4, auto; }
+  a, button, [role="button"], .win95-btn, .win95-titlebar, label, summary, select,
+  input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"] {
+    cursor: url("cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp") 4 4, pointer;
+  }
+  canvas { display: block; }
+  #info {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-size: 11px;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(180, 40, 100, 0.8);
+    pointer-events: none;
+    letter-spacing: 0.4px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<style id="cursor-rot"></style>
+<script>
+  (() => {
+    const CURSORS = [
+      "gifs/cursors/tumblr_06a2aeded2e365c91f54c8d04df87b12_1abf8d91_100.webp",
+      "gifs/cursors/tumblr_0c9bf7afb3ecfb776e9449c7fd2e95d5_bbdf3d58_100.webp",
+      "gifs/cursors/tumblr_0ef8bcf9e6e81665cd946520b2fdc4b3_0bf673ec_100.webp",
+      "gifs/cursors/tumblr_179de0f393cc90fb96e05f29236fcc82_5eb494cf_75.webp",
+      "gifs/cursors/tumblr_3883a365395d756be66e4c7a3665e404_d9d25615_250.webp",
+      "gifs/cursors/tumblr_38e2c9cf3e04d09348ef0af9948d4620_d1e9f925_75.webp",
+      "gifs/cursors/tumblr_465e9f20182f89577ec40f3bce4795f3_feaea217_75.webp",
+      "gifs/cursors/tumblr_4ed11c604ba4a66a11109b0b59dadc68_2839eb3a_100.webp",
+      "gifs/cursors/tumblr_5d19db8c00d20d2baea1a986ec91490f_20fcc1c5_75.webp",
+      "gifs/cursors/tumblr_6b69b1fac2766724812bf14b565deba5_9a15d3df_100.webp",
+      "gifs/cursors/tumblr_734f0fa22c07ecb4fc675c59251a6298_af39f2e5_75.webp",
+      "gifs/cursors/tumblr_7433e1047b83424374a7a3536e7138f6_9f2e786a_75.webp",
+      "gifs/cursors/tumblr_7f53982f5c6d7ead8263d5a4307668aa_d9f5e87b_100.webp",
+      "gifs/cursors/tumblr_8878c078d226b0742dc4f2e88d01e2d9_d25e45c1_100.webp",
+      "gifs/cursors/tumblr_9c21d6e382dd3c44abe5df9a906b5830_60ac9645_100.webp",
+      "gifs/cursors/tumblr_a31c3e32fa82bc567a16641f56d8e45d_1a24ad3a_100.webp",
+      "gifs/cursors/tumblr_b4ef741d1109054a36962e8fc536430c_54b08306_75.webp",
+      "gifs/cursors/tumblr_ce73fa30e4f8988bfcfc8bb21ba6ab80_4b87e70c_75.webp",
+      "gifs/cursors/tumblr_cf8eed39de6be94045a13563c75972a9_f75f971c_75.webp",
+      "gifs/cursors/tumblr_d4b362546e21896ecfc5892ad2a5f0b9_3bb2c843_75.webp",
+      "gifs/cursors/tumblr_df64edb6e6140ef82fb2ad795987f063_9a81b4bf_75.webp",
+    ];
+    CURSORS.forEach(src => { const img = new Image(); img.src = src; });
+    const styleEl = document.getElementById('cursor-rot');
+    let i = 0;
+    function update() {
+      const def = CURSORS[i % CURSORS.length];
+      const ptr = CURSORS[(i + Math.floor(CURSORS.length / 2)) % CURSORS.length];
+      styleEl.textContent = `
+        html, body { cursor: url("${def}") 4 4, auto; }
+        a, button, [role="button"], label, summary, select,
+        input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"] {
+          cursor: url("${ptr}") 4 4, pointer !important;
+        }
+      `;
+      i++;
+    }
+    update();
+    setInterval(update, 700);
+  })();
+</script>
+<div id="info">early internet — three.js</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   Scene / camera / renderer
+   ============================================================ */
+const scene = new THREE.Scene();
+
+const DESIGN_W = 19.2;
+const DESIGN_H = 10.8;
+
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+camera.position.z = 50;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+/* ============================================================
+   Background: heart-swirl shader
+   ============================================================ */
+const bgMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    time:   { value: 0 },
+    aspect: { value: 1 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform float time;
+    uniform float aspect;
+    varying vec2 vUv;
+
+    void main() {
+      vec2 uv = (vUv - 0.5) * 2.0;
+      uv.x *= aspect;
+
+      // Heart-shaped distortion: concentric hearts radiating out
+      vec2 p = uv;
+      p.y = -p.y;
+      p.y -= abs(p.x) * 0.55 - 0.15;
+
+      float r = length(p);
+      float a = atan(p.y, p.x);
+
+      // Rotating swirl stripes
+      float swirl = sin(r * 16.0 - time * 0.4 + a * 0.3);
+      float bands = smoothstep(-0.25, 0.25, swirl);
+
+      vec3 lightPink = vec3(1.00, 0.87, 0.95);
+      vec3 darkPink  = vec3(0.99, 0.58, 0.82);
+      vec3 color = mix(darkPink, lightPink, bands);
+
+      // Gentle vignette
+      float vig = 1.0 - smoothstep(0.4, 1.3, length(uv));
+      color *= 0.85 + 0.15 * vig;
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `,
+  depthWrite: false
+});
+
+const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), bgMaterial);
+bgMesh.position.z = -20;
+scene.add(bgMesh);
+
+/* ============================================================
+   Canvas-texture helpers
+   ============================================================ */
+function makeCanvas(w, h, draw) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  draw(ctx, w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.minFilter = THREE.LinearFilter;
+  t.magFilter = THREE.LinearFilter;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function rrect(ctx, x, y, w, h, r) {
+  if (typeof r === 'number') r = [r, r, r, r];
+  ctx.beginPath();
+  ctx.moveTo(x + r[0], y);
+  ctx.lineTo(x + w - r[1], y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+  ctx.lineTo(x + w, y + h - r[2]);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+  ctx.lineTo(x + r[3], y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+  ctx.lineTo(x, y + r[0]);
+  ctx.quadraticCurveTo(x, y, x + r[0], y);
+  ctx.closePath();
+}
+
+function makePlane(w, h, tex) {
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex,
+    transparent: true,
+    depthWrite: false
+  });
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+}
+
+/* ============================================================
+   Windows 7 Aero chrome (pink)
+   ============================================================ */
+function drawWinChrome(ctx, w, h, title, iconColor = '#a8d8ff') {
+  // Outer drop shadow + body
+  ctx.save();
+  ctx.shadowColor = 'rgba(255, 80, 150, 0.6)';
+  ctx.shadowBlur = 14;
+  ctx.shadowOffsetY = 5;
+  ctx.fillStyle = 'rgba(255, 240, 248, 0.92)';
+  rrect(ctx, 6, 6, w - 12, h - 12, 10);
+  ctx.fill();
+  ctx.restore();
+
+  // Title bar — aero pink gradient
+  const tbG = ctx.createLinearGradient(0, 6, 0, 44);
+  tbG.addColorStop(0,    '#ffe8f3');
+  tbG.addColorStop(0.4,  '#ffc9e0');
+  tbG.addColorStop(1,    '#ff9fcc');
+  ctx.fillStyle = tbG;
+  rrect(ctx, 6, 6, w - 12, 38, [10, 10, 0, 0]);
+  ctx.fill();
+
+  // Glossy highlight
+  const gloss = ctx.createLinearGradient(0, 6, 0, 24);
+  gloss.addColorStop(0, 'rgba(255,255,255,0.7)');
+  gloss.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gloss;
+  rrect(ctx, 6, 6, w - 12, 18, [10, 10, 0, 0]);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = 'rgba(255, 110, 170, 0.95)';
+  ctx.lineWidth = 2;
+  rrect(ctx, 6, 6, w - 12, h - 12, 10);
+  ctx.stroke();
+
+  // Title icon (notepad-like)
+  ctx.fillStyle = iconColor;
+  rrect(ctx, 16, 14, 18, 20, 2);
+  ctx.fill();
+  ctx.strokeStyle = '#557';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(29, 14); ctx.lineTo(34, 19); ctx.lineTo(29, 19);
+  ctx.closePath();
+  ctx.fill();
+
+  // Title text
+  ctx.fillStyle = '#333';
+  ctx.font = '14px "Segoe UI", "Tahoma", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText(title, 40, 24);
+
+  // Window buttons
+  const bw = 42, bh = 26, by = 10;
+  const xMin = w - bw * 3 - 12;
+  const xMax = w - bw * 2 - 12;
+  const xCls = w - bw - 12;
+
+  // minimize
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  rrect(ctx, xMin, by, bw, bh, 3);
+  ctx.fill();
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(xMin + 14, by + 18);
+  ctx.lineTo(xMin + 28, by + 18);
+  ctx.stroke();
+
+  // maximize
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  rrect(ctx, xMax, by, bw, bh, 3);
+  ctx.fill();
+  ctx.strokeRect(xMax + 13, by + 7, 16, 12);
+
+  // close
+  const cg = ctx.createLinearGradient(0, by, 0, by + bh);
+  cg.addColorStop(0,    '#ff9999');
+  cg.addColorStop(0.5,  '#dd3333');
+  cg.addColorStop(1,    '#aa1111');
+  ctx.fillStyle = cg;
+  rrect(ctx, xCls, by, bw, bh, [3, 6, 6, 3]);
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(xCls + 14, by + 8);
+  ctx.lineTo(xCls + 28, by + 22);
+  ctx.moveTo(xCls + 28, by + 8);
+  ctx.lineTo(xCls + 14, by + 22);
+  ctx.stroke();
+}
+
+/* ============================================================
+   Notepad 1 — grid of stars
+   ============================================================ */
+function drawStar(ctx, cx, cy, size, variant) {
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Glow
+  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.4);
+  glow.addColorStop(0, 'rgba(255, 180, 220, 0.4)');
+  glow.addColorStop(1, 'rgba(255, 180, 220, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(0, 0, size * 1.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 5-point star path
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const ang = (Math.PI * 2 * i) / 10 - Math.PI / 2;
+    const rad = i % 2 === 0 ? size : size * 0.42;
+    const x = Math.cos(ang) * rad;
+    const y = Math.sin(ang) * rad;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+
+  if (variant === 0) {
+    ctx.fillStyle = 'rgba(255, 220, 235, 0.35)';
+    ctx.strokeStyle = '#ff66aa';
+  } else if (variant === 1) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.strokeStyle = '#ffaadd';
+  } else {
+    ctx.fillStyle = '#ff66aa';
+    ctx.strokeStyle = '#dd3388';
+  }
+  ctx.lineWidth = 2.5;
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+const notepad1Tex = makeCanvas(560, 480, (ctx, w, h) => {
+  drawWinChrome(ctx, w, h, 'Untitled - Notepad');
+
+  // Content area
+  ctx.save();
+  rrect(ctx, 8, 44, w - 16, h - 52, [0, 0, 8, 8]);
+  ctx.fillStyle = '#fff5fa';
+  ctx.fill();
+  ctx.clip();
+
+  // 8x5 grid of stars
+  const cols = 8, rows = 5;
+  const gridX = 20, gridY = 55;
+  const cellW = (w - 40) / cols;
+  const cellH = 75;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = gridX + c * cellW + cellW / 2;
+      const y = gridY + r * cellH + cellH / 2;
+      const v = (c * 2 + r * 3) % 3;
+      drawStar(ctx, x, y, 26, v);
+    }
+  }
+  ctx.restore();
+});
+
+/* ============================================================
+   Big pink heart
+   ============================================================ */
+const heartTex = makeCanvas(360, 380, (ctx, w, h) => {
+  const cx = w / 2, cy = h / 2;
+  const size = 150;
+
+  function heartPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + size * 0.75);
+    ctx.bezierCurveTo(
+      cx - size * 0.3,  cy + size * 0.45,
+      cx - size * 1.0,  cy - size * 0.10,
+      cx - size * 0.95, cy - size * 0.40
+    );
+    ctx.bezierCurveTo(
+      cx - size * 0.90, cy - size * 0.85,
+      cx - size * 0.35, cy - size * 0.95,
+      cx,               cy - size * 0.28
+    );
+    ctx.bezierCurveTo(
+      cx + size * 0.35, cy - size * 0.95,
+      cx + size * 0.90, cy - size * 0.85,
+      cx + size * 0.95, cy - size * 0.40
+    );
+    ctx.bezierCurveTo(
+      cx + size * 1.00, cy - size * 0.10,
+      cx + size * 0.30, cy + size * 0.45,
+      cx,               cy + size * 0.75
+    );
+    ctx.closePath();
+  }
+
+  // Shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(200, 50, 120, 0.55)';
+  ctx.shadowBlur = 22;
+  ctx.shadowOffsetY = 8;
+  heartPath();
+  const grad = ctx.createRadialGradient(
+    cx - size * 0.3, cy - size * 0.4, size * 0.1,
+    cx, cy, size * 1.2
+  );
+  grad.addColorStop(0,   '#ffffff');
+  grad.addColorStop(0.3, '#ffd6ea');
+  grad.addColorStop(0.7, '#ffa0cf');
+  grad.addColorStop(1,   '#ff66aa');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // Outline
+  heartPath();
+  ctx.strokeStyle = '#dd4488';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Highlight
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.beginPath();
+  ctx.ellipse(cx - size * 0.4, cy - size * 0.4, size * 0.18, size * 0.11, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+});
+
+/* ============================================================
+   Notepad 2 — empty
+   ============================================================ */
+const notepad2Tex = makeCanvas(420, 280, (ctx, w, h) => {
+  drawWinChrome(ctx, w, h, 'Untitled - Notepad');
+  ctx.save();
+  rrect(ctx, 8, 44, w - 16, h - 52, [0, 0, 8, 8]);
+  ctx.fillStyle = '#fff5fa';
+  ctx.fill();
+  ctx.restore();
+});
+
+/* ============================================================
+   Paint tool icons
+   ============================================================ */
+function drawToolIcon(ctx, cx, cy, type) {
+  ctx.save();
+  ctx.strokeStyle = '#333';
+  ctx.fillStyle = '#555';
+  ctx.lineWidth = 1.2;
+  const s = 8;
+  switch (type) {
+    case 'lasso':
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy);
+      ctx.quadraticCurveTo(cx - s, cy - s, cx, cy - s);
+      ctx.quadraticCurveTo(cx + s, cy - s, cx + s, cy);
+      ctx.quadraticCurveTo(cx + s, cy + s * 0.5, cx, cy + s * 0.5);
+      ctx.setLineDash([2, 2]); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + s * 0.5);
+      ctx.lineTo(cx - s * 0.3, cy + s);
+      ctx.stroke();
+      break;
+    case 'rect-sel':
+      ctx.setLineDash([2, 2]);
+      ctx.strokeRect(cx - s, cy - s * 0.7, s * 2, s * 1.4);
+      ctx.setLineDash([]);
+      break;
+    case 'eraser':
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(cx - s, cy - s * 0.3, s * 1.6, s * 0.8);
+      ctx.strokeRect(cx - s, cy - s * 0.3, s * 1.6, s * 0.8);
+      break;
+    case 'fill':
+      ctx.fillStyle = '#ccd';
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy);
+      ctx.lineTo(cx, cy - s);
+      ctx.lineTo(cx + s, cy);
+      ctx.lineTo(cx, cy + s);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      break;
+    case 'picker':
+      ctx.beginPath();
+      ctx.moveTo(cx - s * 0.8, cy + s);
+      ctx.lineTo(cx + s * 0.5, cy - s * 0.3);
+      ctx.moveTo(cx + s * 0.2, cy - s * 0.6);
+      ctx.lineTo(cx + s, cy - s);
+      ctx.stroke();
+      break;
+    case 'zoom':
+      ctx.beginPath();
+      ctx.arc(cx - s * 0.2, cy - s * 0.2, s * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + s * 0.2, cy + s * 0.2);
+      ctx.lineTo(cx + s, cy + s);
+      ctx.stroke();
+      break;
+    case 'pencil':
+      ctx.fillStyle = '#ffd44a';
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy + s);
+      ctx.lineTo(cx - s * 0.3, cy + s * 0.3);
+      ctx.lineTo(cx + s * 0.6, cy - s * 0.6);
+      ctx.lineTo(cx + s, cy - s * 0.3);
+      ctx.lineTo(cx + s * 0.3, cy + s * 0.6);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      break;
+    case 'brush':
+      ctx.fillStyle = '#b84';
+      ctx.fillRect(cx - s * 0.3, cy + s * 0.2, s * 0.6, s * 0.6);
+      ctx.fillStyle = '#333';
+      ctx.fillRect(cx - s * 0.5, cy - s * 0.6, s, s * 0.5);
+      break;
+    case 'spray':
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(a) * s * 0.6, cy + Math.sin(a) * s * 0.6, 0.9, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    case 'text':
+      ctx.font = 'bold 12px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#333';
+      ctx.fillText('A', cx, cy);
+      break;
+    case 'line':
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy + s * 0.5);
+      ctx.lineTo(cx + s, cy - s * 0.5);
+      ctx.stroke();
+      break;
+    case 'curve':
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy + s * 0.5);
+      ctx.quadraticCurveTo(cx, cy - s, cx + s, cy + s * 0.5);
+      ctx.stroke();
+      break;
+    case 'rect':
+      ctx.strokeRect(cx - s * 0.8, cy - s * 0.6, s * 1.6, s * 1.2);
+      break;
+    case 'poly':
+      ctx.beginPath();
+      ctx.moveTo(cx - s, cy + s * 0.5);
+      ctx.lineTo(cx, cy - s);
+      ctx.lineTo(cx + s, cy + s * 0.5);
+      ctx.lineTo(cx + s * 0.5, cy + s);
+      ctx.lineTo(cx - s * 0.5, cy + s);
+      ctx.closePath();
+      ctx.stroke();
+      break;
+    case 'ellipse':
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, s * 0.8, s * 0.6, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    case 'rrect':
+      rrect(ctx, cx - s * 0.8, cy - s * 0.6, s * 1.6, s * 1.2, 2);
+      ctx.stroke();
+      break;
+  }
+  ctx.restore();
+}
+
+/* ============================================================
+   Paint window
+   ============================================================ */
+const paintTex = makeCanvas(600, 840, (ctx, w, h) => {
+  drawWinChrome(ctx, w, h, 'untitled - Paint', '#fff2aa');
+
+  // Menu bar
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(8, 44, w - 16, 28);
+  ctx.fillStyle = '#333';
+  ctx.font = '14px "Segoe UI", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  const menu = ['File', 'Edit', 'View', 'Image', 'Colors', 'Help'];
+  let mx = 20;
+  for (const item of menu) {
+    ctx.fillText(item, mx, 58);
+    mx += ctx.measureText(item).width + 22;
+  }
+
+  // Tool palette background
+  const toolX = 14, toolY = 80, toolW = 68;
+  ctx.fillStyle = '#ffd9ec';
+  rrect(ctx, toolX, toolY, toolW, 320, 4);
+  ctx.fill();
+  ctx.strokeStyle = '#dd66aa';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // 16 tools (pencil selected = index 6)
+  const tools = [
+    'lasso', 'rect-sel',
+    'eraser', 'fill',
+    'picker', 'zoom',
+    'pencil', 'brush',
+    'spray', 'text',
+    'line', 'curve',
+    'rect', 'poly',
+    'ellipse', 'rrect'
+  ];
+  for (let i = 0; i < 16; i++) {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const tx = toolX + 6 + col * 28;
+    const ty = toolY + 6 + row * 36;
+
+    if (i === 6) {
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#cc3388';
+    } else {
+      ctx.fillStyle = '#ffe5f0';
+      ctx.strokeStyle = '#ee88bb';
+    }
+    rrect(ctx, tx, ty, 26, 26, 2);
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    drawToolIcon(ctx, tx + 13, ty + 13, tools[i]);
+  }
+
+  // Thickness selector
+  ctx.fillStyle = '#ffe5f0';
+  rrect(ctx, toolX + 6, toolY + 298, 54, 16, 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ee88bb';
+  ctx.stroke();
+
+  // Canvas area
+  const cvX = toolX + toolW + 12;
+  const cvY = 80;
+  const cvW = w - cvX - 12;
+  const cvH = 590;
+  ctx.fillStyle = 'rgba(100, 30, 60, 0.18)';
+  ctx.fillRect(cvX + 3, cvY + 3, cvW, cvH);
+  ctx.fillStyle = '#ffeaf3';
+  ctx.fillRect(cvX, cvY, cvW, cvH);
+  ctx.strokeStyle = '#aa5577';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cvX, cvY, cvW, cvH);
+
+  // Color palette
+  const paletteY = h - 120;
+  ctx.fillStyle = '#ffe8f2';
+  ctx.fillRect(8, paletteY, w - 16, 70);
+
+  ctx.fillStyle = '#ff8bbc';
+  ctx.fillRect(22, paletteY + 18, 32, 32);
+  ctx.strokeStyle = '#555';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(22, paletteY + 18, 32, 32);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(16, paletteY + 12, 16, 16);
+  ctx.strokeRect(16, paletteY + 12, 16, 16);
+
+  const row1 = [
+    '#f5c8d6','#fff4f5','#fff7ea','#ffeaf0','#ffd9e6','#ffc0d4','#ff96b8','#ee6c96',
+    '#ce4472','#9e1f43','#ff8877','#ffb3aa','#ffccbb','#dcadc5','#c0809a','#7a4a5c',
+    '#56273a','#ffc8c8','#ffa8b0','#ea6a82','#cd4463','#a81e41','#ff8cb4','#ff6a99',
+    '#ec437a','#c72b5e','#a31747','#7c0a32'
+  ];
+  const row2 = [
+    '#ffe0e8','#ffeadc','#ffcec2','#ffe0ce','#ffe2b8','#f8d2a8','#e7a58c','#c07665',
+    '#924c3a','#6c2b1e','#ffd4dc','#f8b8c4','#e898a7','#d26e81','#b24c60','#823143',
+    '#5c1829','#ffd0d8','#f7acbb','#e0808f','#c65a6a','#aa3e4e','#8c2237','#6d1023',
+    '#ffcad0','#eaa0aa','#c47684','#9a4a58'
+  ];
+  const swStart = 70, swTop = paletteY + 10;
+  const swW = 17, swH = 24, swGap = 1;
+  [row1, row2].forEach((row, rIdx) => {
+    for (let c = 0; c < row.length; c++) {
+      const x = swStart + c * (swW + swGap);
+      const y = swTop + rIdx * (swH + 2);
+      if (x + swW > w - 20) break;
+      ctx.fillStyle = row[c];
+      ctx.fillRect(x, y, swW, swH);
+      ctx.strokeStyle = '#777';
+      ctx.strokeRect(x, y, swW, swH);
+    }
+  });
+
+  // Status bar
+  ctx.fillStyle = '#ffdce9';
+  ctx.fillRect(8, h - 40, w - 16, 32);
+  ctx.fillStyle = '#333';
+  ctx.font = '14px "Segoe UI", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('For Help, click Help Topics on the Help Menu.', 20, h - 24);
+});
+
+/* ============================================================
+   Desktop icon factory
+   ============================================================ */
+function makeIcon(label, drawFn) {
+  return makeCanvas(180, 220, (ctx, w, h) => {
+    drawFn(ctx, w / 2, h * 0.33, 88);
+
+    ctx.font = 'bold 16px "Comic Sans MS", "Chalkboard SE", cursive, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    const words = label.split(' ');
+    const lines = [];
+    let cur = '';
+    for (const word of words) {
+      const test = cur ? cur + ' ' + word : word;
+      if (test.length > 14) {
+        if (cur) lines.push(cur);
+        cur = word;
+      } else {
+        cur = test;
+      }
+    }
+    if (cur) lines.push(cur);
+
+    lines.forEach((line, i) => {
+      const y = h * 0.70 + i * 22;
+      ctx.strokeStyle = 'rgba(180, 30, 90, 0.85)';
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      ctx.strokeText(line, w / 2, y);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(line, w / 2, y);
+    });
+  });
+}
+
+function drawMyComputer(ctx, cx, cy, s) {
+  ctx.fillStyle = '#ffccdd';
+  ctx.strokeStyle = '#cc5577';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - s * 0.55, cy + s * 0.25);
+  ctx.lineTo(cx + s * 0.55, cy + s * 0.25);
+  ctx.lineTo(cx + s * 0.62, cy + s * 0.35);
+  ctx.lineTo(cx - s * 0.62, cy + s * 0.35);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#ffccdd';
+  rrect(ctx, cx - s * 0.5, cy - s * 0.4, s, s * 0.65, 3);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(cx - s * 0.42, cy - s * 0.32, s * 0.84, s * 0.5);
+  ctx.strokeRect(cx - s * 0.42, cy - s * 0.32, s * 0.84, s * 0.5);
+
+  ctx.fillStyle = '#aaffcc';
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 6; c++) {
+      ctx.fillRect(cx - s * 0.38 + c * s * 0.13, cy - s * 0.28 + r * s * 0.1, s * 0.09, s * 0.07);
+    }
+  }
+}
+
+function drawFolder(ctx, cx, cy, s) {
+  ctx.fillStyle = 'rgba(150, 50, 100, 0.2)';
+  ctx.fillRect(cx - s * 0.45 + 3, cy - s * 0.2 + 3, s * 0.9, s * 0.65);
+  ctx.fillStyle = '#ff9cc0';
+  ctx.strokeStyle = '#cc4488';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - s * 0.45, cy - s * 0.3);
+  ctx.lineTo(cx - s * 0.12, cy - s * 0.3);
+  ctx.lineTo(cx - s * 0.02, cy - s * 0.2);
+  ctx.lineTo(cx + s * 0.45, cy - s * 0.2);
+  ctx.lineTo(cx + s * 0.45, cy + s * 0.3);
+  ctx.lineTo(cx - s * 0.45, cy + s * 0.3);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffccdd';
+  ctx.beginPath();
+  ctx.moveTo(cx - s * 0.45, cy - s * 0.1);
+  ctx.lineTo(cx + s * 0.45, cy - s * 0.1);
+  ctx.lineTo(cx + s * 0.45, cy + s * 0.3);
+  ctx.lineTo(cx - s * 0.45, cy + s * 0.3);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+}
+
+function drawButterfly(ctx, cx, cy, s) {
+  ctx.fillStyle = '#d88ccc';
+  ctx.strokeStyle = '#551144';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(cx - s * 0.28, cy - s * 0.18, s * 0.26, s * 0.32, -0.4, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(cx + s * 0.28, cy - s * 0.18, s * 0.26, s * 0.32, 0.4, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#b866aa';
+  ctx.beginPath();
+  ctx.ellipse(cx - s * 0.22, cy + s * 0.2, s * 0.2, s * 0.24, -0.2, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(cx + s * 0.22, cy + s * 0.2, s * 0.2, s * 0.24, 0.2, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(cx - s * 0.3, cy - s * 0.2, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + s * 0.3, cy - s * 0.2, 2.5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, s * 0.05, s * 0.38, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - s * 0.02, cy - s * 0.38);
+  ctx.quadraticCurveTo(cx - s * 0.15, cy - s * 0.5, cx - s * 0.22, cy - s * 0.55);
+  ctx.moveTo(cx + s * 0.02, cy - s * 0.38);
+  ctx.quadraticCurveTo(cx + s * 0.15, cy - s * 0.5, cx + s * 0.22, cy - s * 0.55);
+  ctx.stroke();
+}
+
+function drawHeartIcon(ctx, cx, cy, s) {
+  const h = s * 0.7;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + h * 0.5);
+  ctx.bezierCurveTo(cx - h * 0.9, cy, cx - h * 0.9, cy - h * 0.5, cx, cy - h * 0.1);
+  ctx.bezierCurveTo(cx + h * 0.9, cy - h * 0.5, cx + h * 0.9, cy, cx, cy + h * 0.5);
+  ctx.closePath();
+  const g = ctx.createRadialGradient(cx - h * 0.2, cy - h * 0.2, 0, cx, cy, h);
+  g.addColorStop(0,   '#fff');
+  g.addColorStop(0.4, '#ffaacc');
+  g.addColorStop(1,   '#ff5588');
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.strokeStyle = '#cc3366';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  ctx.ellipse(cx - h * 0.25, cy - h * 0.25, h * 0.14, h * 0.08, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawNetwork(ctx, cx, cy, s) {
+  ctx.fillStyle = '#b59cc9';
+  ctx.strokeStyle = '#4a3265';
+  ctx.lineWidth = 2;
+  rrect(ctx, cx - s * 0.5, cy - s * 0.45, s, s * 0.7, 4);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = '#1a1236';
+  ctx.fillRect(cx - s * 0.38, cy - s * 0.35, s * 0.76, s * 0.52);
+
+  ctx.fillStyle = '#ffe4ff';
+  const stars = [[0.12,0.15],[0.38,0.35],[0.60,0.20],[0.22,0.60],[0.72,0.55],[0.48,0.75],[0.15,0.85],[0.85,0.45]];
+  for (const [sx, sy] of stars) {
+    ctx.fillRect(cx - s * 0.32 + sx * s * 0.6, cy - s * 0.30 + sy * s * 0.44, 2, 2);
+  }
+
+  ctx.fillStyle = '#ffee88';
+  ctx.beginPath();
+  ctx.arc(cx + s * 0.2, cy - s * 0.18, s * 0.09, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#1a1236';
+  ctx.beginPath();
+  ctx.arc(cx + s * 0.24, cy - s * 0.20, s * 0.08, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#b59cc9';
+  ctx.fillRect(cx - s * 0.15, cy + s * 0.25, s * 0.3, s * 0.08);
+  ctx.strokeRect(cx - s * 0.15, cy + s * 0.25, s * 0.3, s * 0.08);
+  ctx.fillRect(cx - s * 0.3, cy + s * 0.33, s * 0.6, s * 0.06);
+  ctx.strokeRect(cx - s * 0.3, cy + s * 0.33, s * 0.6, s * 0.06);
+}
+
+function drawRecycleBin(ctx, cx, cy, s) {
+  ctx.fillStyle = '#ffc0dd';
+  ctx.strokeStyle = '#cc4488';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - s * 0.4, cy - s * 0.2);
+  ctx.lineTo(cx + s * 0.4, cy - s * 0.2);
+  ctx.lineTo(cx + s * 0.35, cy + s * 0.4);
+  ctx.lineTo(cx - s * 0.35, cy + s * 0.4);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+
+  ctx.strokeStyle = '#ee88bb';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    const rx = cx - s * 0.4 + (s * 0.8 / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(rx, cy - s * 0.15);
+    ctx.lineTo(rx * 0.98 + cx * 0.02, cy + s * 0.35);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#ff9cbf';
+  ctx.strokeStyle = '#cc4488';
+  ctx.lineWidth = 2;
+  rrect(ctx, cx - s * 0.45, cy - s * 0.3, s * 0.9, s * 0.12, 2);
+  ctx.fill(); ctx.stroke();
+
+  const h = s * 0.22;
+  const hy = cy + s * 0.08;
+  ctx.beginPath();
+  ctx.moveTo(cx, hy + h * 0.5);
+  ctx.bezierCurveTo(cx - h * 0.9, hy, cx - h * 0.9, hy - h * 0.5, cx, hy - h * 0.1);
+  ctx.bezierCurveTo(cx + h * 0.9, hy - h * 0.5, cx + h * 0.9, hy, cx, hy + h * 0.5);
+  ctx.closePath();
+  ctx.fillStyle = '#ffe8f2';
+  ctx.fill();
+  ctx.strokeStyle = '#cc4488';
+  ctx.stroke();
+}
+
+function drawFlowers(ctx, cx, cy, s) {
+  const blooms = [
+    [ 0.00, -0.18, '#ff99cc'],
+    [-0.28,  0.00, '#ffaadd'],
+    [ 0.28,  0.00, '#ffbbdd'],
+    [-0.14,  0.22, '#ee77aa'],
+    [ 0.18,  0.22, '#ff88bb']
+  ];
+  for (const [ox, oy, color] of blooms) {
+    const fx = cx + ox * s;
+    const fy = cy + oy * s;
+    ctx.fillStyle = color;
+    ctx.strokeStyle = '#aa3366';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) {
+      const a = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.ellipse(
+        fx + Math.cos(a) * s * 0.09,
+        fy + Math.sin(a) * s * 0.09,
+        s * 0.09, s * 0.065, a, 0, Math.PI * 2
+      );
+      ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = '#ffee88';
+    ctx.beginPath();
+    ctx.arc(fx, fy, s * 0.055, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#cc9922';
+    ctx.stroke();
+  }
+}
+
+/* ============================================================
+   Taskbar
+   ============================================================ */
+const taskbarTex = makeCanvas(1080, 80, (ctx, w, h) => {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0,   '#ffb3d9');
+  g.addColorStop(0.5, '#ff99cc');
+  g.addColorStop(1,   '#ff77bb');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+
+  const hl = ctx.createLinearGradient(0, 0, 0, 14);
+  hl.addColorStop(0, 'rgba(255,255,255,0.75)');
+  hl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hl;
+  ctx.fillRect(0, 0, w, 14);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, 0.5); ctx.lineTo(w, 0.5);
+  ctx.stroke();
+
+  // Start button
+  const btnG = ctx.createLinearGradient(0, 10, 0, h - 10);
+  btnG.addColorStop(0,   '#9ee99e');
+  btnG.addColorStop(0.5, '#4ebb4e');
+  btnG.addColorStop(1,   '#1f7a1f');
+  ctx.fillStyle = btnG;
+  rrect(ctx, 10, 10, 140, h - 20, [h / 2, h / 2, h / 2, h / 2]);
+  ctx.fill();
+  ctx.strokeStyle = '#115511';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Windows flag
+  const fx = 28, fy = 20;
+  const fs = 16;
+  ctx.fillStyle = '#ff5555'; ctx.fillRect(fx, fy, fs, fs);
+  ctx.fillStyle = '#55ff55'; ctx.fillRect(fx + fs + 2, fy, fs, fs);
+  ctx.fillStyle = '#5555ff'; ctx.fillRect(fx, fy + fs + 2, fs, fs);
+  ctx.fillStyle = '#ffff55'; ctx.fillRect(fx + fs + 2, fy + fs + 2, fs, fs);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px "Comic Sans MS", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('Start', 80, h / 2);
+
+  // Quick launch tray
+  let qx = 170;
+  const qS = 52;
+  const qY = (h - qS) / 2;
+
+  function qBox() {
+    ctx.fillStyle = '#fff0f8';
+    rrect(ctx, qx, qY, qS, qS, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#aa3366';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // Notepad shortcut
+  qBox();
+  ctx.fillStyle = '#ffd1e8';
+  rrect(ctx, qx + 10, qY + 10, qS - 20, qS - 20, 2);
+  ctx.fill();
+  ctx.strokeStyle = '#aa3366';
+  ctx.stroke();
+  ctx.strokeStyle = '#cc5588';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(qx + 14, qY + 16 + i * 5);
+    ctx.lineTo(qx + qS - 14, qY + 16 + i * 5);
+    ctx.stroke();
+  }
+  qx += qS + 10;
+
+  // IE shortcut
+  qBox();
+  ctx.fillStyle = '#4488dd';
+  ctx.font = 'bold italic 34px "Times New Roman", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('e', qx + qS / 2, qY + qS / 2 + 3);
+  ctx.strokeStyle = '#ffcc33';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(qx + qS / 2, qY + qS / 2 + 2, qS * 0.32, qS * 0.2, -0.3, 0, Math.PI * 2);
+  ctx.stroke();
+  qx += qS + 10;
+
+  // MSN butterfly shortcut
+  qBox();
+  const bcx = qx + qS / 2, bcy = qY + qS / 2;
+  ctx.fillStyle = '#6699dd';
+  ctx.strokeStyle = '#224477';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.ellipse(bcx - 8, bcy - 4, 8, 11, -0.4, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(bcx + 8, bcy - 4, 8, 11, 0.4, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#4477bb';
+  ctx.beginPath();
+  ctx.ellipse(bcx - 6, bcy + 8, 6, 7, -0.2, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(bcx + 6, bcy + 8, 6, 7, 0.2, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#222';
+  ctx.beginPath();
+  ctx.ellipse(bcx, bcy, 1.5, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Clock
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 18px "Segoe UI", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('12:34 PM', w - 20, h / 2);
+});
+
+/* ============================================================
+   Assemble the desktop
+   ============================================================ */
+const desktop = new THREE.Group();
+scene.add(desktop);
+
+const iconDefs = [
+  ['My Computer',             drawMyComputer],
+  ['My Documents',            drawFolder],
+  ['Internet Explorer',       drawButterfly],
+  ['Connect to the Internet', drawHeartIcon],
+  ['Network Neighborhood',    drawNetwork],
+  ['Recycle Bin',             drawRecycleBin],
+  ['Setup MSN Internet A...', drawFlowers]
+];
+
+// Icons: column on the left side of a landscape desktop
+const iconMeshes = [];
+const iconW = 1.2;
+const iconH = iconW * (220 / 180);
+const iconSpacing = 1.25;
+const iconX = -8.7;
+const iconYStart = 3.8;
+for (let i = 0; i < iconDefs.length; i++) {
+  const [label, fn] = iconDefs[i];
+  const tex = makeIcon(label, fn);
+  const m = makePlane(iconW, iconH, tex);
+  m.position.set(iconX, iconYStart - i * iconSpacing, 0);
+  desktop.add(m);
+  iconMeshes.push(m);
+}
+
+// Paint window — bottom-right of the desktop
+const paint = makePlane(5.0, 5.0 * (840 / 600), paintTex);
+paint.position.set(5.5, -1.0, 1);
+paint.scale.setScalar(0.75);
+desktop.add(paint);
+
+// Notepad 1 (stars) — upper-center-left
+const notepad1 = makePlane(5.6, 5.6 * (480 / 560), notepad1Tex);
+notepad1.position.set(-2.0, 2.0, 2);
+notepad1.scale.setScalar(0.85);
+desktop.add(notepad1);
+
+// Big pink heart — center
+const heart = makePlane(4.6, 4.6 * (380 / 360), heartTex);
+heart.position.set(1.5, 0.4, 3);
+heart.scale.setScalar(0.75);
+desktop.add(heart);
+
+// Notepad 2 (empty) — upper-right
+const notepad2 = makePlane(4.2, 4.2 * (280 / 420), notepad2Tex);
+notepad2.position.set(4.5, 2.6, 4);
+notepad2.scale.setScalar(0.9);
+desktop.add(notepad2);
+
+// Taskbar — full width along the bottom
+const taskbar = makePlane(DESIGN_W, 0.9, taskbarTex);
+taskbar.position.set(0, -DESIGN_H / 2 + 0.45, 5);
+desktop.add(taskbar);
+
+/* ============================================================
+   Sparkles
+   ============================================================ */
+const sparkleTex = makeCanvas(64, 64, (ctx) => {
+  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0,   'rgba(255,255,255,1)');
+  g.addColorStop(0.3, 'rgba(255,220,240,0.85)');
+  g.addColorStop(0.6, 'rgba(255,150,200,0.3)');
+  g.addColorStop(1,   'rgba(255,100,180,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(32, 4);  ctx.lineTo(32, 60);
+  ctx.moveTo(4, 32);  ctx.lineTo(60, 32);
+  ctx.moveTo(12, 12); ctx.lineTo(52, 52);
+  ctx.moveTo(52, 12); ctx.lineTo(12, 52);
+  ctx.stroke();
+});
+
+const sparkleCount = 45;
+const sparkleGeom = new THREE.BufferGeometry();
+const spPos = new Float32Array(sparkleCount * 3);
+const spSpeed = new Float32Array(sparkleCount);
+const spPhase = new Float32Array(sparkleCount);
+for (let i = 0; i < sparkleCount; i++) {
+  spPos[i * 3 + 0] = (Math.random() - 0.5) * DESIGN_W * 1.2;
+  spPos[i * 3 + 1] = (Math.random() - 0.5) * DESIGN_H * 1.2;
+  spPos[i * 3 + 2] = 6 + Math.random() * 2;
+  spSpeed[i] = 0.3 + Math.random() * 0.7;
+  spPhase[i] = Math.random() * Math.PI * 2;
+}
+sparkleGeom.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+
+const sparkleMat = new THREE.PointsMaterial({
+  map: sparkleTex,
+  size: 10,
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  sizeAttenuation: false,
+  opacity: 0.85
+});
+const sparkles = new THREE.Points(sparkleGeom, sparkleMat);
+scene.add(sparkles);
+
+/* ============================================================
+   Resize handling
+   ============================================================ */
+function resize() {
+  const aspect = window.innerWidth / window.innerHeight;
+  const designAspect = DESIGN_W / DESIGN_H;
+  let halfW, halfH;
+  if (aspect > designAspect) {
+    halfH = DESIGN_H / 2;
+    halfW = halfH * aspect;
+  } else {
+    halfW = DESIGN_W / 2;
+    halfH = halfW / aspect;
+  }
+  camera.left = -halfW;
+  camera.right = halfW;
+  camera.top = halfH;
+  camera.bottom = -halfH;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  // Stretch the background plane to fill the visible view
+  bgMesh.scale.set(halfW * 2, halfH * 2, 1);
+  bgMaterial.uniforms.aspect.value = halfW / halfH;
+}
+window.addEventListener('resize', resize);
+
+/* ============================================================
+   Mouse parallax
+   ============================================================ */
+const mouse = { x: 0, y: 0 };
+window.addEventListener('pointermove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth  - 0.5) * 2;
+  mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+/* ============================================================
+   Animation loop
+   ============================================================ */
+const clock = new THREE.Clock();
+let time = 0;
+
+function animate() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  time += dt;
+
+  bgMaterial.uniforms.time.value = time;
+
+  // Window floating
+  paint.position.y    = -1.0 + Math.sin(time * 0.8)       * 0.08;
+  paint.rotation.z    = Math.sin(time * 0.5)              * 0.006;
+  notepad1.position.y = 2.0  + Math.sin(time * 0.7 + 1.0) * 0.10;
+  notepad1.rotation.z = Math.sin(time * 0.4 + 1.0)        * 0.009;
+  notepad2.position.y = 2.6  + Math.sin(time * 0.9 + 2.0) * 0.09;
+  notepad2.rotation.z = Math.sin(time * 0.5 + 2.0)        * 0.011;
+  heart.position.y    = 0.4  + Math.sin(time * 1.1)       * 0.08;
+  heart.scale.setScalar(0.75 * (1 + Math.sin(time * 2.4) * 0.025));
+
+  // Icons subtle wobble
+  for (let i = 0; i < iconMeshes.length; i++) {
+    iconMeshes[i].rotation.z = Math.sin(time * 1.2 + i * 0.5) * 0.02;
+    iconMeshes[i].position.y = (iconYStart - i * iconSpacing) + Math.sin(time * 1.5 + i) * 0.03;
+  }
+
+  // Sparkles drift up
+  const sp = sparkleGeom.attributes.position.array;
+  for (let i = 0; i < sparkleCount; i++) {
+    sp[i * 3 + 1] += spSpeed[i] * dt;
+    sp[i * 3 + 0] += Math.sin(time * 1.5 + spPhase[i]) * dt * 0.3;
+    if (sp[i * 3 + 1] > DESIGN_H / 2 + 1) {
+      sp[i * 3 + 1] = -DESIGN_H / 2 - 1;
+      sp[i * 3 + 0] = (Math.random() - 0.5) * DESIGN_W * 1.2;
+    }
+  }
+  sparkleGeom.attributes.position.needsUpdate = true;
+
+  // Parallax — smooth ease toward target
+  desktop.position.x += (-mouse.x * 0.25 - desktop.position.x) * 0.05;
+  desktop.position.y += ( mouse.y * 0.25 - desktop.position.y) * 0.05;
+  desktop.rotation.y += (-mouse.x * 0.04  - desktop.rotation.y) * 0.05;
+  desktop.rotation.x += ( mouse.y * 0.04  - desktop.rotation.x) * 0.05;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+resize();
+animate();
+</script>
+</body>
+</html>
