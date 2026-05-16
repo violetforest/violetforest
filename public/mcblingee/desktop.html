@@ -726,7 +726,7 @@
 </head>
 <body>
 <script>
-  // Click anywhere on the pink desktop → navigate the bedroom (parent) page to webcore.html.
+  // Click anywhere on the pink desktop → navigate the bedroom (parent) page to mcblingee.html.
   // Only fires while the player is actually sitting at the monitor — clicks on the live
   // CSS3D screen (when walking around) shouldn't trigger a route change.
   document.addEventListener('click', () => {
@@ -739,14 +739,14 @@
       // Use the parent's gradient route-fader if available
       try {
         if (typeof window.parent.fadeToRoute === 'function') {
-          window.parent.fadeToRoute('webcore.html');
+          window.parent.fadeToRoute('mcblingee.html');
           return;
         }
-        window.parent.location.href = 'webcore.html';
-      } catch (e) { window.location.href = 'webcore.html'; }
+        window.parent.location.href = 'mcblingee.html';
+      } catch (e) { window.location.href = 'mcblingee.html'; }
     } else {
       // Standalone (opened directly outside the bedroom iframe) — allow direct nav.
-      window.location.href = 'webcore.html';
+      window.location.href = 'mcblingee.html';
     }
   });
 </script>
