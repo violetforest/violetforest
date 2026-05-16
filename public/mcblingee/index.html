@@ -13,8 +13,13 @@
     background: #ff66aa;
     font-family: "Segoe UI", Tahoma, sans-serif;
     color: #fff0f7;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
   }
-  canvas { display: block; }
+  canvas { display: block; touch-action: none; }
 
   /* ── hud ─────────────────────────────────────────── */
   #hud {
@@ -539,6 +544,7 @@ cssRenderer.domElement.style.position = 'fixed';
 cssRenderer.domElement.style.top = '0';
 cssRenderer.domElement.style.left = '0';
 cssRenderer.domElement.style.pointerEvents = 'none';
+cssRenderer.domElement.style.touchAction = 'none';
 cssRenderer.domElement.style.zIndex = '1';
 document.body.appendChild(cssRenderer.domElement);
 const cssScene = new THREE.Scene();
@@ -1234,6 +1240,19 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
   screenIframe.style.border = '0';
   screenIframe.style.background = '#fff5fa';
   screenIframe.style.pointerEvents = 'none';
+  screenIframe.setAttribute('tabindex', '-1');
+  screenIframe.setAttribute('aria-hidden', 'true');
+  screenIframe.style.touchAction = 'none';
+  // Disable touch inside the iframe's document once it loads
+  screenIframe.addEventListener('load', () => {
+    try {
+      const doc = screenIframe.contentDocument;
+      if (doc && doc.body) {
+        doc.body.style.pointerEvents = 'none';
+        doc.body.style.touchAction = 'none';
+      }
+    } catch (e) {}
+  });
   const cssScreen = new CSS3DObject(screenIframe);
   cssScreen.scale.setScalar(SCREEN_W / PX_W);
   cssScene.add(cssScreen);
@@ -1689,7 +1708,6 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 // --- Mobile: tap anywhere (including the 3D monitor) to walk + auto-sit ---
 let touchDown = false;
 if (isMobile) {
-  // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
   const hint = document.getElementById('controls-hint');
   if (hint) hint.style.display = 'none';
   const isUI = (el) => {
@@ -1697,21 +1715,23 @@ if (isMobile) {
     if (el.closest && (el.closest('#about-btn') || el.closest('#about-modal') || el.closest('#exit-sit'))) return true;
     return false;
   };
-  // Listen on window in capture phase so taps on the CSS3D monitor iframe
-  // (or any other transparent overlay element) still latch the walk.
-  // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
   const onTap = (e) => {
     if (state !== 'walking') return;
-    if (isUI(e.target)) return;
-    e.preventDefault();
+    const target = (e.composedPath && e.composedPath()[0]) || e.target;
+    if (isUI(target)) return;
+    if (e.cancelable) e.preventDefault();
     touchDown = true;
   };
-  window.addEventListener('touchstart', onTap, { passive: false, capture: true });
-  // Fallback for environments that report PointerEvent but not TouchEvent.
-  window.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'touch') return;
-    onTap(e);
-  }, { capture: true });
+  // Attach to the WebGL canvas directly — this is the layer the user
+  // actually sees and taps. iframe is pointer-events:none so taps fall through.
+  renderer.domElement.addEventListener('touchstart', onTap, { passive: false });
+  renderer.domElement.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') onTap(e);
+  });
+  // Belt-and-suspenders: also catch on document body in bubble phase
+  document.body.addEventListener('touchstart', onTap, { passive: false });
+  // Prevent iOS double-tap zoom from eating the first tap
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
 }
 
 exitBtn.addEventListener('click', () => {
