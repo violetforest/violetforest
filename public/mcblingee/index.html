@@ -1897,10 +1897,13 @@ function animate() {
       mobileSitPoint.x - camera.position.x,
       mobileSitPoint.y - camera.position.z
     );
-    // Auto-sit once close enough. This uses the same approach point as standUp()
-    // instead of the chair center, which can sit behind the desk collision clamp.
-    if (distAfter < 0.35) {
+    const reachedSitZone = camera.position.z <= mobileSitPoint.y + 0.45
+      && Math.abs(camera.position.x - mobileSitPoint.x) < 0.85;
+    // Auto-sit once the phone walk reaches the chair approach zone. Snap onto
+    // the approach point first so tiny mobile viewport/timing differences cannot miss it.
+    if (distAfter < 0.7 || reachedSitZone) {
       touchDown = false;
+      camera.position.set(mobileSitPoint.x, 1.6, mobileSitPoint.y);
       sitDown();
     }
   }
