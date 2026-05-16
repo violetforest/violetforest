@@ -1222,7 +1222,6 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
 
   // Live desktop iframe rendered onto the 3D monitor screen via CSS3D
   const SCREEN_W = 1.22, SCREEN_H = 0.88;
-  const SCREEN_OFFSET_X = 0.015, SCREEN_OFFSET_Y = -0.018;
   const PX_W = 1024, PX_H = Math.round(PX_W * (SCREEN_H / SCREEN_W));
   const screenIframe = document.createElement('iframe');
   screenIframe.src = 'desktop.html';
@@ -1235,7 +1234,6 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
   cssScreen.scale.setScalar(SCREEN_W / PX_W);
   cssScene.add(cssScreen);
   monitorGroup.userData.cssScreen = cssScreen;
-  monitorGroup.userData.cssScreenOffset = new THREE.Vector3(SCREEN_OFFSET_X, SCREEN_OFFSET_Y, 0);
   // power led
   const led = new THREE.Mesh(
     new THREE.SphereGeometry(0.012, 8, 8),
@@ -1937,8 +1935,6 @@ function animate() {
   if (cssScreen && screenMesh) {
     screenMesh.getWorldPosition(cssScreen.position);
     screenMesh.getWorldQuaternion(cssScreen.quaternion);
-    const offset = monitorGroup.userData.cssScreenOffset;
-    if (offset) cssScreen.position.add(offset.clone().applyQuaternion(cssScreen.quaternion));
   }
 
   renderer.render(scene, camera);
