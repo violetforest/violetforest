@@ -10,7 +10,7 @@
   html, body {
     height: 100%;
     overflow: hidden;
-    background: #ff66aa;
+    background: #0a0418;
     font-family: "Segoe UI", Tahoma, sans-serif;
     color: #fff0f7;
     touch-action: none;
@@ -518,7 +518,8 @@ import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer
 // SCENE / CAMERA / RENDERER
 // ═══════════════════════════════════════════════════════════════
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0418);
+// No scene.background — the canvas clears transparent so the CSS3D layer
+// shows through the monitor-screen hole. Body background matches this color.
 scene.fog = new THREE.FogExp2(0x15051c, 0.045);
 
 // Single shared mobile flag — used by the click handler, tap-to-walk setup,
@@ -528,16 +529,25 @@ const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 60);
 camera.position.set(0, 1.6, 3.2);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(2, devicePixelRatio));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
+renderer.setClearColor(0x000000, 0);  // fully transparent clear
 document.body.appendChild(renderer.domElement);
 
-// CSS3D overlay for embedding live HTML (the desktop iframe) onto the 3D monitor screen
+// WebGL canvas sits ON TOP; the CSS3D iframe layer sits BEHIND it. The monitor
+// screen mesh renders depth-only (colorWrite:false), punching a transparent
+// hole through the canvas so the live desktop iframe shows through.
+renderer.domElement.style.position = 'fixed';
+renderer.domElement.style.top = '0';
+renderer.domElement.style.left = '0';
+renderer.domElement.style.zIndex = '2';
+renderer.domElement.style.pointerEvents = 'auto';
+
 const cssRenderer = new CSS3DRenderer();
 cssRenderer.setSize(innerWidth, innerHeight);
 cssRenderer.domElement.style.position = 'fixed';
@@ -545,7 +555,7 @@ cssRenderer.domElement.style.top = '0';
 cssRenderer.domElement.style.left = '0';
 cssRenderer.domElement.style.pointerEvents = 'none';
 cssRenderer.domElement.style.touchAction = 'none';
-cssRenderer.domElement.style.zIndex = '1';
+cssRenderer.domElement.style.zIndex = '1';  // BEHIND the canvas
 document.body.appendChild(cssRenderer.domElement);
 const cssScene = new THREE.Scene();
 
@@ -1215,29 +1225,32 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
   bezel.position.set(0, 0.6, 0.1);
   bezel.castShadow = true;
   monitorGroup.add(bezel);
-  // screen — always on
-  const screenMat = new THREE.MeshStandardMaterial({
-    map: monitorOnTex,
-    emissive: 0xffffff,
-    emissiveMap: monitorOnTex,
-    emissiveIntensity: 0.9,
-    roughness: 0.2
-  });
+  // screen — depth-only "blocker": writes depth but no color, punching a
+  // transparent hole through the WebGL canvas so the CSS3D desktop iframe
+  // (rendered on the layer behind the canvas) shows through.
+  const screenMat = new THREE.MeshBasicMaterial({ colorWrite: false });
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.22, 0.88), screenMat);
   screen.position.set(0, 0.6, 0.131);
   screen.name = 'monitor-screen';
+  screen.renderOrder = -1;  // punch the hole before other opaque geometry draws
   monitorGroup.add(screen);
   monitorGroup.userData.screenMesh = screen;
   monitorGroup.userData.screenMat = screenMat;
 
-  // Live desktop iframe rendered onto the 3D monitor screen via CSS3D
+  // Live desktop iframe rendered onto the 3D monitor screen via CSS3D.
+  // 1220x880 keeps the exact 61:44 ratio of the screen plane — no rounding
+  // drift, so the per-axis scale below maps it pixel-perfectly.
   const SCREEN_W = 1.22, SCREEN_H = 0.88;
-  const PX_W = 1024, PX_H = Math.round(PX_W * (SCREEN_H / SCREEN_W));
+  const PX_W = 1220, PX_H = 880;
   const screenIframe = document.createElement('iframe');
   screenIframe.src = 'desktop.html';
   screenIframe.style.width = PX_W + 'px';
   screenIframe.style.height = PX_H + 'px';
   screenIframe.style.border = '0';
+  screenIframe.style.margin = '0';
+  screenIframe.style.padding = '0';
+  screenIframe.style.display = 'block';
+  screenIframe.style.boxSizing = 'border-box';
   screenIframe.style.background = '#fff5fa';
   screenIframe.style.pointerEvents = 'none';
   screenIframe.setAttribute('tabindex', '-1');
@@ -1254,7 +1267,7 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
     } catch (e) {}
   });
   const cssScreen = new CSS3DObject(screenIframe);
-  cssScreen.scale.setScalar(SCREEN_W / PX_W);
+  cssScreen.scale.set(SCREEN_W / PX_W, SCREEN_H / PX_H, 1);  // explicit per-axis
   cssScene.add(cssScreen);
   monitorGroup.userData.cssScreen = cssScreen;
   // power led
@@ -1818,13 +1831,6 @@ function sitDown() {
     if (iframe.src === 'about:blank' || !iframe.src.endsWith('desktop.html')) {
       iframe.src = 'desktop.html';
     }
-    // turn the 3D monitor screen "on" (behind overlay for if you peek)
-    const mat = monitorGroup.userData.screenMat;
-    mat.map = monitorOnTex;
-    mat.emissiveMap = monitorOnTex;
-    mat.emissive.setHex(0xffffff);
-    mat.emissiveIntensity = 0.9;
-    mat.needsUpdate = true;
     hudEl.style.opacity = '0';
   });
 }
