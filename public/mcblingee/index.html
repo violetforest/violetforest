@@ -1685,6 +1685,7 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 // --- Mobile: tap anywhere (including the 3D monitor) to walk + auto-sit ---
 const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
+const mobileSitPoint = new THREE.Vector2(0, -2.2);
 if (_isMobile) {
   // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
   const hint = document.getElementById('controls-hint');
@@ -1882,19 +1883,23 @@ function animate() {
     clampToRoom(camera.position);
   }
 
-  // Mobile: tap-to-walk forward toward the chair, auto-sit when close.
+  // Mobile: tap-to-walk to the chair approach point, auto-sit when close.
   if (_isMobile && touchDown && state === 'walking' && !controls.isLocked) {
-    // Walk straight toward the chair (chairGroup at z = -2.9, x = 0).
-    const dx = chairGroup.position.x - camera.position.x;
-    const dz = chairGroup.position.z - camera.position.z;
+    const dx = mobileSitPoint.x - camera.position.x;
+    const dz = mobileSitPoint.y - camera.position.z;
     const dist = Math.hypot(dx, dz) || 1;
     const speed = 2.0;
-    camera.position.x += (dx / dist) * speed * dt;
-    camera.position.z += (dz / dist) * speed * dt;
+    const step = Math.min(speed * dt, dist);
+    camera.position.x += (dx / dist) * step;
+    camera.position.z += (dz / dist) * step;
     clampToRoom(camera.position);
-    // Auto-sit once close enough — distance-based, since on mobile there's no
-    // mouse-look so the raycast in checkInteraction() may not be aimed at the chair.
-    if (dist < 1.4) {
+    const distAfter = Math.hypot(
+      mobileSitPoint.x - camera.position.x,
+      mobileSitPoint.y - camera.position.z
+    );
+    // Auto-sit once close enough. This uses the same approach point as standUp()
+    // instead of the chair center, which can sit behind the desk collision clamp.
+    if (distAfter < 0.35) {
       touchDown = false;
       sitDown();
     }
