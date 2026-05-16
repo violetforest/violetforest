@@ -17,6 +17,7 @@ export function NetArtIframe({
   infoPosition,
   infoRainbow,
   favicon,
+  docTitle,
 }: {
   src: string
   title: string
@@ -32,7 +33,20 @@ export function NetArtIframe({
    * the top-level document. Original favicons are restored on unmount.
    */
   favicon?: string
+  /**
+   * Optional document.title to set while this route is mounted. Same reason as
+   * `favicon` — the browser tab uses the parent document's title, not the
+   * iframe's <title>. Original title is restored on unmount.
+   */
+  docTitle?: string
 }) {
+  useEffect(() => {
+    if (!docTitle) return
+    const prev = document.title
+    document.title = docTitle
+    return () => { document.title = prev }
+  }, [docTitle])
+
   useEffect(() => {
     if (!favicon) return
     const head = document.head
