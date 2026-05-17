@@ -1248,7 +1248,7 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
 
   // Live desktop iframe rendered onto the 3D monitor screen via CSS3D
   const SCREEN_W = 1.22, SCREEN_H = 0.88;
-  const MOBILE_SCREEN_OFFSET_X = 0, MOBILE_SCREEN_OFFSET_Y = -0.138;
+  const MOBILE_SCREEN_OFFSET_X = 0, MOBILE_SCREEN_OFFSET_Y = -0.152;
   const PX_W = 1024, PX_H = Math.round(PX_W * (SCREEN_H / SCREEN_W));
   const screenIframe = document.createElement('iframe');
   screenIframe.src = 'desktop.html';
@@ -1261,6 +1261,7 @@ const monitorEdgeMat = new THREE.MeshStandardMaterial({ color: 0xaa5a80, roughne
   cssScreen.scale.setScalar(SCREEN_W / PX_W);
   cssScene.add(cssScreen);
   monitorGroup.userData.cssScreen = cssScreen;
+  monitorGroup.userData.screenIframe = screenIframe;
   monitorGroup.userData.mobileCssScreenOffset = new THREE.Vector3(MOBILE_SCREEN_OFFSET_X, MOBILE_SCREEN_OFFSET_Y, 0);
   // power led
   const led = new THREE.Mesh(
@@ -1715,6 +1716,11 @@ const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
 const mobileSitPoint = new THREE.Vector2(0, -2.2);
 if (_isMobile) {
+  cssRenderer.domElement.style.pointerEvents = 'auto';
+  if (monitorGroup.userData.screenIframe) {
+    monitorGroup.userData.screenIframe.style.pointerEvents = 'auto';
+    monitorGroup.userData.screenIframe.style.touchAction = 'manipulation';
+  }
   // Hide the controls hint entirely on mobile (tap-to-walk is self-explanatory)
   const hint = document.getElementById('controls-hint');
   if (hint) hint.style.display = 'none';
@@ -1726,11 +1732,30 @@ if (_isMobile) {
   // Listen on window in capture phase so taps on the CSS3D monitor iframe
   // (or any other transparent overlay element) still latch the walk.
   // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
+  const latchMobileWalk = () => {
+    if (state !== 'walking') return;
+    touchDown = true;
+  };
   const onTap = (e) => {
     if (state !== 'walking') return;
     if (isUI(e.target)) return;
     e.preventDefault();
-    touchDown = true;
+    latchMobileWalk();
+  };
+  const attachIframeTap = (frame) => {
+    if (!frame) return;
+    const bind = () => {
+      try {
+        frame.contentWindow.addEventListener('touchstart', latchMobileWalk, { passive: true, capture: true });
+        frame.contentWindow.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'touch') latchMobileWalk();
+        }, { capture: true });
+      } catch (err) {
+        // If the iframe ever becomes cross-origin, the page-level tap handler still works.
+      }
+    };
+    frame.addEventListener('load', bind);
+    bind();
   };
   window.addEventListener('touchstart', onTap, { passive: false, capture: true });
   // Fallback for environments that report PointerEvent but not TouchEvent.
@@ -1738,6 +1763,8 @@ if (_isMobile) {
     if (e.pointerType !== 'touch') return;
     onTap(e);
   }, { capture: true });
+  attachIframeTap(monitorGroup.userData.screenIframe);
+  attachIframeTap(iframe);
 }
 
 exitBtn.addEventListener('click', () => {
