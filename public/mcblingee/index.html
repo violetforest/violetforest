@@ -1912,10 +1912,19 @@ function sitDown() {
   const sitPos = new THREE.Vector3(0, 1.22, -2.95);
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
-  startTween(sitPos, lookTarget, 900, () => {
+  if (_isMobile) {
+    // Skip tween on mobile — set sitting state immediately so tap-to-navigate works.
+    camera.position.copy(sitPos);
+    const m = new THREE.Matrix4();
+    m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
+    camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
-    if (!_isMobile) showDesktopOverlay();
-  });
+  } else {
+    startTween(sitPos, lookTarget, 900, () => {
+      setState('sitting');
+      showDesktopOverlay();
+    });
+  }
 }
 
 function standUp() {
