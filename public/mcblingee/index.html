@@ -573,7 +573,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v2</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v3</div>
 
 <script type="importmap">
 {
@@ -1910,7 +1910,7 @@ function showDesktopOverlay() {
 function sitDown() {
   if (state !== 'walking') return;
   setState('transitioning');
-  controls.unlock();
+  try { controls.unlock(); } catch (e) { /* pointer lock unavailable on mobile */ }
   // remember where we were
   standingPose = {
     position: camera.position.clone(),
@@ -1922,18 +1922,18 @@ function sitDown() {
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
   if (_isMobile) {
-    // Skip tween on mobile — set sitting state immediately so tap-to-navigate works.
+    // Skip tween on mobile — snap into the sitting pose, then auto-navigate
+    // to the next page after a short beat so the sit registers visually.
     camera.position.copy(sitPos);
     const m = new THREE.Matrix4();
     m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
     camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
-
-    if (tapCatcher) tapCatcher.style.display = 'block';} else {
-      startTween(sitPos, lookTarget, 900, () => {
+    setTimeout(() => { window.fadeToRoute('mcblingee.html'); }, 700);
+  } else {
+    startTween(sitPos, lookTarget, 900, () => {
       setState('sitting');
       window.fadeToRoute('mcblingee.html');
-      return;
     });
   }
 }
