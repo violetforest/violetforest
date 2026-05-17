@@ -1909,7 +1909,10 @@ function sitDown() {
   const sitPos = new THREE.Vector3(0, 1.22, -2.95);
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
-  if (_isMobile) showDesktopOverlay();
+  if (_isMobile) {
+    window.fadeToRoute('mcblingee.html');
+    return;
+  }
 
   startTween(sitPos, lookTarget, 900, () => {
     setState('sitting');
