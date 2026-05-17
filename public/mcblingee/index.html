@@ -1767,7 +1767,16 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
 const mobileSitPoint = new THREE.Vector2(0, -2.2);
+// Fullscreen tap catcher shown when sitting — ensures taps aren't swallowed by iframe
+let tapCatcher = null;
 if (_isMobile) {
+  tapCatcher = document.createElement('div');
+  tapCatcher.style.cssText = 'position:fixed;inset:0;z-index:999999;display:none;background:rgba(0,0,0,0.001);';
+  document.body.appendChild(tapCatcher);
+  tapCatcher.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    window.fadeToRoute('mcblingee.html');
+  }, { passive: false });
   cssRenderer.domElement.style.pointerEvents = 'auto';
   if (monitorGroup.userData.screenIframe) {
     monitorGroup.userData.screenIframe.style.pointerEvents = 'auto';
@@ -1785,13 +1794,6 @@ if (_isMobile) {
   // (or any other transparent overlay element) still latch the walk.
   // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
   // Fullscreen tap catcher shown when sitting — ensures taps aren't swallowed by iframe
-  const tapCatcher = document.createElement('div');
-  tapCatcher.style.cssText = 'position:fixed;inset:0;z-index:999999;display:none;';
-  document.body.appendChild(tapCatcher);
-  tapCatcher.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    window.fadeToRoute('mcblingee.html');
-  }, { passive: false });
 
   const mobileTapAction = () => {
     if (state === 'sitting') {
@@ -1928,7 +1930,7 @@ function sitDown() {
     m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
     camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
-    tapCatcher.style.display = 'block';
+    if (tapCatcher) tapCatcher.style.display = 'block';
   } else {
     startTween(sitPos, lookTarget, 900, () => {
       setState('sitting');
