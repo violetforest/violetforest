@@ -1772,6 +1772,23 @@ function checkInteraction() {
 // ═══════════════════════════════════════════════════════════════
 // SIT / STAND
 // ═══════════════════════════════════════════════════════════════
+function showDesktopOverlay() {
+  overlayEl.classList.add('active');
+  requestAnimationFrame(() => {
+    overlayEl.classList.add('visible');
+  });
+  if (iframe.src === 'about:blank' || !iframe.src.endsWith('desktop.html')) {
+    iframe.src = 'desktop.html';
+  }
+  const mat = monitorGroup.userData.screenMat;
+  mat.map = monitorOnTex;
+  mat.emissiveMap = monitorOnTex;
+  mat.emissive.setHex(0xffffff);
+  mat.emissiveIntensity = 0.9;
+  mat.needsUpdate = true;
+  hudEl.style.opacity = '0';
+}
+
 function sitDown() {
   if (state !== 'walking') return;
   setState('transitioning');
@@ -1786,26 +1803,11 @@ function sitDown() {
   const sitPos = new THREE.Vector3(0, 1.22, -2.95);
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
+  if (_isMobile) showDesktopOverlay();
+
   startTween(sitPos, lookTarget, 900, () => {
     setState('sitting');
-    // show overlay
-    overlayEl.classList.add('active');
-    // small delay for pretty transition
-    requestAnimationFrame(() => {
-      overlayEl.classList.add('visible');
-    });
-    // point iframe at desktop (pink-desktop.html lives at the repo root)
-    if (iframe.src === 'about:blank' || !iframe.src.endsWith('desktop.html')) {
-      iframe.src = 'desktop.html';
-    }
-    // turn the 3D monitor screen "on" (behind overlay for if you peek)
-    const mat = monitorGroup.userData.screenMat;
-    mat.map = monitorOnTex;
-    mat.emissiveMap = monitorOnTex;
-    mat.emissive.setHex(0xffffff);
-    mat.emissiveIntensity = 0.9;
-    mat.needsUpdate = true;
-    hudEl.style.opacity = '0';
+    showDesktopOverlay();
   });
 }
 
