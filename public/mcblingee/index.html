@@ -573,7 +573,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v1</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v8</div>
 
 <script type="importmap">
 {
@@ -1769,16 +1769,7 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 const _isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 let touchDown = false;
 const mobileSitPoint = new THREE.Vector2(0, -2.2);
-// Fullscreen tap catcher shown when sitting — ensures taps aren't swallowed by iframe
-let tapCatcher = null;
 if (_isMobile) {
-  tapCatcher = document.createElement('div');
-  tapCatcher.style.cssText = 'position:fixed;inset:0;z-index:999999;display:none;background:rgba(0,0,0,0.001);';
-  document.body.appendChild(tapCatcher);
-  tapCatcher.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    window.fadeToRoute('mcblingee.html');
-  }, { passive: false });
   cssRenderer.domElement.style.pointerEvents = 'auto';
   if (monitorGroup.userData.screenIframe) {
     monitorGroup.userData.screenIframe.style.pointerEvents = 'auto';
@@ -1794,9 +1785,7 @@ if (_isMobile) {
   };
   // Listen on window in capture phase so taps on the CSS3D monitor iframe
   // (or any other transparent overlay element) still latch the walk.
-  // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
-  // Fullscreen tap catcher shown when sitting — ensures taps aren't swallowed by iframe
-
+  // Single tap latches auto-walk toward the chair; auto-navigates after sitting.
   const mobileTapAction = () => {
     if (state === 'sitting') {
       window.fadeToRoute('mcblingee.html');
@@ -1914,7 +1903,7 @@ function showDesktopOverlay() {
 function sitDown() {
   if (state !== 'walking') return;
   setState('transitioning');
-  controls.unlock();
+  try { controls.unlock(); } catch (e) { /* pointer lock unavailable on mobile */ }
   // remember where we were
   standingPose = {
     position: camera.position.clone(),
@@ -1926,13 +1915,14 @@ function sitDown() {
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
   if (_isMobile) {
-    // Skip tween on mobile — set sitting state immediately so tap-to-navigate works.
+    // Skip tween on mobile — snap into the sitting pose, then auto-navigate
+    // to the next page after a short beat so the sit registers visually.
     camera.position.copy(sitPos);
     const m = new THREE.Matrix4();
     m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
     camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
-    if (tapCatcher) tapCatcher.style.display = 'block';
+    setTimeout(() => { window.fadeToRoute('mcblingee.html'); }, 700);
   } else {
     startTween(sitPos, lookTarget, 900, () => {
       setState('sitting');
