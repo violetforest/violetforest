@@ -573,7 +573,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v6</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v5</div>
 
 <script type="importmap">
 {
@@ -1931,11 +1931,9 @@ function sitDown() {
 
   if (_isMobile) {
     // Skip tween on mobile — set sitting state immediately so tap-to-navigate works.
-    // Pulled back from the desktop sitPos so the monitor isn't so zoomed in.
-    const mobileSitPos = new THREE.Vector3(0, 1.4, -1.2);
-    camera.position.copy(mobileSitPos);
+    camera.position.copy(sitPos);
     const m = new THREE.Matrix4();
-    m.lookAt(mobileSitPos, lookTarget, new THREE.Vector3(0, 1, 0));
+    m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
     camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
     if (tapCatcher) tapCatcher.style.display = 'block';
