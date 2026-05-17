@@ -4,9 +4,13 @@
     <meta charset="utf-8">
     <script>
       // Single-page app redirect for GitHub Pages
-      // Converts path to query string so index.html can restore it
+      // Converts path to query string so index.html can restore it,
+      // preserving any original query string (e.g. ?embed=ig).
       var segments = window.location.pathname.split('/').filter(Boolean)
-      var query = segments.length ? '?p=/' + segments.join('/') : ''
+      var parts = []
+      if (segments.length) parts.push('p=/' + segments.join('/'))
+      if (window.location.search) parts.push(window.location.search.slice(1))
+      var query = parts.length ? '?' + parts.join('&') : ''
       window.location.replace(window.location.origin + '/' + query + window.location.hash)
     </script>
   </head>
