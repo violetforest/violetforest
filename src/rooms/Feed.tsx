@@ -32,15 +32,6 @@ function timeAgo(date: string) {
 }
 
 function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) => void }) {
-  const share = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        text: post.body || undefined,
-        url: window.location.href,
-      })
-    }
-  }
-
   return (
     <article
       className="h-entry"
@@ -200,21 +191,6 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
         <time className="dt-published" dateTime={post.created_at} style={{ fontSize: '1.13rem', opacity: 0.45 }}>
           {timeAgo(post.created_at)}
         </time>
-        {'share' in navigator && (
-          <button
-            onClick={share}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '1.13rem',
-              opacity: 0.45,
-              cursor: 'pointer',
-              fontFamily: 'Georgia, serif',
-            }}
-          >
-            share
-          </button>
-        )}
       </div>
     </article>
   )
