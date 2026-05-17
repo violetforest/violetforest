@@ -1784,28 +1784,26 @@ if (_isMobile) {
   // Listen on window in capture phase so taps on the CSS3D monitor iframe
   // (or any other transparent overlay element) still latch the walk.
   // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
-  const latchMobileWalk = () => {
-    if (state !== 'walking') return;
-    touchDown = true;
-  };
-  const onTap = (e) => {
+  const mobileTapAction = () => {
     if (state === 'sitting') {
-      e.preventDefault();
       window.fadeToRoute('mcblingee.html');
       return;
     }
     if (state !== 'walking') return;
+    touchDown = true;
+  };
+  const onTap = (e) => {
     if (isUI(e.target)) return;
     e.preventDefault();
-    latchMobileWalk();
+    mobileTapAction();
   };
   const attachIframeTap = (frame) => {
     if (!frame) return;
     const bind = () => {
       try {
-        frame.contentWindow.addEventListener('touchstart', latchMobileWalk, { passive: true, capture: true });
+        frame.contentWindow.addEventListener('touchstart', mobileTapAction, { passive: true, capture: true });
         frame.contentWindow.addEventListener('pointerdown', (e) => {
-          if (e.pointerType === 'touch') latchMobileWalk();
+          if (e.pointerType === 'touch') mobileTapAction();
         }, { capture: true });
       } catch (err) {
         // If the iframe ever becomes cross-origin, the page-level tap handler still works.
