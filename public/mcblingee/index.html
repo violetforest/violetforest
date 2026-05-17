@@ -1789,6 +1789,11 @@ if (_isMobile) {
     touchDown = true;
   };
   const onTap = (e) => {
+    if (state === 'sitting') {
+      e.preventDefault();
+      window.fadeToRoute('mcblingee.html');
+      return;
+    }
     if (state !== 'walking') return;
     if (isUI(e.target)) return;
     e.preventDefault();
@@ -1909,14 +1914,9 @@ function sitDown() {
   const sitPos = new THREE.Vector3(0, 1.22, -2.95);
   const lookTarget = new THREE.Vector3(0, 1.42, -4.4);
 
-  if (_isMobile) {
-    window.fadeToRoute('mcblingee.html');
-    return;
-  }
-
   startTween(sitPos, lookTarget, 900, () => {
     setState('sitting');
-    showDesktopOverlay();
+    if (!_isMobile) showDesktopOverlay();
   });
 }
 
