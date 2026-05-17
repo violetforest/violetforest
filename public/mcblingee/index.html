@@ -198,15 +198,41 @@
       inset 0 1px 0 rgba(255,255,255,0.85),
       inset 0 -3px 8px rgba(180, 40, 100, 0.15);
   }
-  @media (max-width: 640px) {
+  @media (hover: none) and (pointer: coarse), (max-width: 640px) {
+    #desktop-overlay {
+      z-index: 1000;
+      background: #fff5fa;
+    }
     .monitor-frame {
-      width: 94vw;
-      height: min(80vh, 700px);
-      height: min(80svh, 700px);
-      max-height: calc(100vh - 60px);
-      max-height: calc(100svh - 60px);
-      padding: 14px 14px 36px 14px;
-      border-radius: 10px;
+      inset: 0;
+      left: 0;
+      top: 0;
+      transform: none;
+      width: 100vw;
+      width: 100dvw;
+      height: 100vh;
+      height: 100dvh;
+      max-height: none;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: #fff5fa;
+    }
+    .monitor-frame::before,
+    .monitor-frame::after,
+    .screen-inner::before,
+    .screen-inner::after {
+      display: none;
+    }
+    .screen-inner {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    #exit-sit {
+      z-index: 1001;
+      bottom: max(14px, env(safe-area-inset-bottom));
     }
   }
   .monitor-frame::before {
