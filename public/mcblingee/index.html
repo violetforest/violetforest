@@ -573,7 +573,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v3</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v2</div>
 
 <script type="importmap">
 {
@@ -2048,8 +2048,6 @@ function animate() {
       touchDown = false;
       camera.position.set(mobileSitPoint.x, 1.6, mobileSitPoint.y);
       sitDown();
-      // Directly show tap catcher here in case sitDown's mobile path fails
-      if (tapCatcher) tapCatcher.style.display = 'flex';
     }
   }
 
