@@ -295,12 +295,12 @@ const IG_EMBED_STYLES = `
   }
 `
 
-export function Feed() {
+export function Feed({ embed }: { embed?: boolean } = {}) {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
-  const igEmbed = searchParams.get('embed') === 'ig'
+  const igEmbed = embed || searchParams.get('embed') === 'ig'
 
   useEffect(() => {
     let query = supabase

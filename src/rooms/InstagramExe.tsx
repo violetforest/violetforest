@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Feed } from './Feed'
 
 interface MediaItem {
   name: string
@@ -917,12 +918,8 @@ export function InstagramExe() {
               <div className="igexe-content">
                 {tab === 'home' && (
                   <div className="igexe-section">
-                    <div className="igexe-feed" style={{ padding: 0 }}>
-                      <iframe
-                        src={`${base}feed?embed=ig`}
-                        title="feed"
-                        style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#000' }}
-                      />
+                    <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
+                      <Feed embed />
                     </div>
                   </div>
                 )}
