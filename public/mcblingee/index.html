@@ -573,7 +573,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v4</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v5</div>
 
 <script type="importmap">
 {
@@ -1707,9 +1707,11 @@ window.bedroomState = state;
     setTimeout(() => { window.location.href = url; }, 1050);
   };
 
-  // On bfcache restore, hide the fader so it doesn't linger.
+  // On bfcache restore (e.g. browser Back), the page can resume frozen in the
+  // 'sitting' state and auto-navigate again — an infinite back-button loop.
+  // Reload for a clean walking state instead of resuming the frozen one.
   window.addEventListener('pageshow', (e) => {
-    if (e.persisted) fader.classList.remove('on');
+    if (e.persisted) window.location.reload();
   });
 })();
 let currentInteraction = null;
