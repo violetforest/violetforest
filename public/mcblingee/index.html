@@ -1784,6 +1784,15 @@ if (_isMobile) {
   // Listen on window in capture phase so taps on the CSS3D monitor iframe
   // (or any other transparent overlay element) still latch the walk.
   // Single tap latches auto-walk toward the chair; cleared automatically when sitting.
+  // Fullscreen tap catcher shown when sitting — ensures taps aren't swallowed by iframe
+  const tapCatcher = document.createElement('div');
+  tapCatcher.style.cssText = 'position:fixed;inset:0;z-index:999999;display:none;';
+  document.body.appendChild(tapCatcher);
+  tapCatcher.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    window.fadeToRoute('mcblingee.html');
+  }, { passive: false });
+
   const mobileTapAction = () => {
     if (state === 'sitting') {
       window.fadeToRoute('mcblingee.html');
@@ -1919,6 +1928,7 @@ function sitDown() {
     m.lookAt(sitPos, lookTarget, new THREE.Vector3(0, 1, 0));
     camera.quaternion.setFromRotationMatrix(m);
     setState('sitting');
+    tapCatcher.style.display = 'block';
   } else {
     startTween(sitPos, lookTarget, 900, () => {
       setState('sitting');
