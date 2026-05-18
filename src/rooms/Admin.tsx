@@ -471,6 +471,33 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setPosts(posts.map(p => (p.id === post.id ? { ...p, body } : p)))
   }
 
+  // Edit the created_at date of a post via a quick prompt.
+  const editDate = async (post: any) => {
+    const current = new Date(post.created_at)
+    const prefill = current.toISOString().slice(0, 16).replace('T', ' ')
+    const next = window.prompt('Date (YYYY-MM-DD or YYYY-MM-DD HH:MM):', prefill)
+    if (next === null) return
+    const parsed = new Date(next.trim())
+    if (isNaN(parsed.getTime())) {
+      window.alert('Could not read that date — try YYYY-MM-DD.')
+      return
+    }
+    const created_at = parsed.toISOString()
+    const { error } = await supabase
+      .from('posts')
+      .update({ created_at })
+      .eq('id', post.id)
+    if (error) {
+      window.alert(`Saving date failed: ${error.message}`)
+      return
+    }
+    setPosts(
+      posts
+        .map(p => (p.id === post.id ? { ...p, created_at } : p))
+        .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+    )
+  }
+
   return (
     <div style={{ width: '100%', marginTop: '2rem' }}>
       {stories.length > 0 && (
@@ -650,6 +677,13 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                       style={{ ...deleteStyle, opacity: 0.5 }}
                     >
                       edit text
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => editDate(post)}
+                      style={{ ...deleteStyle, opacity: 0.5 }}
+                    >
+                      edit date
                     </button>
                     <label style={{ ...deleteStyle, opacity: 0.5, cursor: 'pointer' }}>
                       add media
