@@ -372,7 +372,7 @@ function PostList({ refreshKey }: { refreshKey: number }) {
   }
 
   // Upload new files and append them to an existing post's media array.
-  const addMediaToPost = async (post: any, files: FileList) => {
+  const addMediaToPost = async (post: any, files: File[]) => {
     const current: MediaItem[] =
       post.media && post.media.length > 0
         ? post.media
@@ -569,10 +569,11 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                         multiple
                         style={{ display: 'none' }}
                         onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            addMediaToPost(post, e.target.files)
-                          }
+                          // Copy into an array before clearing the input —
+                          // resetting value wipes the live FileList.
+                          const files = e.target.files ? Array.from(e.target.files) : []
                           e.target.value = ''
+                          if (files.length > 0) addMediaToPost(post, files)
                         }}
                       />
                     </label>
