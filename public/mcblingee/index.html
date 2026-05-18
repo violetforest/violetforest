@@ -1919,6 +1919,7 @@ function sitDown() {
   } else {
     startTween(sitPos, lookTarget, 900, () => {
       setState('sitting');
+      showDesktopOverlay();
     });
   }
 }
