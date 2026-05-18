@@ -372,6 +372,18 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setPosts(posts.map(p => (p.id === post.id ? { ...p, tags } : p)))
   }
 
+  // Edit the text/body of an existing post via a quick prompt.
+  const editBody = async (post: any) => {
+    const next = window.prompt('Post text:', post.body || '')
+    if (next === null) return
+    const body = next.trim() || null
+    await supabase
+      .from('posts')
+      .update({ body })
+      .eq('id', post.id)
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, body } : p)))
+  }
+
   return (
     <div style={{ width: '100%', marginTop: '2rem' }}>
       {stories.length > 0 && (
@@ -489,7 +501,16 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
                   <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
-                  <DeleteButton onDelete={() => deletePost(post.id)} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => editBody(post)}
+                      style={{ ...deleteStyle, opacity: 0.5 }}
+                    >
+                      edit text
+                    </button>
+                    <DeleteButton onDelete={() => deletePost(post.id)} />
+                  </div>
                 </div>
               </div>
             )
