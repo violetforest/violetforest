@@ -55,51 +55,18 @@ function Linkified({ text }: { text: string }) {
   )
 }
 
-// A video thumbnail that auto-captures an early frame as its poster, so it
-// shows a still image instead of a black box before playback.
+// A video thumbnail that shows an early frame as a still. Uses a #t= media
+// fragment so the browser natively renders that frame — works on iOS, where
+// off-screen canvas frame-capture does not.
 function VideoThumb({ src, style, onClick }: {
   src: string
   style: React.CSSProperties
   onClick: () => void
 }) {
-  const [poster, setPoster] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    const v = document.createElement('video')
-    v.crossOrigin = 'anonymous'
-    v.muted = true
-    v.preload = 'metadata'
-    v.src = src
-    const onLoaded = () => {
-      try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2) } catch { /* ignore */ }
-    }
-    const onSeeked = () => {
-      if (cancelled || !v.videoWidth) return
-      const canvas = document.createElement('canvas')
-      canvas.width = v.videoWidth
-      canvas.height = v.videoHeight
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      ctx.drawImage(v, 0, 0)
-      try {
-        if (!cancelled) setPoster(canvas.toDataURL('image/jpeg', 0.72))
-      } catch { /* cross-origin tainted — skip */ }
-    }
-    v.addEventListener('loadeddata', onLoaded)
-    v.addEventListener('seeked', onSeeked)
-    return () => {
-      cancelled = true
-      v.removeEventListener('loadeddata', onLoaded)
-      v.removeEventListener('seeked', onSeeked)
-      v.src = ''
-    }
-  }, [src])
-
+  const posterSrc = src.includes('#') ? src : `${src}#t=0.1`
   return (
     <video
-      src={src}
-      poster={poster ?? undefined}
+      src={posterSrc}
       muted
       playsInline
       preload="metadata"
