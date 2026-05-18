@@ -371,6 +371,33 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
   }
 
+  // Swap a media item with its neighbour to reorder it within the post.
+  const moveMediaItem = async (post: any, index: number, dir: -1 | 1) => {
+    const current: MediaItem[] =
+      post.media && post.media.length > 0
+        ? post.media
+        : post.image_url
+          ? [{ url: post.image_url, type: 'image' }]
+          : []
+    const target = index + dir
+    if (target < 0 || target >= current.length) return
+
+    const next = current.slice()
+    ;[next[index], next[target]] = [next[target], next[index]]
+
+    const firstImage = next.find(m => m.type === 'image')
+    const updates: Record<string, any> = {
+      media: next,
+      image_url: firstImage ? firstImage.url : null,
+    }
+    const { error } = await supabase.from('posts').update(updates).eq('id', post.id)
+    if (error) {
+      window.alert(`Reorder failed: ${error.message}`)
+      return
+    }
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
+  }
+
   // Upload new files and append them to an existing post's media array.
   const addMediaToPost = async (post: any, files: File[]) => {
     const current: MediaItem[] =
@@ -533,6 +560,61 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                         >
                           ×
                         </button>
+                        {items.length > 1 && (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              bottom: 2,
+                              left: 2,
+                              right: 2,
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <button
+                              type="button"
+                              title="move left"
+                              disabled={i === 0}
+                              onClick={() => moveMediaItem(post, i, -1)}
+                              style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: '50%',
+                                border: 'none',
+                                background: 'rgba(0,0,0,0.65)',
+                                color: '#fff',
+                                fontSize: 11,
+                                lineHeight: '18px',
+                                padding: 0,
+                                cursor: i === 0 ? 'default' : 'pointer',
+                                opacity: i === 0 ? 0.3 : 1,
+                              }}
+                            >
+                              ‹
+                            </button>
+                            <button
+                              type="button"
+                              title="move right"
+                              disabled={i === items.length - 1}
+                              onClick={() => moveMediaItem(post, i, 1)}
+                              style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: '50%',
+                                border: 'none',
+                                background: 'rgba(0,0,0,0.65)',
+                                color: '#fff',
+                                fontSize: 11,
+                                lineHeight: '18px',
+                                padding: 0,
+                                cursor: i === items.length - 1 ? 'default' : 'pointer',
+                                opacity: i === items.length - 1 ? 0.3 : 1,
+                              }}
+                            >
+                              ›
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
