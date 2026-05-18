@@ -194,9 +194,13 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                 borderRadius: '4px',
                 display: 'block',
                 gridColumn: span === 2 ? 'span 2' : undefined,
-                objectFit: 'cover',
-                maxHeight: single ? undefined : '320px',
                 cursor: 'pointer',
+                // The single image and the spanning "hero" image show fully
+                // at their natural aspect ratio; only the side-by-side tiles
+                // are cropped to a uniform square.
+                ...(single || span === 2
+                  ? { objectFit: 'contain' as const, alignSelf: 'start' as const }
+                  : { objectFit: 'cover' as const, aspectRatio: '1 / 1' }),
               }
               return m.type === 'video' ? (
                 <VideoThumb
