@@ -31,7 +31,94 @@ function timeAgo(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
+function Lightbox({ items, index, onClose, onNav }: {
+  items: MediaItem[]
+  index: number
+  onClose: () => void
+  onNav: (delta: number) => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowLeft') onNav(-1)
+      else if (e.key === 'ArrowRight') onNav(1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose, onNav])
+
+  const m = items[index]
+  if (!m) return null
+
+  const arrowStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: 48,
+    height: 48,
+    borderRadius: '50%',
+    border: 'none',
+    background: 'rgba(0,0,0,0.55)',
+    color: '#fff',
+    fontSize: 28,
+    lineHeight: '48px',
+    padding: 0,
+    cursor: 'pointer',
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1000,
+        background: 'rgba(0,0,0,0.92)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute', top: 16, right: 16,
+          width: 40, height: 40, borderRadius: '50%', border: 'none',
+          background: 'rgba(0,0,0,0.55)', color: '#fff', fontSize: 22,
+          lineHeight: '40px', padding: 0, cursor: 'pointer',
+        }}
+      >
+        ×
+      </button>
+      {items.length > 1 && (
+        <button onClick={(e) => { e.stopPropagation(); onNav(-1) }} style={{ ...arrowStyle, left: 12 }}>
+          ‹
+        </button>
+      )}
+      <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {m.type === 'video' ? (
+          <video src={m.url} controls autoPlay playsInline style={{ maxWidth: '92vw', maxHeight: '88vh' }} />
+        ) : (
+          <img src={m.url} alt="" style={{ maxWidth: '92vw', maxHeight: '88vh', objectFit: 'contain' }} />
+        )}
+      </div>
+      {items.length > 1 && (
+        <button onClick={(e) => { e.stopPropagation(); onNav(1) }} style={{ ...arrowStyle, right: 12 }}>
+          ›
+        </button>
+      )}
+    </div>
+  )
+}
+
 function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) => void }) {
+  const [lightbox, setLightbox] = useState<number | null>(null)
+  // Prefer the multi-media array; fall back to legacy single image_url
+  const items: MediaItem[] = post.media && post.media.length > 0
+    ? post.media
+    : post.image_url
+      ? [{ url: post.image_url, type: 'image' }]
+      : []
   return (
     <article
       className="h-entry"
@@ -43,12 +130,6 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
     >
       <data className="p-author h-card" value="violet forest" style={{ display: 'none' }} />
       {post.type === 'photo' && (() => {
-        // Prefer the multi-media array; fall back to legacy single image_url
-        const items: MediaItem[] = post.media && post.media.length > 0
-          ? post.media
-          : post.image_url
-            ? [{ url: post.image_url, type: 'image' }]
-            : []
         if (items.length === 0) return null
         const single = items.length === 1
         return (
@@ -70,13 +151,15 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                 gridColumn: span === 2 ? 'span 2' : undefined,
                 objectFit: 'cover',
                 maxHeight: single ? undefined : '320px',
+                cursor: 'pointer',
               }
               return m.type === 'video' ? (
                 <video
                   key={i}
                   src={m.url}
-                  controls
+                  muted
                   playsInline
+                  onClick={() => setLightbox(i)}
                   style={style}
                 />
               ) : (
@@ -85,6 +168,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                   className={i === 0 ? 'u-photo' : undefined}
                   src={m.url}
                   alt=""
+                  onClick={() => setLightbox(i)}
                   style={style}
                 />
               )
@@ -192,6 +276,14 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
           {timeAgo(post.created_at)}
         </time>
       </div>
+      {lightbox !== null && (
+        <Lightbox
+          items={items}
+          index={lightbox}
+          onClose={() => setLightbox(null)}
+          onNav={(delta) => setLightbox((cur) => (cur === null ? cur : (cur + delta + items.length) % items.length))}
+        />
+      )}
     </article>
   )
 }
