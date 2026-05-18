@@ -31,6 +31,60 @@ function timeAgo(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
+// A video thumbnail that auto-captures an early frame as its poster, so it
+// shows a still image instead of a black box before playback.
+function VideoThumb({ src, style, onClick }: {
+  src: string
+  style: React.CSSProperties
+  onClick: () => void
+}) {
+  const [poster, setPoster] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const v = document.createElement('video')
+    v.crossOrigin = 'anonymous'
+    v.muted = true
+    v.preload = 'metadata'
+    v.src = src
+    const onLoaded = () => {
+      try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2) } catch { /* ignore */ }
+    }
+    const onSeeked = () => {
+      if (cancelled || !v.videoWidth) return
+      const canvas = document.createElement('canvas')
+      canvas.width = v.videoWidth
+      canvas.height = v.videoHeight
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.drawImage(v, 0, 0)
+      try {
+        if (!cancelled) setPoster(canvas.toDataURL('image/jpeg', 0.72))
+      } catch { /* cross-origin tainted — skip */ }
+    }
+    v.addEventListener('loadeddata', onLoaded)
+    v.addEventListener('seeked', onSeeked)
+    return () => {
+      cancelled = true
+      v.removeEventListener('loadeddata', onLoaded)
+      v.removeEventListener('seeked', onSeeked)
+      v.src = ''
+    }
+  }, [src])
+
+  return (
+    <video
+      src={src}
+      poster={poster ?? undefined}
+      muted
+      playsInline
+      preload="metadata"
+      onClick={onClick}
+      style={style}
+    />
+  )
+}
+
 function Lightbox({ items, index, onClose, onNav }: {
   items: MediaItem[]
   index: number
@@ -154,11 +208,9 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                 cursor: 'pointer',
               }
               return m.type === 'video' ? (
-                <video
+                <VideoThumb
                   key={i}
                   src={m.url}
-                  muted
-                  playsInline
                   onClick={() => setLightbox(i)}
                   style={style}
                 />
