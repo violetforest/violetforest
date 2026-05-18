@@ -563,7 +563,7 @@
   <button id="exit-sit">× stand up</button>
 </div>
 
-<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v9</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:6px;font-size:9px;color:rgba(255,200,230,0.6);z-index:9999;pointer-events:none;font-family:monospace;">v10</div>
 
 <script type="importmap">
 {
@@ -2066,6 +2066,46 @@ function animate() {
   cssRenderer.render(cssScene, camera);
 }
 animate();
+</script>
+
+<style>
+@keyframes sparkle-float {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, calc(-50% - 28px)) scale(0.2) rotate(60deg); }
+}
+.sparkle-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  line-height: 1;
+  animation: sparkle-float 0.75s ease-out forwards;
+  text-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+  user-select: none;
+}
+</style>
+<script>
+(function () {
+  const COLORS = ['#ff99cc','#ffccee','#ff66bb','#ffffff','#ffaadd','#dd88ff','#ffccff','#ffe4f0'];
+  const CHARS  = ['✦','✧','✩','⋆','★','✨','◆','·'];
+  let lastT = 0;
+
+  document.addEventListener('mousemove', function (e) {
+    const now = Date.now();
+    if (now - lastT < 35) return;   // ~28 sparkles/sec max
+    lastT = now;
+
+    // don't spawn while pointer is locked (no real cursor visible)
+    if (document.pointerLockElement) return;
+
+    const el = document.createElement('span');
+    el.className = 'sparkle-particle';
+    el.textContent = CHARS[Math.random() * CHARS.length | 0];
+    const size = 9 + Math.random() * 11;
+    el.style.cssText += `left:${e.clientX}px;top:${e.clientY}px;font-size:${size}px;color:${COLORS[Math.random() * COLORS.length | 0]};`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 780);
+  });
+})();
 </script>
 </body>
 </html>
