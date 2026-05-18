@@ -102,14 +102,17 @@ function PostComposer({ onPost }: { onPost: () => void }) {
     } else {
       const hasMedia = media.length > 0
       const tags = parseTags(tagsInput)
-      const { error } = await supabase.from('posts').insert({
+      // Only include media/tags keys when they have values, so a plain post
+      // doesn't reference those columns at all if they're absent from the db.
+      const row: Record<string, any> = {
         type: hasMedia ? 'photo' : type,
         body: body || null,
         image_url,
-        media: hasMedia ? media : null,
         link_url: type === 'link' ? linkUrl || null : null,
-        tags: tags.length > 0 ? tags : null,
-      })
+      }
+      if (hasMedia) row.media = media
+      if (tags.length > 0) row.tags = tags
+      const { error } = await supabase.from('posts').insert(row)
       insertError = error
     }
 
