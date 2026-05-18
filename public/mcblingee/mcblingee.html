@@ -2571,8 +2571,9 @@ function placeGifs(manifest) {
     const scale = randRange(g.scaleMin, g.scaleMax);
 
     // Grid from x: -150..150, z: 190 up to 600 (all behind welcome sign)
-    let x = -MAP_X / 2 + (col + 0.5) * cellW + randRange(-cellW * 0.35, cellW * 0.35);
-    let z = MAP_Z_START + (row + 0.5) * cellH + randRange(-cellH * 0.35, cellH * 0.35);
+    // Tight jitter (±15%) so gifs stay near their cell centres and rarely need nudging.
+    let x = -MAP_X / 2 + (col + 0.5) * cellW + randRange(-cellW * 0.15, cellW * 0.15);
+    let z = MAP_Z_START + (row + 0.5) * cellH + randRange(-cellH * 0.15, cellH * 0.15);
 
     // Use per-category yMin/yMax, with ground clearance accounting for full rendered size
     const groundY = hillHeight(x, z) + HILL_Y_OFFSET;
@@ -2582,18 +2583,20 @@ function placeGifs(manifest) {
     const maxY = Math.max(minY + 5, Math.min(g.yMax, gifMaxY));
     let y = randRange(minY, maxY);
 
-    // Effective radius of this gif after scaling (generous padding)
-    const effectiveR = scale * gifScale * 0.6 + 3;
+    // Effective radius — generous so gifs with extreme aspect ratios don't clip.
+    // Uses 0.75× scale instead of 0.6×, plus a flat +10 gap.
+    const effectiveR = scale * gifScale * 0.75 + 10;
 
-    // Nudge away from all occupied volumes (spheres + other gifs)
-    for (let attempt = 0; attempt < 12; attempt++) {
+    // Nudge away from all occupied volumes (spheres + other gifs).
+    // 60 attempts + a bigger minimum push gap guarantee convergence.
+    for (let attempt = 0; attempt < 60; attempt++) {
       let collision = false;
       for (const occ of occupied) {
         const dx = x - occ.x, dy = y - occ.y, dz = z - occ.z;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         const minDist = occ.r + effectiveR;
         if (dist < minDist) {
-          const push = (minDist - dist) + 3;
+          const push = (minDist - dist) + 6;
           const len = Math.max(0.01, dist);
           x += (dx / len) * push;
           y += Math.abs(dy / len) * push;
