@@ -371,6 +371,46 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
   }
 
+  // Upload new files and append them to an existing post's media array.
+  const addMediaToPost = async (post: any, files: FileList) => {
+    const current: MediaItem[] =
+      post.media && post.media.length > 0
+        ? post.media
+        : post.image_url
+          ? [{ url: post.image_url, type: 'image' }]
+          : []
+
+    const added: MediaItem[] = []
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const ext = file.name.split('.').pop()
+      const path = `posts/${Date.now()}-${i}.${ext}`
+      const { error } = await supabase.storage.from('media').upload(path, file)
+      if (error) {
+        window.alert(`Upload failed: ${error.message}`)
+        continue
+      }
+      const { data } = supabase.storage.from('media').getPublicUrl(path)
+      const kind: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image'
+      added.push({ url: data.publicUrl, type: kind })
+    }
+    if (added.length === 0) return
+
+    const next = [...current, ...added]
+    const firstImage = next.find(m => m.type === 'image')
+    const updates: Record<string, any> = {
+      media: next,
+      image_url: firstImage ? firstImage.url : post.image_url || null,
+      type: 'photo',
+    }
+    const { error } = await supabase.from('posts').update(updates).eq('id', post.id)
+    if (error) {
+      window.alert(`Update failed: ${error.message}`)
+      return
+    }
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, ...updates } : p)))
+  }
+
   // Edit tags on an existing post via a quick prompt.
   const editTags = async (post: any) => {
     const current: string[] = post.tags || []
@@ -521,6 +561,21 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                     >
                       edit text
                     </button>
+                    <label style={{ ...deleteStyle, opacity: 0.5, cursor: 'pointer' }}>
+                      add media
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            addMediaToPost(post, e.target.files)
+                          }
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
                     <DeleteButton onDelete={() => deletePost(post.id)} />
                   </div>
                 </div>
