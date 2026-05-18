@@ -417,10 +417,14 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     const next = window.prompt('Tags (comma separated):', current.join(', '))
     if (next === null) return
     const tags = parseTags(next)
-    await supabase
+    const { error } = await supabase
       .from('posts')
       .update({ tags: tags.length > 0 ? tags : null })
       .eq('id', post.id)
+    if (error) {
+      window.alert(`Saving tags failed: ${error.message}`)
+      return
+    }
     setPosts(posts.map(p => (p.id === post.id ? { ...p, tags } : p)))
   }
 
@@ -429,10 +433,14 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     const next = window.prompt('Post text:', post.body || '')
     if (next === null) return
     const body = next.trim() || null
-    await supabase
+    const { error } = await supabase
       .from('posts')
       .update({ body })
       .eq('id', post.id)
+    if (error) {
+      window.alert(`Saving text failed: ${error.message}`)
+      return
+    }
     setPosts(posts.map(p => (p.id === post.id ? { ...p, body } : p)))
   }
 
