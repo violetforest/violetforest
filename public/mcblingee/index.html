@@ -1996,8 +1996,8 @@ function animate() {
     const speed = running ? 44 : 22;
     if (keys.KeyW || keys.ArrowUp)    velocity.z -= speed * dt;
     if (keys.KeyS || keys.ArrowDown)  velocity.z += speed * dt;
-    if (keys.KeyA || keys.ArrowLeft)  velocity.x += speed * dt;
-    if (keys.KeyD || keys.ArrowRight) velocity.x -= speed * dt;
+    if (keys.KeyA || keys.ArrowLeft)  velocity.x -= speed * dt;
+    if (keys.KeyD || keys.ArrowRight) velocity.x += speed * dt;
     controls.moveRight(-velocity.x * dt);
     controls.moveForward(-velocity.z * dt);
     clampToRoom(camera.position);
