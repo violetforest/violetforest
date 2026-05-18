@@ -31,6 +31,30 @@ function timeAgo(date: string) {
   return new Date(date).toLocaleDateString()
 }
 
+// Render text with any http(s) URLs turned into clickable links.
+function Linkified({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g)
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            {part}
+          </a>
+        ) : (
+          part
+        )
+      )}
+    </>
+  )
+}
+
 // A video thumbnail that auto-captures an early frame as its poster, so it
 // shows a still image instead of a black box before playback.
 function VideoThumb({ src, style, onClick }: {
@@ -240,7 +264,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
             opacity: 0.85,
           }}
         >
-          <span className="e-content">{post.body}</span>
+          <span className="e-content"><Linkified text={post.body} /></span>
         </blockquote>
       )}
 
@@ -274,7 +298,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
             whiteSpace: 'pre-wrap',
           }}
         >
-          {post.body}
+          <Linkified text={post.body} />
         </p>
       )}
 
@@ -288,7 +312,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
             whiteSpace: 'pre-wrap',
           }}
         >
-          {post.body}
+          <Linkified text={post.body} />
         </p>
       )}
 
