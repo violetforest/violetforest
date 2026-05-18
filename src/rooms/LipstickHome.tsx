@@ -267,29 +267,14 @@ export function LipstickHome() {
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const transitionedRef = useRef(false)
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
     if (!el) return
     const hallwayHeight = window.innerHeight * 3
-    const hallwayEnd = hallwayHeight - window.innerHeight
     const scrollTop = el.scrollTop
-    const progress = Math.max(0, Math.min(1, scrollTop / hallwayEnd))
+    const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
-
-    // When user reaches the end of the hallway, smooth-scroll to lock the
-    // instagram section in view. Fires once per descent.
-    if (!transitionedRef.current && progress >= 0.98) {
-      transitionedRef.current = true
-      const igTarget = hallwayEnd + window.innerHeight // bottom of page
-      el.scrollTo({ top: igTarget, behavior: 'smooth' })
-    }
-    // Reset when user scrolls back up into the hallway so the transition
-    // can fire again next time they walk down.
-    if (transitionedRef.current && progress < 0.6) {
-      transitionedRef.current = false
-    }
   }, [])
 
   return (
