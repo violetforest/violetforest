@@ -874,8 +874,8 @@ function updateWalk(dt) {
   const move = new THREE.Vector3();
   if (keys.w) move.add(flyForward);
   if (keys.s) move.sub(flyForward);
-  if (keys.d) move.add(flyRight);
-  if (keys.a) move.sub(flyRight);
+  if (keys.a) move.add(flyRight);
+  if (keys.d) move.sub(flyRight);
   if (keys[' ']) move.add(flyUp);
   if (move.lengthSq() === 0) return;
   move.normalize().multiplyScalar(speed);
