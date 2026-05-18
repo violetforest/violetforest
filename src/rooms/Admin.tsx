@@ -92,15 +92,17 @@ function PostComposer({ onPost }: { onPost: () => void }) {
       }
     }
 
+    let insertError = null
     if (type === 'story') {
-      await supabase.from('stories').insert({
+      const { error } = await supabase.from('stories').insert({
         body: body || null,
         image_url,
       })
+      insertError = error
     } else {
       const hasMedia = media.length > 0
       const tags = parseTags(tagsInput)
-      await supabase.from('posts').insert({
+      const { error } = await supabase.from('posts').insert({
         type: hasMedia ? 'photo' : type,
         body: body || null,
         image_url,
@@ -108,6 +110,14 @@ function PostComposer({ onPost }: { onPost: () => void }) {
         link_url: type === 'link' ? linkUrl || null : null,
         tags: tags.length > 0 ? tags : null,
       })
+      insertError = error
+    }
+
+    setPosting(false)
+
+    if (insertError) {
+      window.alert(`Post failed: ${insertError.message}`)
+      return
     }
 
     setBody('')
@@ -115,7 +125,6 @@ function PostComposer({ onPost }: { onPost: () => void }) {
     setTagsInput('')
     setMediaFiles([])
     setType('text')
-    setPosting(false)
     onPost()
   }
 
