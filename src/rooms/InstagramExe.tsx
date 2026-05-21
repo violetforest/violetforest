@@ -881,7 +881,7 @@ function Modal({ post, onClose }: { post: Post; onClose: () => void }) {
 
 export function InstagramExe() {
   const [data, setData] = useState<GraveyardData | null>(null)
-  const [tab, setTab] = useState<'home' | 'profile' | 'stories'>('profile')
+  const [tab, setTab] = useState<'home' | 'profile' | 'stories'>('home')
   const [openPost, setOpenPost] = useState<Post | null>(null)
   const [openStory, setOpenStory] = useState<Story | null>(null)
 
