@@ -226,6 +226,7 @@ function Comments({ postId }: { postId: string }) {
             padding: 0,
             marginTop: '0.35rem',
             fontSize: '1.13rem',
+            fontStyle: 'italic',
             opacity: 0.55,
             cursor: 'pointer',
             fontFamily: 'inherit',
