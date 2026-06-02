@@ -170,6 +170,7 @@ function Comments({ postId }: { postId: string }) {
   const [body, setBody] = useState('')
   const [posting, setPosting] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     supabase
@@ -200,6 +201,7 @@ function Comments({ postId }: { postId: string }) {
     }
     if (data) setComments([...comments, data as Comment])
     setBody('')
+    setOpen(false)
   }
 
   return (
@@ -214,27 +216,59 @@ function Comments({ postId }: { postId: string }) {
           ))}
         </div>
       )}
-      <form onSubmit={submit} style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', marginTop: '0.35rem' }}>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="name (optional)"
-          style={{ flex: '0 0 32%', minWidth: 0, fontSize: '0.95rem', padding: '0.2rem 0.4rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
-        />
-        <input
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="add a comment…"
-          style={{ flex: 1, minWidth: 0, fontSize: '0.95rem', padding: '0.2rem 0.4rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
-        />
+      {!open ? (
         <button
-          type="submit"
-          disabled={posting || !body.trim()}
-          style={{ fontSize: '0.95rem', padding: '0.2rem 0.6rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: posting ? 'default' : 'pointer', opacity: posting || !body.trim() ? 0.4 : 0.7, fontFamily: 'inherit' }}
+          type="button"
+          onClick={() => setOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            marginTop: '0.35rem',
+            fontSize: '1rem',
+            fontStyle: 'italic',
+            opacity: 0.55,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            color: 'inherit',
+            textDecoration: 'underline',
+          }}
         >
-          {posting ? '…' : 'post'}
+          write a comment
         </button>
-      </form>
+      ) : (
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.35rem' }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="name (optional)"
+            style={{ width: '100%', fontSize: '0.95rem', padding: '0.3rem 0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
+          />
+          <input
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="add a comment…"
+            autoFocus
+            style={{ width: '100%', fontSize: '0.95rem', padding: '0.3rem 0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
+          />
+          <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => { setOpen(false); setBody(''); setName('') }}
+              style={{ fontSize: '0.95rem', padding: '0.2rem 0.6rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: 'pointer', opacity: 0.55, fontFamily: 'inherit' }}
+            >
+              cancel
+            </button>
+            <button
+              type="submit"
+              disabled={posting || !body.trim()}
+              style={{ fontSize: '0.95rem', padding: '0.2rem 0.6rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: posting ? 'default' : 'pointer', opacity: posting || !body.trim() ? 0.4 : 0.7, fontFamily: 'inherit' }}
+            >
+              {posting ? '…' : 'post'}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   )
 }
