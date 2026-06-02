@@ -209,7 +209,7 @@ function Comments({ postId }: { postId: string }) {
       {loaded && comments.length > 0 && (
         <div style={{ marginBottom: '0.5rem' }}>
           {comments.map(c => (
-            <div key={c.id} style={{ fontSize: '1.13rem', opacity: 0.75, marginBottom: '0.4rem', lineHeight: 1.5, fontFamily: 'Georgia, serif' }}>
+            <div key={c.id} style={{ fontSize: '1.13rem', opacity: 0.75, marginBottom: '0.4rem', lineHeight: 1.5 }}>
               <span style={{ fontStyle: 'italic', opacity: 0.7 }}>{c.name || 'someone'}: </span>
               <Linkified text={c.body} />
             </div>
@@ -229,7 +229,7 @@ function Comments({ postId }: { postId: string }) {
             fontStyle: 'italic',
             opacity: 0.55,
             cursor: 'pointer',
-            fontFamily: 'Georgia, serif',
+            fontFamily: 'inherit',
             color: 'inherit',
           }}
         >
@@ -241,27 +241,27 @@ function Comments({ postId }: { postId: string }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="name (optional)"
-            style={{ width: '100%', fontSize: '1.13rem', padding: '0.4rem 0.5rem', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 3, background: 'transparent', fontFamily: 'Georgia, serif', fontStyle: 'italic', color: 'inherit' }}
+            style={{ width: '100%', fontSize: '1.13rem', padding: '0.4rem 0.5rem', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit', fontStyle: 'italic', color: 'inherit' }}
           />
           <input
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="add a comment…"
             autoFocus
-            style={{ width: '100%', fontSize: '1.13rem', padding: '0.4rem 0.5rem', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 3, background: 'transparent', fontFamily: 'Georgia, serif', color: 'inherit' }}
+            style={{ width: '100%', fontSize: '1.13rem', padding: '0.4rem 0.5rem', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit', color: 'inherit' }}
           />
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button
               type="button"
               onClick={() => { setOpen(false); setBody(''); setName('') }}
-              style={{ fontSize: '1.13rem', fontStyle: 'italic', padding: '0.25rem 0.7rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: 'pointer', opacity: 0.55, fontFamily: 'Georgia, serif', color: 'inherit' }}
+              style={{ fontSize: '1.13rem', fontStyle: 'italic', padding: '0.25rem 0.7rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: 'pointer', opacity: 0.55, fontFamily: 'inherit', color: 'inherit' }}
             >
               cancel
             </button>
             <button
               type="submit"
               disabled={posting || !body.trim()}
-              style={{ fontSize: '1.13rem', fontStyle: 'italic', padding: '0.25rem 0.7rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: posting ? 'default' : 'pointer', opacity: posting || !body.trim() ? 0.4 : 0.7, fontFamily: 'Georgia, serif', color: 'inherit' }}
+              style={{ fontSize: '1.13rem', fontStyle: 'italic', padding: '0.25rem 0.7rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: posting ? 'default' : 'pointer', opacity: posting || !body.trim() ? 0.4 : 0.7, fontFamily: 'inherit', color: 'inherit' }}
             >
               {posting ? '…' : 'post'}
             </button>
