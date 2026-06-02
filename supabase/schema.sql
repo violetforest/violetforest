@@ -20,6 +20,21 @@ create policy "auth write" on posts for insert with check (auth.role() = 'authen
 create policy "auth update" on posts for update using (auth.role() = 'authenticated');
 create policy "auth delete" on posts for delete using (auth.role() = 'authenticated');
 
+-- comments (public, attached to a post)
+create table comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid references posts(id) on delete cascade,
+  name text,
+  body text not null,
+  created_at timestamptz default now()
+);
+create index if not exists comments_post_id_idx on comments(post_id, created_at);
+
+alter table comments enable row level security;
+create policy "public read comments" on comments for select using (true);
+create policy "public write comments" on comments for insert with check (true);
+create policy "auth delete comments" on comments for delete using (auth.role() = 'authenticated');
+
 -- stories (ephemeral)
 create table stories (
   id uuid primary key default gen_random_uuid(),

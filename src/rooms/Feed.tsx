@@ -156,6 +156,89 @@ function Lightbox({ items, index, onClose, onNav }: {
   )
 }
 
+interface Comment {
+  id: string
+  post_id: string
+  name: string | null
+  body: string
+  created_at: string
+}
+
+function Comments({ postId }: { postId: string }) {
+  const [comments, setComments] = useState<Comment[]>([])
+  const [name, setName] = useState('')
+  const [body, setBody] = useState('')
+  const [posting, setPosting] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('comments')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        setComments(data || [])
+        setLoaded(true)
+      })
+  }, [postId])
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = body.trim()
+    if (!trimmed) return
+    setPosting(true)
+    const { data, error } = await supabase
+      .from('comments')
+      .insert({ post_id: postId, name: name.trim() || null, body: trimmed })
+      .select()
+      .single()
+    setPosting(false)
+    if (error) {
+      window.alert(`Comment failed: ${error.message}`)
+      return
+    }
+    if (data) setComments([...comments, data as Comment])
+    setBody('')
+  }
+
+  return (
+    <div style={{ marginTop: '0.75rem', paddingLeft: '0.5rem', borderLeft: '1px solid rgba(0,0,0,0.06)' }}>
+      {loaded && comments.length > 0 && (
+        <div style={{ marginBottom: '0.5rem' }}>
+          {comments.map(c => (
+            <div key={c.id} style={{ fontSize: '1rem', opacity: 0.75, marginBottom: '0.3rem', lineHeight: 1.4 }}>
+              <span style={{ fontStyle: 'italic', opacity: 0.7 }}>{c.name || 'someone'}: </span>
+              <Linkified text={c.body} />
+            </div>
+          ))}
+        </div>
+      )}
+      <form onSubmit={submit} style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', marginTop: '0.35rem' }}>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="name (optional)"
+          style={{ flex: '0 0 32%', minWidth: 0, fontSize: '0.95rem', padding: '0.2rem 0.4rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
+        />
+        <input
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="add a comment…"
+          style={{ flex: 1, minWidth: 0, fontSize: '0.95rem', padding: '0.2rem 0.4rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 3, background: 'transparent', fontFamily: 'inherit' }}
+        />
+        <button
+          type="submit"
+          disabled={posting || !body.trim()}
+          style={{ fontSize: '0.95rem', padding: '0.2rem 0.6rem', background: 'transparent', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 3, cursor: posting ? 'default' : 'pointer', opacity: posting || !body.trim() ? 0.4 : 0.7, fontFamily: 'inherit' }}
+        >
+          {posting ? '…' : 'post'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
 function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) => void }) {
   const [lightbox, setLightbox] = useState<number | null>(null)
   // Prefer the multi-media array; fall back to legacy single image_url
@@ -323,6 +406,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
           {timeAgo(post.created_at)}
         </time>
       </div>
+      <Comments postId={post.id} />
       {lightbox !== null && (
         <Lightbox
           items={items}
