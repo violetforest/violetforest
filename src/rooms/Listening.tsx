@@ -1140,7 +1140,9 @@ export function Listening() {
         if (currentIdx < 0 || tracks.length === 0) return
         const next = (currentIdx + 1) % tracks.length
         selectTrack(next)
-        targetOffset.current = next
+        // The visual stack puts the cover at index = offset - 1 at the
+        // front, so the offset that brings `next` to the front is next+1.
+        targetOffset.current = next + 1
       })
     }
 
