@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { ScrollableRoomLayout } from '../components/ScrollableRoomLayout'
 
@@ -114,7 +115,7 @@ function Lightbox({ items, index, onClose, onNav }: {
     justifyContent: 'center',
   }
 
-  return (
+  const overlay = (
     <div
       onClick={onClose}
       style={{
@@ -129,11 +130,15 @@ function Lightbox({ items, index, onClose, onNav }: {
     >
       <button
         onClick={onClose}
+        aria-label="close"
         style={{
-          position: 'absolute', top: 16, right: 16,
-          width: 40, height: 40, borderRadius: '50%', border: 'none',
-          background: 'rgba(0,0,0,0.55)', color: '#fff', fontSize: 22,
-          lineHeight: '40px', padding: 0, cursor: 'pointer',
+          position: 'absolute', top: 16, right: 16, zIndex: 2,
+          width: 44, height: 44, borderRadius: '50%',
+          border: '1.5px solid rgba(255,255,255,0.6)',
+          background: 'rgba(255,255,255,0.08)', color: '#fff',
+          fontSize: 26, fontWeight: 300,
+          padding: 0, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
         ×
@@ -157,6 +162,10 @@ function Lightbox({ items, index, onClose, onNav }: {
       )}
     </div>
   )
+
+  // Portal the overlay to <body> so it escapes the .ig-embed { color, opacity,
+  // border-color !important } scope and isn't tinted/dimmed inside Instagram.exe.
+  return typeof document !== 'undefined' ? createPortal(overlay, document.body) : overlay
 }
 
 interface Comment {
