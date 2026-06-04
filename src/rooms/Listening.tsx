@@ -998,6 +998,9 @@ export function Listening() {
   const [loaded, setLoaded] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [nowPlaying, setNowPlaying] = useState<string | null>(null)
+  // Auto-play the iframe once the user has engaged (clicked a track, hit
+  // play, or a finished track auto-advanced). First load stays silent.
+  const [autoPlay, setAutoPlay] = useState(false)
   const [configState, setConfigState] = useState<Config>({ ...DEFAULT_CONFIG })
   const [panelVisible, setPanelVisible] = useState(false)
   const scrollOffset = useRef(0)
@@ -1111,6 +1114,7 @@ export function Listening() {
 
   const selectTrack = useCallback((i: number) => {
     setActiveIndex(i)
+    setAutoPlay(true)
     setNowPlaying(tracks[i]?.permalink_url || null)
   }, [tracks])
 
@@ -1127,11 +1131,14 @@ export function Listening() {
       if (!SC?.Widget) return
       widget = SC.Widget(iframe)
       widget.bind(SC.Widget.Events.FINISH, () => {
-        const next = activeIndex + 1
-        if (next < tracks.length) {
-          selectTrack(next)
-          targetOffset.current = next
-        }
+        // Find the track currently playing (not the scrolled-to one) and
+        // advance from there, wrapping at the end. selectTrack flips
+        // autoPlay on so the new iframe load starts playing.
+        const currentIdx = tracks.findIndex(t => t.permalink_url === nowPlaying)
+        if (currentIdx < 0 || tracks.length === 0) return
+        const next = (currentIdx + 1) % tracks.length
+        selectTrack(next)
+        targetOffset.current = next
       })
     }
 
@@ -1157,10 +1164,13 @@ export function Listening() {
         /* iframe already detached */
       }
     }
-  }, [nowPlaying, activeIndex, tracks.length, selectTrack])
+  }, [nowPlaying, tracks, selectTrack])
 
   const playActive = useCallback(() => {
-    if (tracks[activeIndex]) setNowPlaying(tracks[activeIndex].permalink_url)
+    if (tracks[activeIndex]) {
+      setAutoPlay(true)
+      setNowPlaying(tracks[activeIndex].permalink_url)
+    }
   }, [tracks, activeIndex])
 
   const activeTrack = tracks[activeIndex]
@@ -1256,7 +1266,7 @@ export function Listening() {
               <iframe
                 ref={iframeRef}
                 width="100%" height="80" scrolling="no" frameBorder="no" allow="autoplay"
-                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
+                src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(nowPlaying)}&color=%23b8a8e0&auto_play=${autoPlay}&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`}
                 style={{ borderRadius: '8px', opacity: 0.9 }}
               />
             </div>
