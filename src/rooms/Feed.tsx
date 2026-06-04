@@ -549,6 +549,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
   const PAGE_SIZE = 8
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [pageCount, setPageCount] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [allTags, setAllTags] = useState<string[]>([])
@@ -566,6 +567,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
   }, [activeTag])
 
   useEffect(() => {
+    if (pageCount > 1) setLoadingMore(true)
     let query = supabase
       .from('posts')
       .select('*')
@@ -576,6 +578,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       const arr = (data || []) as Post[]
       setPosts(arr)
       setLoading(false)
+      setLoadingMore(false)
       if (arr.length < pageCount * PAGE_SIZE) setHasMore(false)
     })
   }, [activeTag, pageCount])
@@ -727,6 +730,11 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
 
         {hasMore && posts.length > 0 && (
           <div ref={sentinelRef} style={{ height: 1 }} />
+        )}
+        {loadingMore && (
+          <p style={{ textAlign: 'center', opacity: 0.45, fontStyle: 'italic', padding: '0.75rem 0' }}>
+            loading more…
+          </p>
         )}
       </div>
     </>
