@@ -266,7 +266,6 @@ export function LipstickHome() {
   useSpaceStore()
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
-  const [listeningProgress, setListeningProgress] = useState(0)
   const [feedMounted, setFeedMounted] = useState(false)
   const [listeningMounted, setListeningMounted] = useState(false)
   const feedMountedRef = useRef(false)
@@ -280,13 +279,6 @@ export function LipstickHome() {
     const scrollTop = el.scrollTop
     const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
-
-    // Listening progress: 0 when the section is just entering the viewport
-    // from the bottom, 1 when it has fully replaced the previous section.
-    // The listening section is the last 300vh of the page.
-    const listeningSectionTop = el.scrollHeight - window.innerHeight * 3
-    const lp = (scrollTop + window.innerHeight - listeningSectionTop) / window.innerHeight
-    setListeningProgress(Math.max(0, Math.min(1, lp)))
 
     // Lazy-mount the Instagram iframe once the user is within ~1 viewport
     // of it, so it doesn't load (or run its nested React app + Supabase
@@ -309,7 +301,7 @@ export function LipstickHome() {
     <motion.div
       ref={scrollRef}
       onScroll={handleScroll}
-      style={{ position: 'fixed', inset: 0, zIndex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', scrollSnapType: 'y proximity' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
       variants={pageVariants}
       initial="initial"
       animate="animate"
@@ -373,20 +365,12 @@ export function LipstickHome() {
 
       {/* Sticky listening section — mirrors the hallway pattern at top:
           300vh scroll space with a 100dvh sticky iframe of /listening.
-          Snap-scrolls into place (y proximity on the parent), and the
-          iframe fades + scales in as listeningProgress climbs 0 → 1.
-          Lazy-mounted via handleScroll. */}
-      <div style={{ height: '300vh', position: 'relative', scrollSnapAlign: 'start' }}>
-        <div
-          style={{
-            position: 'sticky', top: 0, height: '100dvh', width: '100%', zIndex: 2,
-            background: '#000',
-            opacity: 0.2 + listeningProgress * 0.8,
-            transform: `scale(${0.94 + listeningProgress * 0.06})`,
-            transformOrigin: 'center',
-            transition: 'opacity 0.15s linear, transform 0.15s linear',
-          }}
-        >
+          dvh (dynamic viewport height) accounts for the mobile browser
+          toolbar so the SoundCloud player at the bottom of the
+          listening page isn't clipped behind it. Lazy-mounted via
+          handleScroll. */}
+      <div style={{ height: '300vh', position: 'relative' }}>
+        <div style={{ position: 'sticky', top: 0, height: '100dvh', width: '100%', zIndex: 2, background: '#000' }}>
           {listeningMounted ? (
             <iframe
               src={`${import.meta.env.BASE_URL}listening`}
@@ -405,16 +389,6 @@ export function LipstickHome() {
               loading…
             </div>
           )}
-          <div
-            style={{
-              position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-              pointerEvents: 'none', opacity: Math.max(0, 0.5 - listeningProgress * 2),
-              fontSize: '1.5rem', color: '#f0eaf5',
-              animation: 'scrollHint 2s ease-in-out infinite',
-            }}
-          >
-            ↓
-          </div>
         </div>
       </div>
     </motion.div>
