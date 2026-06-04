@@ -361,6 +361,20 @@ export function LipstickHome() {
             )}
           </div>
         </DoorSection>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            padding: '0 0 2rem',
+            fontSize: '1.5rem',
+            color: 'rgb(136, 68, 255)',
+            opacity: 0.55,
+            animation: 'scrollHint 2s ease-in-out infinite',
+          }}
+        >
+          ↓
+        </div>
       </div>
 
       {/* Sticky listening section — mirrors the hallway pattern at top:
