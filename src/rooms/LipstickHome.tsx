@@ -364,12 +364,13 @@ export function LipstickHome() {
       </div>
 
       {/* Sticky listening section — mirrors the hallway pattern at top:
-          300vh scroll space with a 100vh sticky iframe of /listening.
-          The iframe is lazy-mounted from handleScroll once the user is
-          near it, so the 3D canvas + audio + Supabase request don't run
-          on initial page load. */}
+          300vh scroll space with a 100dvh sticky iframe of /listening.
+          dvh (dynamic viewport height) accounts for the mobile browser
+          toolbar so the SoundCloud player at the bottom of the
+          listening page isn't clipped behind it. Lazy-mounted via
+          handleScroll. */}
       <div style={{ height: '300vh', position: 'relative' }}>
-        <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', zIndex: 2, background: '#000' }}>
+        <div style={{ position: 'sticky', top: 0, height: '100dvh', width: '100%', zIndex: 2, background: '#000' }}>
           {listeningMounted ? (
             <iframe
               src={`${import.meta.env.BASE_URL}listening`}
