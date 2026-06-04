@@ -301,7 +301,7 @@ export function LipstickHome() {
     <motion.div
       ref={scrollRef}
       onScroll={handleScroll}
-      style={{ position: 'fixed', inset: 0, zIndex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', scrollSnapType: 'y proximity' }}
       variants={pageVariants}
       initial="initial"
       animate="animate"
@@ -383,7 +383,7 @@ export function LipstickHome() {
           toolbar so the SoundCloud player at the bottom of the
           listening page isn't clipped behind it. Lazy-mounted via
           handleScroll. */}
-      <div style={{ height: '300vh', position: 'relative' }}>
+      <div style={{ height: '300vh', position: 'relative', scrollSnapAlign: 'start' }}>
         <div style={{ position: 'sticky', top: 0, height: '100dvh', width: '100%', zIndex: 2, background: '#000' }}>
           {listeningMounted ? (
             <iframe
