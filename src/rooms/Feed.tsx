@@ -484,12 +484,24 @@ const IG_EMBED_STYLES = `
     color: #fff !important;
     text-shadow: 0 0 4px rgba(136, 68, 255, 0.6);
   }
-  .ig-embed p, .ig-embed span, .ig-embed div, .ig-embed time, .ig-embed a {
+  .ig-embed p, .ig-embed span, .ig-embed div, .ig-embed time, .ig-embed a,
+  .ig-embed input, .ig-embed textarea {
     font-size: 11px !important;
     line-height: 1.4 !important;
     font-style: normal !important;
   }
   .ig-embed a.comment-link {
+    font-style: italic !important;
+  }
+  .ig-embed input, .ig-embed textarea {
+    font-family: Tahoma, Helvetica, Arial, sans-serif !important;
+    color: #d4c1ff !important;
+    background: transparent !important;
+    border: 1px solid #221655 !important;
+    padding: 4px 6px !important;
+  }
+  .ig-embed input::placeholder, .ig-embed textarea::placeholder {
+    color: #6a4cac !important;
     font-style: italic !important;
   }
   .ig-embed em, .ig-embed i {
