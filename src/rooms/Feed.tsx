@@ -99,16 +99,19 @@ function Lightbox({ items, index, onClose, onNav }: {
     position: 'absolute',
     top: '50%',
     transform: 'translateY(-50%)',
-    width: 48,
-    height: 48,
+    width: 64,
+    height: 64,
     borderRadius: '50%',
     border: 'none',
     background: 'rgba(0,0,0,0.55)',
     color: '#fff',
-    fontSize: 28,
-    lineHeight: '48px',
+    fontSize: 40,
+    lineHeight: 1,
     padding: 0,
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 
   return (
@@ -137,7 +140,7 @@ function Lightbox({ items, index, onClose, onNav }: {
       </button>
       {items.length > 1 && (
         <button onClick={(e) => { e.stopPropagation(); onNav(-1) }} style={{ ...arrowStyle, left: 12 }}>
-          ‹
+          ❮
         </button>
       )}
       <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -149,7 +152,7 @@ function Lightbox({ items, index, onClose, onNav }: {
       </div>
       {items.length > 1 && (
         <button onClick={(e) => { e.stopPropagation(); onNav(1) }} style={{ ...arrowStyle, right: 12 }}>
-          ›
+          ❯
         </button>
       )}
     </div>
