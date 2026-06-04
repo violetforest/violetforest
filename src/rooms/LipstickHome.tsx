@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { motion, type Variants } from 'framer-motion'
 import { useSpaceStore } from '../store'
 import { DoorSection } from '../components/DoorSection'
@@ -268,10 +267,10 @@ export function LipstickHome() {
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
   const [feedMounted, setFeedMounted] = useState(false)
+  const [listeningMounted, setListeningMounted] = useState(false)
   const feedMountedRef = useRef(false)
-  const transitioningRef = useRef(false)
+  const listeningMountedRef = useRef(false)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
@@ -289,17 +288,14 @@ export function LipstickHome() {
       setFeedMounted(true)
     }
 
-    // When the user reaches the bottom of the page (past the Instagram
-    // feed), navigate to /listening. AnimatePresence in App.tsx cross-
-    // fades the route transition. Guarded by a ref so it only fires once.
-    if (!transitioningRef.current) {
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4
-      if (atBottom) {
-        transitioningRef.current = true
-        navigate('/listening')
-      }
+    // Lazy-mount the listening iframe once the user is approaching it
+    // (past the hallway + feed) so its 3D canvas + audio + Supabase
+    // request don't run on page load.
+    if (!listeningMountedRef.current && scrollTop > window.innerHeight * 3.2) {
+      listeningMountedRef.current = true
+      setListeningMounted(true)
     }
-  }, [navigate])
+  }, [])
 
   return (
     <motion.div
@@ -365,6 +361,34 @@ export function LipstickHome() {
             )}
           </div>
         </DoorSection>
+      </div>
+
+      {/* Sticky listening section — mirrors the hallway pattern at top:
+          300vh scroll space with a 100vh sticky iframe of /listening.
+          The iframe is lazy-mounted from handleScroll once the user is
+          near it, so the 3D canvas + audio + Supabase request don't run
+          on initial page load. */}
+      <div style={{ height: '300vh', position: 'relative' }}>
+        <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', zIndex: 2, background: '#000' }}>
+          {listeningMounted ? (
+            <iframe
+              src={`${import.meta.env.BASE_URL}listening`}
+              title="listening"
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%', height: '100%', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                color: '#f0eaf5', opacity: 0.45, fontSize: 12,
+                fontFamily: 'monospace',
+              }}
+            >
+              loading…
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   )
