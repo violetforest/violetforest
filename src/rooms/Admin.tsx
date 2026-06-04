@@ -314,6 +314,8 @@ function DeleteButton({ onDelete }: { onDelete: () => void }) {
 function PostList({ refreshKey }: { refreshKey: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [stories, setStories] = useState<any[]>([])
+  const [editing, setEditing] = useState<{ id: string; body: string } | null>(null)
+  const [savingEdit, setSavingEdit] = useState(false)
 
   useEffect(() => {
     supabase.from('posts').select('*').order('created_at', { ascending: false }).then(({ data }) => setPosts(data || []))
@@ -456,19 +458,26 @@ function PostList({ refreshKey }: { refreshKey: number }) {
   }
 
   // Edit the text/body of an existing post via a quick prompt.
-  const editBody = async (post: any) => {
-    const next = window.prompt('Post text:', post.body || '')
-    if (next === null) return
-    const body = next.trim() || null
+  // Open the multiline edit modal for a post.
+  const editBody = (post: any) => {
+    setEditing({ id: post.id, body: post.body || '' })
+  }
+
+  const saveEdit = async () => {
+    if (!editing) return
+    setSavingEdit(true)
+    const body = editing.body.trim() || null
     const { error } = await supabase
       .from('posts')
       .update({ body })
-      .eq('id', post.id)
+      .eq('id', editing.id)
+    setSavingEdit(false)
     if (error) {
       window.alert(`Saving text failed: ${error.message}`)
       return
     }
-    setPosts(posts.map(p => (p.id === post.id ? { ...p, body } : p)))
+    setPosts(posts.map(p => (p.id === editing.id ? { ...p, body } : p)))
+    setEditing(null)
   }
 
   // Edit the created_at date of a post via a quick prompt.
@@ -708,6 +717,60 @@ function PostList({ refreshKey }: { refreshKey: number }) {
             )
           })}
         </>
+      )}
+
+      {editing && (
+        <div
+          onClick={() => setEditing(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 480, background: '#fff',
+              borderRadius: 6, padding: '1rem',
+              display: 'flex', flexDirection: 'column', gap: '0.6rem',
+              fontFamily: 'Georgia, serif',
+            }}
+          >
+            <p style={{ fontSize: '1.05rem', opacity: 0.55, fontStyle: 'italic' }}>
+              edit post
+            </p>
+            <textarea
+              value={editing.body}
+              onChange={(e) => setEditing({ ...editing, body: e.target.value })}
+              autoFocus
+              style={{
+                width: '100%', minHeight: 160, resize: 'vertical',
+                fontSize: '1.13rem', fontFamily: 'Georgia, serif',
+                padding: '0.6rem', border: '1px solid rgba(0,0,0,0.15)',
+                borderRadius: 4, background: 'rgba(255,255,255,0.6)',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                style={{ ...deleteStyle, opacity: 0.5 }}
+              >
+                cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveEdit}
+                disabled={savingEdit}
+                style={{ ...deleteStyle, opacity: savingEdit ? 0.4 : 0.8 }}
+              >
+                {savingEdit ? 'saving…' : 'save'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
