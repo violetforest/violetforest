@@ -884,10 +884,17 @@ export function InstagramExe() {
   const [tab, setTab] = useState<'home' | 'profile' | 'stories'>('home')
   const [openPost, setOpenPost] = useState<Post | null>(null)
   const [openStory, setOpenStory] = useState<Story | null>(null)
+  // Only fetch the (large) archive data.json once the user actually opens
+  // the Archive (profile) or Stories tab — neither the Feed home tab
+  // needs it.
+  const needsArchive = tab === 'profile' || tab === 'stories'
+  const fetchedRef = useRef(false)
 
   useEffect(() => {
+    if (!needsArchive || fetchedRef.current) return
+    fetchedRef.current = true
     fetch(`${base}graveyard/ig/data.json`).then(r => r.json()).then(setData)
-  }, [])
+  }, [needsArchive])
 
   const posts = data?.posts ?? []
   const stories = data?.stories ?? []
