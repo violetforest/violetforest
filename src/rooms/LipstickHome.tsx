@@ -253,7 +253,7 @@ function LipstickTunnel({ scrollProgress }: { scrollProgress: number }) {
         style={{
           position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
           pointerEvents: 'none', opacity: Math.max(0, 0.5 - scrollProgress * 2),
-          fontSize: '1.5rem', color: '#f0eaf5', animation: 'scrollHint 2s ease-in-out infinite',
+          fontSize: '3rem', color: '#f0eaf5', animation: 'scrollHint 2s ease-in-out infinite',
         }}
       >
         ↓
@@ -384,7 +384,7 @@ export function LipstickHome() {
             justifyContent: 'center',
             pointerEvents: 'none',
             padding: '0 0 2rem',
-            fontSize: '1.5rem',
+            fontSize: '3rem',
             color: 'rgb(136, 68, 255)',
             opacity: 0.55,
             animation: 'scrollHint 2s ease-in-out infinite',
