@@ -266,11 +266,13 @@ export function LipstickHome() {
   useSpaceStore()
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
+  const [listeningProgress, setListeningProgress] = useState(0)
   const [feedMounted, setFeedMounted] = useState(false)
   const [listeningMounted, setListeningMounted] = useState(false)
   const feedMountedRef = useRef(false)
   const listeningMountedRef = useRef(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const listeningIframeRef = useRef<HTMLIFrameElement>(null)
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
@@ -279,6 +281,12 @@ export function LipstickHome() {
     const scrollTop = el.scrollTop
     const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
+
+    // Listening progress: 0 when the section is just entering the viewport,
+    // 1 once it's fully filled it. The listening section is the last 300vh.
+    const listeningSectionTop = el.scrollHeight - window.innerHeight * 3
+    const lp = (scrollTop + window.innerHeight - listeningSectionTop) / window.innerHeight
+    setListeningProgress(Math.max(0, Math.min(1, lp)))
 
     // Lazy-mount the Instagram iframe once the user is within ~1 viewport
     // of it, so it doesn't load (or run its nested React app + Supabase
@@ -296,6 +304,15 @@ export function LipstickHome() {
       setListeningMounted(true)
     }
   }, [])
+
+  // Drive the listening iframe's album stack from the parent scroll, the
+  // same way the hallway camera is driven. The listening page (when
+  // embedded) accepts { type: 'listening-progress', value } messages.
+  useEffect(() => {
+    const w = listeningIframeRef.current?.contentWindow
+    if (!w) return
+    w.postMessage({ type: 'listening-progress', value: listeningProgress }, '*')
+  }, [listeningProgress])
 
   return (
     <motion.div
@@ -387,6 +404,7 @@ export function LipstickHome() {
         <div style={{ position: 'sticky', top: 0, height: '100dvh', width: '100%', zIndex: 2, background: '#000' }}>
           {listeningMounted ? (
             <iframe
+              ref={listeningIframeRef}
               src={`${import.meta.env.BASE_URL}listening`}
               title="listening"
               style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
