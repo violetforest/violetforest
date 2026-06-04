@@ -217,13 +217,11 @@ function Comments({ postId }: { postId: string }) {
         </div>
       )}
       {!open ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
+        <a
+          href="#"
+          onClick={(e) => { e.preventDefault(); setOpen(true) }}
           style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
+            display: 'inline-block',
             marginTop: '0.35rem',
             fontSize: '1.13rem',
             fontStyle: 'italic',
@@ -235,7 +233,7 @@ function Comments({ postId }: { postId: string }) {
           }}
         >
           write a comment
-        </button>
+        </a>
       ) : (
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.35rem' }}>
           <input
