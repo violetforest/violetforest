@@ -266,6 +266,8 @@ export function LipstickHome() {
   useSpaceStore()
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
+  const [feedMounted, setFeedMounted] = useState(false)
+  const feedMountedRef = useRef(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleScroll = useCallback(() => {
@@ -275,6 +277,14 @@ export function LipstickHome() {
     const scrollTop = el.scrollTop
     const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
+
+    // Lazy-mount the Instagram iframe once the user is within ~1 viewport
+    // of it, so it doesn't load (or run its nested React app + Supabase
+    // requests) on page load.
+    if (!feedMountedRef.current && scrollTop > window.innerHeight * 1.8) {
+      feedMountedRef.current = true
+      setFeedMounted(true)
+    }
   }, [])
 
   return (
@@ -322,11 +332,23 @@ export function LipstickHome() {
               overflow: 'hidden',
             }}
           >
-            <iframe
-              src={`${import.meta.env.BASE_URL}instagram`}
-              title="instagram"
-              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            />
+            {feedMounted ? (
+              <iframe
+                src={`${import.meta.env.BASE_URL}instagram`}
+                title="instagram"
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '100%', height: '100%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  color: 'rgb(136, 68, 255)', fontSize: 12, opacity: 0.55,
+                }}
+              >
+                loading…
+              </div>
+            )}
           </div>
         </DoorSection>
       </div>
