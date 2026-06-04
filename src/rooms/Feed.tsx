@@ -118,7 +118,7 @@ function Lightbox({ items, index, onClose, onNav }: {
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        background: 'rgba(0,0,0,0.92)',
+        background: '#000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -142,9 +142,9 @@ function Lightbox({ items, index, onClose, onNav }: {
       )}
       <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {m.type === 'video' ? (
-          <video src={m.url} controls autoPlay playsInline style={{ maxWidth: '92vw', maxHeight: '88vh' }} />
+          <video src={m.url} controls autoPlay playsInline style={{ maxWidth: '92vw', maxHeight: '88vh', opacity: 1, filter: 'none', mixBlendMode: 'normal' }} />
         ) : (
-          <img src={m.url} alt="" style={{ maxWidth: '92vw', maxHeight: '88vh', objectFit: 'contain' }} />
+          <img src={m.url} alt="" style={{ maxWidth: '92vw', maxHeight: '88vh', objectFit: 'contain', opacity: 1, filter: 'none', mixBlendMode: 'normal' }} />
         )}
       </div>
       {items.length > 1 && (
