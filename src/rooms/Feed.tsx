@@ -501,8 +501,9 @@ const IG_EMBED_STYLES = `
     padding: 4px 6px !important;
   }
   .ig-embed input::placeholder, .ig-embed textarea::placeholder {
-    color: #6a4cac !important;
-    font-style: italic !important;
+    color: #d4c1ff !important;
+    font-style: normal !important;
+    opacity: 0.55;
   }
   .ig-embed em, .ig-embed i {
     font-style: italic !important;
