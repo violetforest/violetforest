@@ -92,7 +92,7 @@ const DEFAULT_CONFIG: Config = {
   entranceStagger: 0.06,
   hoverLift: 2.5,
   hoverSnap: 0.18,
-  scrollLerp: 0.12,
+  scrollLerp: 0.06,
   coverScale: 1,
   cloudOpacity: 0.4,
   cloudSpeed: 0.2,
