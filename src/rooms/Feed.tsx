@@ -554,20 +554,21 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
   const [pageCount, setPageCount] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [allTags, setAllTags] = useState<string[]>([])
-  // year → { post index in unfiltered list, post id } — first post of that year
-  const [yearAnchors, setYearAnchors] = useState<Map<number, { index: number; id: string }>>(new Map())
+  const [years, setYears] = useState<number[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
+  const activeYearParam = searchParams.get('year')
+  const activeYear = activeYearParam ? parseInt(activeYearParam, 10) : null
   const igEmbed = embed || searchParams.get('embed') === 'ig'
   const sentinelRef = useRef<HTMLDivElement>(null)
 
-  // Reset pagination when the active tag changes
+  // Reset pagination when the active tag / year filter changes
   useEffect(() => {
     setPosts([])
     setPageCount(1)
     setHasMore(true)
     setLoading(true)
-  }, [activeTag])
+  }, [activeTag, activeYear])
 
   useEffect(() => {
     if (pageCount > 1) setLoadingMore(true)
@@ -577,6 +578,11 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       .order('created_at', { ascending: false })
       .range(0, pageCount * PAGE_SIZE - 1)
     if (activeTag) query = query.contains('tags', [activeTag])
+    if (activeYear) {
+      query = query
+        .gte('created_at', `${activeYear}-01-01`)
+        .lt('created_at', `${activeYear + 1}-01-01`)
+    }
     query.then(({ data }) => {
       const arr = (data || []) as Post[]
       setPosts(arr)
@@ -584,7 +590,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       setLoadingMore(false)
       if (arr.length < pageCount * PAGE_SIZE) setHasMore(false)
     })
-  }, [activeTag, pageCount])
+  }, [activeTag, activeYear, pageCount])
 
   // Load the next page when the sentinel scrolls into view
   useEffect(() => {
@@ -618,45 +624,20 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       })
   }, [])
 
-  // Load the post id + created_at for every post (lightweight) so we know
-  // which years exist and where the first post of each year sits in the
-  // unfiltered timeline. Used by the year jump links.
+  // Load all distinct years from post created_at (lightweight) so the year
+  // filter row shows the same options regardless of the current filter.
   useEffect(() => {
     supabase
       .from('posts')
-      .select('id, created_at')
-      .order('created_at', { ascending: false })
+      .select('created_at')
       .then(({ data }) => {
-        const m = new Map<number, { index: number; id: string }>()
-        ;(data || []).forEach((row: { id: string; created_at: string }, i: number) => {
-          const year = new Date(row.created_at).getFullYear()
-          if (!m.has(year)) m.set(year, { index: i, id: row.id })
-        })
-        setYearAnchors(m)
+        const yset = new Set<number>()
+        for (const row of (data || []) as { created_at: string }[]) {
+          yset.add(new Date(row.created_at).getFullYear())
+        }
+        setYears(Array.from(yset).sort((a, b) => b - a))
       })
   }, [])
-
-  const years = Array.from(yearAnchors.keys()).sort((a, b) => b - a)
-
-  const jumpToYear = (year: number) => {
-    const anchor = yearAnchors.get(year)
-    if (!anchor) return
-    // Clear any active tag filter so the year jump operates on the full feed
-    if (activeTag) setSearchParams({})
-    // Make sure enough pages have been requested to include the anchor post
-    const pageNeeded = Math.ceil((anchor.index + 1) / PAGE_SIZE)
-    if (pageNeeded > pageCount) setPageCount(pageNeeded)
-    // Wait for the new posts to render, then scroll the post into view.
-    const tryScroll = (attempts = 0) => {
-      const el = document.querySelector(`[data-post-id="${anchor.id}"]`)
-      if (el) {
-        ;(el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else if (attempts < 30) {
-        setTimeout(() => tryScroll(attempts + 1), 100)
-      }
-    }
-    tryScroll()
-  }
 
   const setTag = (tag: string | null) => {
     if (tag) setSearchParams({ tag })
@@ -733,14 +714,17 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
             {years.map(y => (
               <button
                 key={y}
-                onClick={() => jumpToYear(y)}
+                onClick={() => {
+                  if (activeYear === y) setSearchParams({})
+                  else setSearchParams({ year: String(y) })
+                }}
                 style={{
                   background: 'none',
                   border: 'none',
                   padding: 0,
                   fontSize: '1.13rem',
                   fontStyle: 'italic',
-                  opacity: 0.55,
+                  opacity: activeYear === y ? 0.95 : 0.55,
                   cursor: 'pointer',
                   fontFamily: 'Georgia, serif',
                   textDecoration: 'underline',
@@ -752,7 +736,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
           </div>
         )}
 
-        {activeTag && (
+        {(activeTag || activeYear) && (
           <div
             style={{
               display: 'flex',
@@ -767,10 +751,10 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
             }}
           >
             <span style={{ fontStyle: 'italic', opacity: 0.7 }}>
-              filtering by #{activeTag}
+              filtering by {activeTag ? `#${activeTag}` : activeYear}
             </span>
             <button
-              onClick={() => setTag(null)}
+              onClick={() => setSearchParams({})}
               style={{
                 background: 'none',
                 border: 'none',
