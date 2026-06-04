@@ -7,6 +7,11 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // Self-destruct mode: ships a service worker that unregisters any
+      // existing SW and clears its caches on the next visit. After every
+      // device has loaded the site once, the VitePWA plugin can be
+      // removed entirely. No more stale-cache surprises.
+      selfDestroying: true,
       registerType: 'autoUpdate',
       manifest: {
         name: 'violet forest',
@@ -28,11 +33,6 @@ export default defineConfig({
             type: 'image/png',
           },
         ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // sludge-flower has a few 2-3 MB PNGs that bust the 2 MiB default
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
     }),
   ],
