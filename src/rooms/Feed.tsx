@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { ScrollableRoomLayout } from '../components/ScrollableRoomLayout'
 
@@ -331,6 +331,8 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                   className={i === 0 ? 'u-photo' : undefined}
                   src={m.url}
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   onClick={() => setLightbox(i)}
                   style={style}
                 />
@@ -544,24 +546,52 @@ const IG_EMBED_STYLES = `
 `
 
 export function Feed({ embed }: { embed?: boolean } = {}) {
+  const PAGE_SIZE = 8
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [pageCount, setPageCount] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
   const [allTags, setAllTags] = useState<string[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
   const igEmbed = embed || searchParams.get('embed') === 'ig'
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  // Reset pagination when the active tag changes
+  useEffect(() => {
+    setPosts([])
+    setPageCount(1)
+    setHasMore(true)
+    setLoading(true)
+  }, [activeTag])
 
   useEffect(() => {
     let query = supabase
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
+      .range(0, pageCount * PAGE_SIZE - 1)
     if (activeTag) query = query.contains('tags', [activeTag])
     query.then(({ data }) => {
-      setPosts(data || [])
+      const arr = (data || []) as Post[]
+      setPosts(arr)
       setLoading(false)
+      if (arr.length < pageCount * PAGE_SIZE) setHasMore(false)
     })
-  }, [activeTag])
+  }, [activeTag, pageCount])
+
+  // Load the next page when the sentinel scrolls into view
+  useEffect(() => {
+    if (!hasMore || loading) return
+    const el = sentinelRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setPageCount(c => c + 1) },
+      { rootMargin: '600px 0px' }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [hasMore, loading, posts.length])
 
   // Load every distinct tag (unfiltered) so the tag cloud is the same on
   // every view, regardless of the current filter. Frequency-sorted desc.
@@ -694,6 +724,10 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
         {posts.map(post => (
           <PostCard key={post.id} post={post} onTagClick={setTag} />
         ))}
+
+        {hasMore && posts.length > 0 && (
+          <div ref={sentinelRef} style={{ height: 1 }} />
+        )}
       </div>
     </>
   )
