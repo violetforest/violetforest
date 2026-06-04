@@ -330,20 +330,6 @@ export function LipstickHome() {
           </div>
         </DoorSection>
       </div>
-
-      {/* Sticky listening section — mirrors the hallway: 300vh of scroll
-          space with a 100vh sticky iframe of /listening, so scrolling
-          past the feed reveals the album-stack 3D scene the same way the
-          hallway reveals the feed. */}
-      <div style={{ height: '300vh', position: 'relative' }}>
-        <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', zIndex: 2, background: '#000' }}>
-          <iframe
-            src={`${import.meta.env.BASE_URL}listening`}
-            title="listening"
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-          />
-        </div>
-      </div>
     </motion.div>
   )
 }
