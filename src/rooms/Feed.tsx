@@ -283,6 +283,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
   return (
     <article
       className="h-entry"
+      data-post-id={post.id}
       style={{
         width: '100%',
         borderBottom: '1px solid rgba(0,0,0,0.06)',
@@ -553,6 +554,8 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
   const [pageCount, setPageCount] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [allTags, setAllTags] = useState<string[]>([])
+  // year → { post index in unfiltered list, post id } — first post of that year
+  const [yearAnchors, setYearAnchors] = useState<Map<number, { index: number; id: string }>>(new Map())
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
   const igEmbed = embed || searchParams.get('embed') === 'ig'
@@ -615,6 +618,46 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       })
   }, [])
 
+  // Load the post id + created_at for every post (lightweight) so we know
+  // which years exist and where the first post of each year sits in the
+  // unfiltered timeline. Used by the year jump links.
+  useEffect(() => {
+    supabase
+      .from('posts')
+      .select('id, created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        const m = new Map<number, { index: number; id: string }>()
+        ;(data || []).forEach((row: { id: string; created_at: string }, i: number) => {
+          const year = new Date(row.created_at).getFullYear()
+          if (!m.has(year)) m.set(year, { index: i, id: row.id })
+        })
+        setYearAnchors(m)
+      })
+  }, [])
+
+  const years = Array.from(yearAnchors.keys()).sort((a, b) => b - a)
+
+  const jumpToYear = (year: number) => {
+    const anchor = yearAnchors.get(year)
+    if (!anchor) return
+    // Clear any active tag filter so the year jump operates on the full feed
+    if (activeTag) setSearchParams({})
+    // Make sure enough pages have been requested to include the anchor post
+    const pageNeeded = Math.ceil((anchor.index + 1) / PAGE_SIZE)
+    if (pageNeeded > pageCount) setPageCount(pageNeeded)
+    // Wait for the new posts to render, then scroll the post into view.
+    const tryScroll = (attempts = 0) => {
+      const el = document.querySelector(`[data-post-id="${anchor.id}"]`)
+      if (el) {
+        ;(el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } else if (attempts < 30) {
+        setTimeout(() => tryScroll(attempts + 1), 100)
+      }
+    }
+    tryScroll()
+  }
+
   const setTag = (tag: string | null) => {
     if (tag) setSearchParams({ tag })
     else setSearchParams({})
@@ -673,6 +716,37 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
                 }}
               >
                 #{tag}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {years.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            {years.map(y => (
+              <button
+                key={y}
+                onClick={() => jumpToYear(y)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontSize: '1.13rem',
+                  fontStyle: 'italic',
+                  opacity: 0.55,
+                  cursor: 'pointer',
+                  fontFamily: 'Georgia, serif',
+                  textDecoration: 'underline',
+                }}
+              >
+                {y}
               </button>
             ))}
           </div>
