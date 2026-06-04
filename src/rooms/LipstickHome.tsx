@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, type Variants } from 'framer-motion'
 import { useSpaceStore } from '../store'
 import { DoorSection } from '../components/DoorSection'
@@ -267,6 +268,8 @@ export function LipstickHome() {
 
   const [hallwayProgress, setHallwayProgress] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const transitioningRef = useRef(false)
+  const navigate = useNavigate()
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
@@ -275,7 +278,20 @@ export function LipstickHome() {
     const scrollTop = el.scrollTop
     const progress = Math.max(0, Math.min(1, scrollTop / (hallwayHeight - window.innerHeight)))
     setHallwayProgress(progress)
-  }, [])
+
+    // Once the user scrolls past the Instagram feed (i.e., hits the bottom),
+    // navigate to /listening. AnimatePresence in App.tsx cross-fades the
+    // route transition — same effect chain as hallway → feed reveal, just
+    // applied at the page level so /listening loads fresh rather than
+    // running as a third nested iframe.
+    if (!transitioningRef.current) {
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4
+      if (atBottom) {
+        transitioningRef.current = true
+        navigate('/listening')
+      }
+    }
+  }, [navigate])
 
   return (
     <motion.div
