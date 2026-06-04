@@ -1119,14 +1119,6 @@ export function Listening() {
   }, [tracks])
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  // Tracks whatever URL is actually playing in the iframe right now —
-  // diverges from React's nowPlaying state on FINISH-driven advances,
-  // which navigate the existing iframe via widget.load() without
-  // re-rendering React.
-  const currentPlayingRef = useRef<string | null>(null)
-  useEffect(() => {
-    if (nowPlaying) currentPlayingRef.current = nowPlaying
-  }, [nowPlaying])
 
   // Auto-advance to next track when current finishes
   useEffect(() => {
@@ -1140,20 +1132,15 @@ export function Listening() {
       widget = SC.Widget(iframe)
       widget.bind(SC.Widget.Events.FINISH, () => {
         // Find the track currently playing (not the scrolled-to one) and
-        // advance from there, wrapping at the end.
-        const currentUrl = currentPlayingRef.current || nowPlaying
-        const currentIdx = tracks.findIndex(t => t.permalink_url === currentUrl)
+        // advance from there, wrapping at the end. Uses src reload (not
+        // widget.load) so we avoid SoundCloud's "Listen in browser"
+        // consent overlay; iOS will still block autoplay either way, so
+        // src reload is the lesser of two evils.
+        const currentIdx = tracks.findIndex(t => t.permalink_url === nowPlaying)
         if (currentIdx < 0 || tracks.length === 0) return
         const next = (currentIdx + 1) % tracks.length
-        const nextTrack = tracks[next]
-        // Visual stack moves to the new track
-        setActiveIndex(next)
+        selectTrack(next)
         targetOffset.current = next
-        // Use widget.load() instead of swapping React's iframe src — the
-        // browser drops the user-gesture chain on src changes and blocks
-        // autoplay. Loading inside the existing iframe keeps the context.
-        currentPlayingRef.current = nextTrack.permalink_url
-        widget.load(nextTrack.permalink_url, { auto_play: true, color: 'b8a8e0' })
       })
     }
 
