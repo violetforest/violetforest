@@ -546,6 +546,7 @@ const IG_EMBED_STYLES = `
 export function Feed({ embed }: { embed?: boolean } = {}) {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [allTags, setAllTags] = useState<string[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTag = searchParams.get('tag')
   const igEmbed = embed || searchParams.get('embed') === 'ig'
@@ -561,6 +562,25 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
       setLoading(false)
     })
   }, [activeTag])
+
+  // Load every distinct tag (unfiltered) so the tag cloud is the same on
+  // every view, regardless of the current filter. Frequency-sorted desc.
+  useEffect(() => {
+    supabase
+      .from('posts')
+      .select('tags')
+      .then(({ data }) => {
+        const counts = new Map<string, number>()
+        for (const row of (data || []) as { tags: string[] | null }[]) {
+          for (const t of row.tags || []) counts.set(t, (counts.get(t) || 0) + 1)
+        }
+        setAllTags(
+          Array.from(counts.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map(([t]) => t)
+        )
+      })
+  }, [])
 
   const setTag = (tag: string | null) => {
     if (tag) setSearchParams({ tag })
@@ -591,6 +611,37 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
               feed
             </p>
             <div style={{ width: '2rem' }} />
+          </div>
+        )}
+
+        {allTags.length > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            {allTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setTag(activeTag === tag ? null : tag)}
+                className="p-category"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontSize: '1.13rem',
+                  fontStyle: 'italic',
+                  opacity: activeTag === tag ? 0.95 : 0.55,
+                  cursor: 'pointer',
+                  fontFamily: 'Georgia, serif',
+                }}
+              >
+                #{tag}
+              </button>
+            ))}
           </div>
         )}
 
