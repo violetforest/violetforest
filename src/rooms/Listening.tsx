@@ -1011,23 +1011,6 @@ export function Listening() {
   const fpsRef = useRef(0)
   const [headingIndex, setHeadingIndex] = useState(0)
 
-  // When embedded in the home page, the parent posts the parent-scroll
-  // progress (0 → 1 as the listening section enters the viewport).
-  // Map that onto the album stack offset so the covers slide as the
-  // user scrolls — same idea as the hallway camera dolly.
-  useEffect(() => {
-    if (window.parent === window) return
-    const onMessage = (e: MessageEvent) => {
-      if (e.data?.type !== 'listening-progress') return
-      const v = Math.max(0, Math.min(1, +e.data.value || 0))
-      if (tracks.length > 0) {
-        targetOffset.current = v * tracks.length
-      }
-    }
-    window.addEventListener('message', onMessage)
-    return () => window.removeEventListener('message', onMessage)
-  }, [tracks.length])
-
   useEffect(() => { configRef.current = configState }, [configState])
 
   useEffect(() => {
