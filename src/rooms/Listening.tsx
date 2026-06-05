@@ -1024,9 +1024,7 @@ export function Listening() {
       if (e.data?.type !== 'listening-progress') return
       const v = Math.max(0, Math.min(1, +e.data.value || 0))
       if (tracks.length === 0) return
-      // 3× slower than 1:1 — the full listening section now sweeps through
-      // only a third of the playlist instead of all of it.
-      targetOffset.current = (v * tracks.length) / 3
+      targetOffset.current = v * tracks.length
       if (settleTimer) clearTimeout(settleTimer)
       settleTimer = setTimeout(() => {
         const idx = (((Math.round(targetOffset.current) - 1) % tracks.length) + tracks.length) % tracks.length
