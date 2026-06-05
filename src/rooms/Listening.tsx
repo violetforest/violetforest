@@ -1014,31 +1014,19 @@ export function Listening() {
   // When embedded in the home page, the parent posts the parent-scroll
   // progress (0 → 1 as the listening section enters the viewport).
   // Map that onto the album stack offset so the covers slide as the
-  // user scrolls — same idea as the hallway camera dolly. When the
-  // scroll settles, also swap the SoundCloud player to the track now
-  // at the front of the stack so the audio follows the visual.
+  // user scrolls — same idea as the hallway camera dolly.
   useEffect(() => {
     if (window.parent === window) return
-    let settleTimer: ReturnType<typeof setTimeout> | undefined
     const onMessage = (e: MessageEvent) => {
       if (e.data?.type !== 'listening-progress') return
       const v = Math.max(0, Math.min(1, +e.data.value || 0))
-      if (tracks.length === 0) return
-      targetOffset.current = v * tracks.length
-      if (settleTimer) clearTimeout(settleTimer)
-      settleTimer = setTimeout(() => {
-        const idx = (((Math.round(targetOffset.current) - 1) % tracks.length) + tracks.length) % tracks.length
-        setActiveIndex(idx)
-        setAutoPlay(true)
-        setNowPlaying(tracks[idx]?.permalink_url || null)
-      }, 300)
+      if (tracks.length > 0) {
+        targetOffset.current = v * tracks.length
+      }
     }
     window.addEventListener('message', onMessage)
-    return () => {
-      if (settleTimer) clearTimeout(settleTimer)
-      window.removeEventListener('message', onMessage)
-    }
-  }, [tracks])
+    return () => window.removeEventListener('message', onMessage)
+  }, [tracks.length])
 
   useEffect(() => { configRef.current = configState }, [configState])
 
