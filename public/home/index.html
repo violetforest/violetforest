@@ -135,7 +135,10 @@
 				// Stationary camera — no OrbitControls. Position + lookAt
 				// frozen, sliders below let you nudge values live.
 				camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-				camera.position.set( 660, 100, 0 );
+				// Match the parent's CAMERA_DEFAULTS split so home-camera messages
+				// don't cause a basePos teleport on mount (which the user perceived
+				// as a ping-pong when combined with mid-flight home-progress lerp).
+				camera.position.set( window.innerWidth < 768 ? 350 : 660, 100, 0 );
 				camera.lookAt( camTarget );
 
 				// Scroll = dolly along the camera's forward axis
