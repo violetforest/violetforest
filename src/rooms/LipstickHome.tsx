@@ -152,7 +152,17 @@ function LipstickTunnel({ scrollProgress }: { scrollProgress: number }) {
     return () => clearTimeout(id)
   }, [scrollProgress])
 
+  // Skip the very first run so the iframe keeps its own baked-in prop
+  // positions on load (e.g. plant1 at x=-150). Posting our defaults during
+  // mount would teleport the props mid-init — combined with the dolly lerp
+  // it reads as a ping-pong. Only forward changes once the user touches
+  // the sliders.
+  const camConfigPostedRef = useRef(false)
   useEffect(() => {
+    if (!camConfigPostedRef.current) {
+      camConfigPostedRef.current = true
+      return
+    }
     const post = () => {
       const w = iframeRef.current?.contentWindow
       if (!w) return
