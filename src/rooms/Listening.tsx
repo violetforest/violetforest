@@ -796,7 +796,7 @@ function Scene({
       <DprController config={config} />
       <CameraRig config={config} />
       {c.showClouds && <PastelClouds config={config} />}
-      {c.showReflection && <ReflectionFloor config={config} />}
+      {c.showReflection && !loading && <ReflectionFloor config={config} />}
       {!loading && <ScrollGlitter scrollOffset={scrollOffset} />}
 
       {!loading && (
