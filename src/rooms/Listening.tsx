@@ -89,7 +89,7 @@ const DEFAULT_CONFIG: Config = {
   vanishX: -0.6,
   vanishY: -0.6,
   entranceSpeed: 1.8,
-  entranceStagger: 0.06,
+  entranceStagger: 0.02,
   hoverLift: 2.5,
   hoverSnap: 0.18,
   scrollLerp: 0.06,
