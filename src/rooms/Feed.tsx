@@ -558,7 +558,7 @@ const IG_EMBED_STYLES = `
   }
 `
 
-export function Feed({ embed }: { embed?: boolean } = {}) {
+export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string } = {}) {
   const PAGE_SIZE = 8
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -568,7 +568,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
   const [allTags, setAllTags] = useState<string[]>([])
   const [years, setYears] = useState<number[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeTag = searchParams.get('tag')
+  const activeTag = lockedTag ?? searchParams.get('tag')
   const activeYearParam = searchParams.get('year')
   const activeYear = activeYearParam ? parseInt(activeYearParam, 10) : null
   const igEmbed = embed || searchParams.get('embed') === 'ig'
@@ -683,7 +683,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
           </div>
         )}
 
-        {allTags.length > 0 && (
+        {!lockedTag && allTags.length > 0 && (
           <div
             style={{
               display: 'flex',
@@ -748,7 +748,7 @@ export function Feed({ embed }: { embed?: boolean } = {}) {
           </div>
         )}
 
-        {(activeTag || activeYear) && (
+        {!lockedTag && (activeTag || activeYear) && (
           <div
             style={{
               display: 'flex',

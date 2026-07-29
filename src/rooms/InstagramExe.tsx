@@ -881,12 +881,11 @@ function Modal({ post, onClose }: { post: Post; onClose: () => void }) {
 
 export function InstagramExe() {
   const [data, setData] = useState<GraveyardData | null>(null)
-  const [tab, setTab] = useState<'home' | 'profile' | 'stories'>('home')
+  const [tab, setTab] = useState<'art' | 'personal' | 'profile' | 'stories'>('art')
   const [openPost, setOpenPost] = useState<Post | null>(null)
   const [openStory, setOpenStory] = useState<Story | null>(null)
   // Only fetch the (large) archive data.json once the user actually opens
-  // the Archive (profile) or Stories tab — neither the Feed home tab
-  // needs it.
+  // the Archive (profile) or Stories tab — the feed tabs don't need it.
   const needsArchive = tab === 'profile' || tab === 'stories'
   const fetchedRef = useRef(false)
 
@@ -923,10 +922,17 @@ export function InstagramExe() {
             </nav>
             <div className="igexe-container">
               <div className="igexe-content">
-                {tab === 'home' && (
+                {tab === 'art' && (
                   <div className="igexe-section">
                     <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
-                      <Feed embed />
+                      <Feed embed tag="art" />
+                    </div>
+                  </div>
+                )}
+                {tab === 'personal' && (
+                  <div className="igexe-section">
+                    <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
+                      <Feed embed tag="personal" />
                     </div>
                   </div>
                 )}
@@ -995,12 +1001,17 @@ export function InstagramExe() {
               </div>
               <div className="igexe-tabs">
                 <button
-                  className={`igexe-tab ${tab === 'home' ? 'active' : ''}`}
-                  onClick={() => setTab('home')}
+                  className={`igexe-tab ${tab === 'art' ? 'active' : ''}`}
+                  onClick={() => setTab('art')}
                 >
-                  Feed
+                  art
                 </button>
-                <button className="igexe-tab" disabled>Explore</button>
+                <button
+                  className={`igexe-tab ${tab === 'personal' ? 'active' : ''}`}
+                  onClick={() => setTab('personal')}
+                >
+                  personal
+                </button>
                 <button className="igexe-tab" disabled>Camera</button>
                 <button className="igexe-tab" disabled>Stories</button>
                 <button
