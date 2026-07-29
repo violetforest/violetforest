@@ -558,7 +558,7 @@ const IG_EMBED_STYLES = `
   }
 `
 
-export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string } = {}) {
+export function Feed({ embed, category }: { embed?: boolean; category?: string } = {}) {
   const PAGE_SIZE = 8
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -568,7 +568,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
   const [allTags, setAllTags] = useState<string[]>([])
   const [years, setYears] = useState<number[]>([])
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeTag = lockedTag ?? searchParams.get('tag')
+  const activeTag = searchParams.get('tag')
   const activeYearParam = searchParams.get('year')
   const activeYear = activeYearParam ? parseInt(activeYearParam, 10) : null
   const igEmbed = embed || searchParams.get('embed') === 'ig'
@@ -580,7 +580,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
     setPageCount(1)
     setHasMore(true)
     setLoading(true)
-  }, [activeTag, activeYear])
+  }, [activeTag, activeYear, category])
 
   useEffect(() => {
     if (pageCount > 1) setLoadingMore(true)
@@ -589,6 +589,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
       .select('*')
       .order('created_at', { ascending: false })
       .range(0, pageCount * PAGE_SIZE - 1)
+    if (category) query = query.eq('category', category)
     if (activeTag) query = query.contains('tags', [activeTag])
     if (activeYear) {
       query = query
@@ -602,7 +603,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
       setLoadingMore(false)
       if (arr.length < pageCount * PAGE_SIZE) setHasMore(false)
     })
-  }, [activeTag, activeYear, pageCount])
+  }, [activeTag, activeYear, category, pageCount])
 
   // Load the next page when the sentinel scrolls into view
   useEffect(() => {
@@ -683,7 +684,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
           </div>
         )}
 
-        {!lockedTag && allTags.length > 0 && (
+        {allTags.length > 0 && (
           <div
             style={{
               display: 'flex',
@@ -748,7 +749,7 @@ export function Feed({ embed, tag: lockedTag }: { embed?: boolean; tag?: string 
           </div>
         )}
 
-        {!lockedTag && (activeTag || activeYear) && (
+        {(activeTag || activeYear) && (
           <div
             style={{
               display: 'flex',

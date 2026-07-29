@@ -7,12 +7,15 @@ create table posts (
   media jsonb,    -- array of { url: string, type: 'image' | 'video' }
   link_url text,
   tags text[] default '{}',
+  category text, -- 'art' | 'personal' | null (drives Instagram.exe tabs)
   created_at timestamptz default now()
 );
 
 -- Migrations for existing dbs:
 --   alter table posts add column if not exists media jsonb;
 --   alter table posts add column if not exists tags text[] default '{}';
+--   alter table posts add column if not exists category text;
+--   notify pgrst, 'reload schema';
 
 alter table posts enable row level security;
 create policy "public read" on posts for select using (true);

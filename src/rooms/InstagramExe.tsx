@@ -925,14 +925,14 @@ export function InstagramExe() {
                 {tab === 'art' && (
                   <div className="igexe-section">
                     <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
-                      <Feed embed tag="art" />
+                      <Feed embed category="art" />
                     </div>
                   </div>
                 )}
                 {tab === 'personal' && (
                   <div className="igexe-section">
                     <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
-                      <Feed embed tag="personal" />
+                      <Feed embed category="personal" />
                     </div>
                   </div>
                 )}

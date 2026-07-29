@@ -66,6 +66,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
   const [type, setType] = useState('text')
   const [linkUrl, setLinkUrl] = useState('')
   const [tagsInput, setTagsInput] = useState('')
+  const [category, setCategory] = useState<'art' | 'personal' | ''>('')
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [posting, setPosting] = useState(false)
 
@@ -112,6 +113,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
       }
       if (hasMedia) row.media = media
       if (tags.length > 0) row.tags = tags
+      if (category) row.category = category
       const { error } = await supabase.from('posts').insert(row)
       insertError = error
     }
@@ -126,6 +128,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
     setBody('')
     setLinkUrl('')
     setTagsInput('')
+    setCategory('')
     setMediaFiles([])
     setType('text')
     onPost()
@@ -214,6 +217,29 @@ function PostComposer({ onPost }: { onPost: () => void }) {
           onChange={e => setTagsInput(e.target.value)}
           style={{ ...inputStyle, marginTop: '0.75rem' }}
         />
+      )}
+
+      {!isStory && (
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '1.05rem', opacity: 0.5, fontStyle: 'italic', fontFamily: 'Georgia, serif' }}>
+            category:
+          </span>
+          {(['art', 'personal'] as const).map(c => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setCategory(category === c ? '' : c)}
+              style={{
+                ...buttonStyle,
+                opacity: category === c ? 0.8 : 0.4,
+                fontSize: '1.05rem',
+                padding: '0.3rem 0.7rem',
+              }}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
       )}
 
       <div style={{ marginTop: '0.75rem' }}>
@@ -480,6 +506,22 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setEditing(null)
   }
 
+  // Cycle a post's category: (none) → art → personal → (none).
+  const cycleCategory = async (post: any) => {
+    const order = [null, 'art', 'personal'] as const
+    const idx = order.indexOf((post.category ?? null) as any)
+    const next = order[(idx + 1) % order.length]
+    const { error } = await supabase
+      .from('posts')
+      .update({ category: next })
+      .eq('id', post.id)
+    if (error) {
+      window.alert(`Saving category failed: ${error.message}`)
+      return
+    }
+    setPosts(posts.map(p => (p.id === post.id ? { ...p, category: next } : p)))
+  }
+
   // Edit the created_at date of a post via a quick prompt.
   const editDate = async (post: any) => {
     const current = new Date(post.created_at)
@@ -678,8 +720,19 @@ function PostList({ refreshKey }: { refreshKey: number }) {
                   </button>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.25rem' }}>
-                  <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>{post.type} · {new Date(post.created_at).toLocaleString()}</p>
+                  <p style={{ fontSize: '0.9rem', opacity: 0.4 }}>
+                    {post.type}
+                    {post.category ? ` · ${post.category}` : ''}
+                    {' · '}{new Date(post.created_at).toLocaleString()}
+                  </p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => cycleCategory(post)}
+                      style={{ ...deleteStyle, opacity: 0.5 }}
+                    >
+                      {post.category ? `category: ${post.category}` : '+ category'}
+                    </button>
                     <button
                       type="button"
                       onClick={() => editBody(post)}
