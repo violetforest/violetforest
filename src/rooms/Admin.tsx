@@ -66,7 +66,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
   const [type, setType] = useState('text')
   const [linkUrl, setLinkUrl] = useState('')
   const [tagsInput, setTagsInput] = useState('')
-  const [category, setCategory] = useState<'art' | 'personal' | ''>('')
+  const [category, setCategory] = useState<'art' | 'tech' | 'personal' | ''>('')
   const [mediaFiles, setMediaFiles] = useState<File[]>([])
   const [posting, setPosting] = useState(false)
 
@@ -224,7 +224,7 @@ function PostComposer({ onPost }: { onPost: () => void }) {
           <span style={{ fontSize: '1.05rem', opacity: 0.5, fontStyle: 'italic', fontFamily: 'Georgia, serif' }}>
             category:
           </span>
-          {(['art', 'personal'] as const).map(c => (
+          {(['art', 'tech', 'personal'] as const).map(c => (
             <button
               key={c}
               type="button"
@@ -506,9 +506,9 @@ function PostList({ refreshKey }: { refreshKey: number }) {
     setEditing(null)
   }
 
-  // Cycle a post's category: (none) → art → personal → (none).
+  // Cycle a post's category: (none) → art → tech → personal → (none).
   const cycleCategory = async (post: any) => {
-    const order = [null, 'art', 'personal'] as const
+    const order = [null, 'art', 'tech', 'personal'] as const
     const idx = order.indexOf((post.category ?? null) as any)
     const next = order[(idx + 1) % order.length]
     const { error } = await supabase
