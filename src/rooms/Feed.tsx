@@ -631,39 +631,38 @@ export function Feed({ embed, category }: { embed?: boolean; category?: string }
     return () => obs.disconnect()
   }, [hasMore, loading, posts.length])
 
-  // Load every distinct tag (unfiltered) so the tag cloud is the same on
-  // every view, regardless of the current filter. Frequency-sorted desc.
+  // Load every distinct tag so the tag cloud only shows tags from posts
+  // that live in the current category (or from every post if unfiltered).
+  // Frequency-sorted desc.
   useEffect(() => {
-    supabase
-      .from('posts')
-      .select('tags')
-      .then(({ data }) => {
-        const counts = new Map<string, number>()
-        for (const row of (data || []) as { tags: string[] | null }[]) {
-          for (const t of row.tags || []) counts.set(t, (counts.get(t) || 0) + 1)
-        }
-        setAllTags(
-          Array.from(counts.entries())
-            .sort((a, b) => b[1] - a[1])
-            .map(([t]) => t)
-        )
-      })
-  }, [])
+    let query = supabase.from('posts').select('tags')
+    if (category) query = query.eq('category', category)
+    query.then(({ data }) => {
+      const counts = new Map<string, number>()
+      for (const row of (data || []) as { tags: string[] | null }[]) {
+        for (const t of row.tags || []) counts.set(t, (counts.get(t) || 0) + 1)
+      }
+      setAllTags(
+        Array.from(counts.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([t]) => t)
+      )
+    })
+  }, [category])
 
-  // Load all distinct years from post created_at (lightweight) so the year
-  // filter row shows the same options regardless of the current filter.
+  // Load all distinct years from post created_at, scoped the same way as
+  // the tag cloud so the year filter matches what's actually visible.
   useEffect(() => {
-    supabase
-      .from('posts')
-      .select('created_at')
-      .then(({ data }) => {
-        const yset = new Set<number>()
-        for (const row of (data || []) as { created_at: string }[]) {
-          yset.add(new Date(row.created_at).getFullYear())
-        }
-        setYears(Array.from(yset).sort((a, b) => b - a))
-      })
-  }, [])
+    let query = supabase.from('posts').select('created_at')
+    if (category) query = query.eq('category', category)
+    query.then(({ data }) => {
+      const yset = new Set<number>()
+      for (const row of (data || []) as { created_at: string }[]) {
+        yset.add(new Date(row.created_at).getFullYear())
+      }
+      setYears(Array.from(yset).sort((a, b) => b - a))
+    })
+  }, [category])
 
   const setTag = (tag: string | null) => {
     if (tag) setSearchParams({ tag })
