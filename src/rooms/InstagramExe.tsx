@@ -881,7 +881,7 @@ function Modal({ post, onClose }: { post: Post; onClose: () => void }) {
 
 export function InstagramExe() {
   const [data, setData] = useState<GraveyardData | null>(null)
-  const [tab, setTab] = useState<'art' | 'tech' | 'personal' | 'profile' | 'stories'>('art')
+  const [tab, setTab] = useState<'art' | 'music' | 'tech' | 'personal' | 'profile' | 'stories'>('art')
   const [openPost, setOpenPost] = useState<Post | null>(null)
   const [openStory, setOpenStory] = useState<Story | null>(null)
   // Only fetch the (large) archive data.json once the user actually opens
@@ -926,6 +926,13 @@ export function InstagramExe() {
                   <div className="igexe-section">
                     <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
                       <Feed embed category="art" />
+                    </div>
+                  </div>
+                )}
+                {tab === 'music' && (
+                  <div className="igexe-section">
+                    <div className="igexe-feed" style={{ padding: 0, overflowY: 'auto' }}>
+                      <Feed embed category="music" />
                     </div>
                   </div>
                 )}
@@ -1014,6 +1021,12 @@ export function InstagramExe() {
                   Art
                 </button>
                 <button
+                  className={`igexe-tab ${tab === 'music' ? 'active' : ''}`}
+                  onClick={() => setTab('music')}
+                >
+                  Music
+                </button>
+                <button
                   className={`igexe-tab ${tab === 'tech' ? 'active' : ''}`}
                   onClick={() => setTab('tech')}
                 >
@@ -1025,7 +1038,6 @@ export function InstagramExe() {
                 >
                   Personal
                 </button>
-                <button className="igexe-tab" disabled>Stories</button>
                 <button
                   className={`igexe-tab ${tab === 'profile' ? 'active' : ''}`}
                   onClick={() => setTab('profile')}
