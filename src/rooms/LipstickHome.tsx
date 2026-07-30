@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { useSpaceStore } from '../store'
 import { DoorSection } from '../components/DoorSection'
+import { Lightbox } from './Feed'
+
+type LightboxItem = { url: string; type: 'image' | 'video' }
 
 const pageVariants: Variants = {
   initial: { opacity: 0, y: 12 },
@@ -278,9 +281,24 @@ export function LipstickHome() {
   const [hallwayProgress, setHallwayProgress] = useState(0)
   const [feedMounted, setFeedMounted] = useState(false)
   const [listeningMounted, setListeningMounted] = useState(false)
+  const [lightbox, setLightbox] = useState<{ items: LightboxItem[]; index: number } | null>(null)
   const feedMountedRef = useRef(false)
   const listeningMountedRef = useRef(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // The Instagram iframe posts a message when a media item is clicked so
+  // the lightbox can render at full viewport instead of being clipped
+  // inside the ~420×720 iframe box.
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      const data = e.data
+      if (data && data.type === 'ig-lightbox-open' && Array.isArray(data.items)) {
+        setLightbox({ items: data.items, index: data.index || 0 })
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
@@ -415,6 +433,21 @@ export function LipstickHome() {
           )}
         </div>
       </div>
+
+      {lightbox && (
+        <Lightbox
+          items={lightbox.items}
+          index={lightbox.index}
+          onClose={() => setLightbox(null)}
+          onNav={(delta) =>
+            setLightbox((cur) =>
+              cur
+                ? { ...cur, index: (cur.index + delta + cur.items.length) % cur.items.length }
+                : cur
+            )
+          }
+        />
+      )}
     </motion.div>
   )
 }

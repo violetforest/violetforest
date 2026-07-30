@@ -77,7 +77,7 @@ function VideoThumb({ src, style, onClick }: {
   )
 }
 
-function Lightbox({ items, index, onClose, onNav }: {
+export function Lightbox({ items, index, onClose, onNav }: {
   items: MediaItem[]
   index: number
   onClose: () => void
@@ -292,6 +292,19 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
     : post.image_url
       ? [{ url: post.image_url, type: 'image' }]
       : []
+  // If we're embedded in an iframe (e.g. Instagram.exe inside LipstickHome),
+  // ask the parent window to render the lightbox at full-viewport size —
+  // otherwise the portal is trapped inside the iframe.
+  const openMedia = (i: number) => {
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage(
+        { type: 'ig-lightbox-open', items, index: i },
+        '*'
+      )
+      return
+    }
+    setLightbox(i)
+  }
   return (
     <article
       className="h-entry"
@@ -335,7 +348,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                 <VideoThumb
                   key={i}
                   src={m.url}
-                  onClick={() => setLightbox(i)}
+                  onClick={() => openMedia(i)}
                   style={style}
                 />
               ) : (
@@ -346,7 +359,7 @@ function PostCard({ post, onTagClick }: { post: Post; onTagClick: (tag: string) 
                   alt=""
                   loading="lazy"
                   decoding="async"
-                  onClick={() => setLightbox(i)}
+                  onClick={() => openMedia(i)}
                   style={style}
                 />
               )
