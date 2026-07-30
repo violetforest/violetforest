@@ -720,7 +720,7 @@ export function Feed({ embed, category }: { embed?: boolean; category?: string }
                   background: 'none',
                   border: 'none',
                   padding: 0,
-                  fontSize: '1.13rem',
+                  fontSize: '1.4rem',
                   fontStyle: 'italic',
                   opacity: activeTag === tag ? 0.95 : 0.55,
                   cursor: 'pointer',
