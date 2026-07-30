@@ -587,6 +587,12 @@ export function Feed({ embed, category }: { embed?: boolean; category?: string }
   const igEmbed = embed || searchParams.get('embed') === 'ig'
   const sentinelRef = useRef<HTMLDivElement>(null)
 
+  // When switching between feed tabs (category changes), drop any active
+  // tag/year filter — Personal shouldn't inherit a #girly filter from Art.
+  useEffect(() => {
+    if (activeTag || activeYearParam) setSearchParams({})
+  }, [category])
+
   // Reset pagination when the active tag / year filter changes
   useEffect(() => {
     setPosts([])
