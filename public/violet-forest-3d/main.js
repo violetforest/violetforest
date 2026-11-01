@@ -659,15 +659,14 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ============ ENTER LINK → HOME ============
+// ============ ENTER LINKS → WORK / PERSONAL ============
 
-const enterLink = document.getElementById('enter-link');
-if (enterLink) {
-    enterLink.addEventListener('click', (event) => {
-        const dest = enterLink.getAttribute('href') || '/home';
+document.querySelectorAll('#enter-links a.internal').forEach((link) => {
+    link.addEventListener('click', (event) => {
+        const dest = link.getAttribute('href') || '/home';
         if (window.parent && window.parent !== window) {
             event.preventDefault();
             window.parent.postMessage({ type: 'navigate', to: dest }, '*');
         }
     });
-}
+});

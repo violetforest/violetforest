@@ -21,7 +21,7 @@
             font-family: monospace;
             font-size: 14px;
         }
-        #enter-link {
+        #enter-links {
             position: fixed;
             bottom: 2rem;
             left: 50%;
@@ -29,11 +29,19 @@
             color: #8844ff;
             font-family: monospace;
             font-size: 14px;
+            white-space: nowrap;
+        }
+        #enter-links a {
+            color: inherit;
             text-decoration: none;
             cursor: pointer;
         }
-        #enter-link:hover {
+        #enter-links a:hover {
             text-decoration: underline;
+        }
+        #enter-links .divider {
+            margin: 0 0.75em;
+            opacity: 0.5;
         }
         #spin-hint {
             position: fixed;
@@ -50,7 +58,9 @@
 </head>
 <body>
     <div id="loading">Loading...</div>
-    <a id="enter-link" href="/home">enter</a>
+    <nav id="enter-links">
+        <a href="https://portfolio.violetforest.com" target="_top">work</a><span class="divider">|</span><a class="internal" href="/home">personal</a>
+    </nav>
     <div id="spin-hint">spin the logo</div>
     <script type="importmap">
     {
