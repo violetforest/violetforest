@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>loves me, loves me not</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0; height: 100%; overflow: hidden;
+      background: #f6eef2;
+      touch-action: none;
+      -webkit-user-select: none; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    body { transition: background 1.2s ease; }
+    canvas { display: block; position: fixed; inset: 0; }
+    #ui {
+      position: fixed; left: 0; right: 0;
+      top: calc(env(safe-area-inset-top, 0px) + 9vh);
+      text-align: center; pointer-events: none;
+      font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+      color: var(--ink, #4a2a3a);
+    }
+    #word {
+      font-size: clamp(40px, 12vw, 84px); line-height: 1; font-weight: 600;
+      opacity: 0; transform: translateY(10px) scale(.96);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    #word.show { opacity: 1; transform: none; }
+    #word.final { font-size: clamp(52px, 16vw, 110px); }
+    #hint {
+      position: fixed; left: 0; right: 0;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 7vh);
+      text-align: center; pointer-events: none;
+      font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+      font-size: clamp(18px, 5vw, 26px);
+      color: var(--ink, #4a2a3a); opacity: .65;
+      transition: opacity .6s ease;
+    }
+    #hint.hide { opacity: 0; }
+    #ui, #hint { z-index: 2; }
+  </style>
+</head>
+<body>
+  <div id="ui"><div id="word"></div></div>
+  <div id="hint">tap a petal</div>
+
+  <script type="importmap">
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+  </script>
+  <script type="module">
+  import * as THREE from 'three'
+
+  // ---------- helpers ----------
+  const rand = (a, b) => a + Math.random() * (b - a)
+  const randInt = (a, b) => Math.floor(rand(a, b + 1))
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v))
+  const easeOutBack = (t) => { const c = 1.7; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2) }
+
+  const wordEl = document.getElementById('word')
+  const hintEl = document.getElementById('hint')
+
+  // ---------- renderer / scene ----------
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setSize(innerWidth, innerHeight)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  document.body.appendChild(renderer.domElement)
+
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 100)
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd8c8d0, 1.6))
+  const key = new THREE.DirectionalLight(0xffffff, 1.6)
+  key.position.set(-2, 3, 5)
+  scene.add(key)
+  const rim = new THREE.DirectionalLight(0xffffff, 0.5)
+  rim.position.set(3, -2, -2)
+  scene.add(rim)
+
+  // ---------- flower state ----------
+  let flower = null        // THREE.Group
+  let head = null          // group holding petals + center
+  let petals = []          // remaining petal groups
+  let flying = []          // petals in flight
+  let plucked = 0
+  let finished = false
+  let born = 0
+  let flowerRadius = 1
+
+  // ---------- petal geometry ----------
+  function makePetalGeometry({ L, W, tip, cup, curl, waist }) {
+    const s = new THREE.Shape()
+    const bw = W * waist // width near base
+    s.moveTo(0, 0)
+    if (tip === 'pointed') {
+      s.bezierCurveTo(bw, L * 0.15, W * 0.62, L * 0.55, 0, L)
+      s.bezierCurveTo(-W * 0.62, L * 0.55, -bw, L * 0.15, 0, 0)
+    } else if (tip === 'notched') {
+      s.bezierCurveTo(bw, L * 0.2, W * 0.6, L * 0.75, W * 0.32, L * 0.98)
+      s.quadraticCurveTo(W * 0.12, L * 1.02, 0, L * 0.9)
+      s.quadraticCurveTo(-W * 0.12, L * 1.02, -W * 0.32, L * 0.98)
+      s.bezierCurveTo(-W * 0.6, L * 0.75, -bw, L * 0.2, 0, 0)
+    } else if (tip === 'frilly') {
+      s.bezierCurveTo(bw, L * 0.2, W * 0.58, L * 0.7, W * 0.4, L * 0.92)
+      const teeth = 4
+      for (let i = 1; i <= teeth; i++) {
+        const x = W * 0.4 - (W * 0.8 * i) / teeth
+        const xm = x + (W * 0.8) / teeth / 2
+        s.quadraticCurveTo(xm, L * 1.04, x, L * (i === teeth ? 0.92 : 0.95))
+      }
+      s.bezierCurveTo(-W * 0.58, L * 0.7, -bw, L * 0.2, 0, 0)
+    } else { // rounded
+      s.bezierCurveTo(bw, L * 0.2, W * 0.62, L * 0.6, W * 0.42, L * 0.88)
+      s.quadraticCurveTo(0, L * 1.1, -W * 0.42, L * 0.88)
+      s.bezierCurveTo(-W * 0.62, L * 0.6, -bw, L * 0.2, 0, 0)
+    }
+    const g = new THREE.ShapeGeometry(s, 28)
+    // bend it: cup lengthwise, curl across the width
+    const p = g.attributes.position
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i)
+      const t = y / L
+      p.setZ(i, cup * t * t * L - curl * (x / W) * (x / W) * W)
+    }
+    g.computeVertexNormals()
+    return g
+  }
+
+  function paintPetal(geo, L, baseCol, tipCol, veinCol) {
+    const p = geo.attributes.position
+    const colors = new Float32Array(p.count * 3)
+    const c = new THREE.Color()
+    for (let i = 0; i < p.count; i++) {
+      const t = clamp(p.getY(i) / L, 0, 1)
+      c.copy(baseCol).lerp(tipCol, Math.pow(t, 0.7))
+      // soft central vein
+      const v = Math.exp(-Math.pow(p.getX(i) / (L * 0.03), 2)) * (1 - t) * 0.5
+      c.lerp(veinCol, v)
+      colors.set([c.r, c.g, c.b], i * 3)
+    }
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+  }
+
+  // ---------- build a random flower ----------
+  function buildFlower() {
+    if (flower) {
+      scene.remove(flower)
+      flower.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.() })
+    }
+    flying.forEach((f) => { scene.remove(f.obj) })
+    flying = []
+    petals = []
+    plucked = 0
+    finished = false
+    born = performance.now()
+
+    const n = randInt(5, 23)
+    const hue = Math.random()
+    const sat = rand(0.45, 0.9)
+    const style = pick(['pastel', 'pastel', 'vivid', 'white', 'deep'])
+    let base, tipC
+    if (style === 'white') {
+      base = new THREE.Color().setHSL(hue, 0.5, 0.82)
+      tipC = new THREE.Color().setHSL(hue, 0.15, 0.97)
+    } else if (style === 'deep') {
+      base = new THREE.Color().setHSL(hue, sat, 0.25)
+      tipC = new THREE.Color().setHSL((hue + rand(-0.06, 0.06) + 1) % 1, sat, 0.5)
+    } else if (style === 'vivid') {
+      base = new THREE.Color().setHSL((hue + rand(-0.1, 0.1) + 1) % 1, sat, 0.45)
+      tipC = new THREE.Color().setHSL(hue, sat, 0.62)
+    } else {
+      base = new THREE.Color().setHSL(hue, sat * 0.8, 0.7)
+      tipC = new THREE.Color().setHSL((hue + rand(-0.05, 0.05) + 1) % 1, sat * 0.6, 0.88)
+    }
+    const veinCol = base.clone().offsetHSL(0, 0, -0.12)
+
+    const centerR = rand(0.22, 0.42)
+    const L = rand(0.85, 1.25)
+    const spacing = (Math.PI * 2) / n
+    const W = clamp(2 * (centerR + L * 0.5) * Math.sin(spacing / 2) * rand(1.15, 1.6), L * 0.18, L * 0.95)
+    const shape = {
+      L, W,
+      tip: pick(['rounded', 'pointed', 'notched', 'frilly']),
+      cup: rand(0.05, 0.28),
+      curl: rand(0.02, 0.12),
+      waist: rand(0.15, 0.45),
+    }
+    const tilt = rand(0.05, 0.4) // how much petals rise toward the viewer
+    flowerRadius = centerR + L
+
+    // page backdrop: pale complement of petal hue
+    const bgHue = (hue + rand(0.35, 0.65)) % 1
+    const bg = new THREE.Color().setHSL(bgHue, rand(0.3, 0.6), rand(0.9, 0.95))
+    document.body.style.background = `radial-gradient(ellipse at 50% 42%, #${bg.getHexString()} 0%, #${bg.clone().offsetHSL(0, 0, -0.08).getHexString()} 100%)`
+    const ink = new THREE.Color().setHSL(hue, 0.4, 0.25)
+    document.documentElement.style.setProperty('--ink', '#' + ink.getHexString())
+
+    flower = new THREE.Group()
+    head = new THREE.Group()
+    flower.add(head)
+    scene.add(flower)
+
+    // stem + leaf, hanging down behind the head
+    const stemCol = new THREE.Color().setHSL(rand(0.22, 0.36), rand(0.35, 0.6), rand(0.28, 0.4))
+    const bend = rand(-0.6, 0.6)
+    const stemCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, -0.15),
+      new THREE.Vector3(bend * 0.3, -1.5, -0.35),
+      new THREE.Vector3(bend, -3.5, -0.5),
+      new THREE.Vector3(bend * 0.6, -7, -0.6),
+    ])
+    const stemMat = new THREE.MeshStandardMaterial({ color: stemCol, roughness: 0.7 })
+    flower.add(new THREE.Mesh(new THREE.TubeGeometry(stemCurve, 64, 0.06, 10), stemMat))
+    const leafGeo = makePetalGeometry({ L: 1.2, W: 0.5, tip: 'pointed', cup: 0.1, curl: 0.12, waist: 0.3 })
+    const leafMat = new THREE.MeshStandardMaterial({ color: stemCol.clone().offsetHSL(0, 0, 0.06), side: THREE.DoubleSide, roughness: 0.65 })
+    const leafT = rand(0.35, 0.6)
+    const leaf = new THREE.Mesh(leafGeo, leafMat)
+    leaf.position.copy(stemCurve.getPoint(leafT))
+    const side = Math.random() < 0.5 ? -1 : 1
+    leaf.rotation.set(-0.5, side * 0.3, side * -rand(0.9, 1.4))
+    flower.add(leaf)
+
+    // sepals peeking from behind
+    const sepalMat = new THREE.MeshStandardMaterial({ color: stemCol, side: THREE.DoubleSide, roughness: 0.7 })
+    const sepalGeo = makePetalGeometry({ L: centerR + 0.25, W: 0.18, tip: 'pointed', cup: -0.1, curl: 0.05, waist: 0.4 })
+    const ns = randInt(5, 8)
+    for (let i = 0; i < ns; i++) {
+      const s = new THREE.Mesh(sepalGeo, sepalMat)
+      s.rotation.z = (i / ns) * Math.PI * 2 + 0.3
+      s.position.z = -0.12
+      head.add(s)
+    }
+
+    // petals
+    const petalMat = new THREE.MeshStandardMaterial({
+      vertexColors: true, side: THREE.DoubleSide, roughness: 0.55,
+      emissive: tipC.clone().multiplyScalar(0.08),
+    })
+    const rot0 = Math.random() * Math.PI * 2
+    for (let i = 0; i < n; i++) {
+      const geo = makePetalGeometry({
+        ...shape,
+        L: L * rand(0.93, 1.05),
+        W: W * rand(0.92, 1.06),
+      })
+      paintPetal(geo, L, base, tipC, veinCol)
+      const mesh = new THREE.Mesh(geo, petalMat)
+      mesh.position.y = centerR * 0.55
+      mesh.rotation.x = -tilt + rand(-0.05, 0.05)
+
+      const pivot = new THREE.Group()
+      const angle = rot0 + i * spacing + rand(-0.06, 0.06)
+      pivot.rotation.z = angle - Math.PI / 2 // local +y points outward along angle
+      // alternate depths so overlaps read as layered instead of z-fighting
+      pivot.position.z = (i % 2 === 0 ? 0 : 0.025) + i * 0.002
+      pivot.userData = { angle, delay: i * (900 / n) }
+      pivot.scale.setScalar(0.001)
+      pivot.add(mesh)
+      head.add(pivot)
+      petals.push(pivot)
+    }
+
+    // center disc + seed florets in a phyllotaxis spiral
+    const centerCol = pick([
+      new THREE.Color().setHSL(rand(0.1, 0.15), 0.9, 0.5),  // golden
+      new THREE.Color().setHSL(rand(0.05, 0.1), 0.6, 0.18), // dark chocolate
+      new THREE.Color().setHSL((hue + 0.5) % 1, 0.6, 0.45), // complement
+      base.clone().offsetHSL(0, 0, -0.2),
+    ])
+    const discGeo = new THREE.SphereGeometry(centerR, 40, 20)
+    discGeo.scale(1, 1, 0.42)
+    const disc = new THREE.Mesh(discGeo, new THREE.MeshStandardMaterial({ color: centerCol.clone().offsetHSL(0, 0, -0.1), roughness: 0.9 }))
+    disc.position.z = 0.08
+    head.add(disc)
+
+    const seeds = Math.round(centerR * centerR * 1400)
+    const seedGeo = new THREE.SphereGeometry(centerR * 0.055, 8, 6)
+    const seedMesh = new THREE.InstancedMesh(seedGeo, new THREE.MeshStandardMaterial({ roughness: 0.6 }), seeds)
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), v = new THREE.Vector3()
+    const golden = Math.PI * (3 - Math.sqrt(5))
+    const tmp = new THREE.Color()
+    for (let i = 0; i < seeds; i++) {
+      const r = Math.sqrt(i / seeds) * centerR * 0.95
+      const a = i * golden
+      const zr = Math.sqrt(Math.max(0, 1 - (r / centerR) ** 2))
+      v.set(Math.cos(a) * r, Math.sin(a) * r, 0.08 + zr * centerR * 0.42)
+      sc.setScalar(1 - (r / centerR) * 0.4)
+      m.compose(v, q, sc)
+      seedMesh.setMatrixAt(i, m)
+      seedMesh.setColorAt(i, tmp.copy(centerCol).offsetHSL(0, 0, (r / centerR) * 0.12 - 0.04 + rand(-0.03, 0.03)))
+    }
+    head.add(seedMesh)
+
+    fitCamera()
+    setWord('')
+    hintEl.textContent = 'tap a petal'
+    hintEl.classList.remove('hide')
+  }
+
+  // ---------- camera fit (portrait-first) ----------
+  function fitCamera() {
+    camera.aspect = innerWidth / innerHeight
+    // flower should fill ~78% of the narrower dimension
+    const want = flowerRadius * 2 / 0.78
+    const vFov = THREE.MathUtils.degToRad(camera.fov)
+    const distH = (want / 2) / Math.tan(vFov / 2)
+    const distW = distH / camera.aspect
+    const d = Math.max(distH, distW)
+    camera.position.set(0, -0.15 * flowerRadius, d)
+    camera.lookAt(0, 0, 0)
+    camera.updateProjectionMatrix()
+  }
+
+  // ---------- text ----------
+  let wordTimer = 0
+  function setWord(text, final = false) {
+    wordEl.classList.remove('show')
+    clearTimeout(wordTimer)
+    if (!text) { wordEl.textContent = ''; return }
+    wordTimer = setTimeout(() => {
+      wordEl.textContent = text
+      wordEl.classList.toggle('final', final)
+      wordEl.classList.add('show')
+    }, 90)
+  }
+
+  // ---------- interaction ----------
+  const raycaster = new THREE.Raycaster()
+  const ndc = new THREE.Vector2()
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+  const hit = new THREE.Vector3()
+  let tilt = { x: 0, y: 0 }
+
+  function pluckAt(clientX, clientY) {
+    if (finished) { buildFlower(); return }
+    if (!petals.length) return
+    // wait until the flower has bloomed in
+    if (performance.now() - born < 700) return
+
+    ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1)
+    raycaster.setFromCamera(ndc, camera)
+
+    // direct hit on a petal first
+    let target = null
+    const hits = raycaster.intersectObjects(petals, true)
+    if (hits.length) {
+      let o = hits[0].object
+      while (o && !petals.includes(o)) o = o.parent
+      target = o
+    }
+    // otherwise the petal pointing closest to where you tapped (generous for thumbs)
+    if (!target && raycaster.ray.intersectPlane(plane, hit)) {
+      head.worldToLocal(hit)
+      const a = Math.atan2(hit.y, hit.x)
+      let best = Infinity
+      for (const p of petals) {
+        let d = Math.abs(((p.userData.angle - a) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI)
+        if (d < best) { best = d; target = p }
+      }
+    }
+    if (target) pluck(target)
+  }
+
+  function pluck(p) {
+    petals.splice(petals.indexOf(p), 1)
+    plucked++
+    const lovesMe = plucked % 2 === 1
+    const dir = new THREE.Vector3(Math.cos(p.userData.angle), Math.sin(p.userData.angle), 0)
+    scene.attach(p) // keep its world transform, detach from the head
+    flying.push({
+      obj: p,
+      vel: dir.clone().multiplyScalar(rand(2.2, 3.6)).add(new THREE.Vector3(rand(-0.4, 0.4), rand(1.2, 2.4), rand(1.5, 3))),
+      spin: new THREE.Vector3(rand(-6, 6), rand(-6, 6), rand(-4, 4)),
+      age: 0,
+    })
+    head.userData.kick = 1
+    head.userData.kickDir = dir
+    navigator.vibrate?.(lovesMe ? 12 : [6, 30, 6])
+    hintEl.classList.add('hide')
+
+    if (petals.length === 0) {
+      finished = true
+      setWord(lovesMe ? 'loves me ♡' : 'loves me not', true)
+      setTimeout(() => {
+        hintEl.textContent = 'tap for another flower'
+        hintEl.classList.remove('hide')
+      }, 1400)
+      if (lovesMe) burstHearts()
+    } else {
+      setWord(lovesMe ? 'loves me' : 'loves me not')
+    }
+  }
+
+  // tiny heart confetti for a happy ending
+  function burstHearts() {
+    const s = new THREE.Shape()
+    s.moveTo(0, -0.5)
+    s.bezierCurveTo(-0.9, 0.1, -0.5, 0.8, 0, 0.35)
+    s.bezierCurveTo(0.5, 0.8, 0.9, 0.1, 0, -0.5)
+    const g = new THREE.ShapeGeometry(s, 12)
+    const col = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#e05080'
+    for (let i = 0; i < 26; i++) {
+      const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(col).offsetHSL(rand(-0.05, 0.05), 0.3, 0.25), side: THREE.DoubleSide, transparent: true })
+      const h = new THREE.Mesh(g, mat)
+      h.scale.setScalar(rand(0.08, 0.18))
+      h.position.set(0, 0, 0.4)
+      scene.add(h)
+      const a = rand(0, Math.PI * 2)
+      flying.push({
+        obj: h, heart: true,
+        vel: new THREE.Vector3(Math.cos(a) * rand(1, 3.5), Math.sin(a) * rand(1, 3.5) + 2, rand(0, 2)),
+        spin: new THREE.Vector3(0, rand(-3, 3), rand(-2, 2)),
+        age: 0,
+      })
+    }
+  }
+
+  renderer.domElement.addEventListener('pointerdown', (e) => {
+    e.preventDefault()
+    pluckAt(e.clientX, e.clientY)
+  })
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse') {
+      tilt.x = (e.clientY / innerHeight - 0.5) * 0.4
+      tilt.y = (e.clientX / innerWidth - 0.5) * 0.5
+    }
+  })
+  // gentle parallax from phone tilt (Android; iOS needs a permission prompt, so skip it there)
+  addEventListener('deviceorientation', (e) => {
+    if (e.beta == null) return
+    tilt.x = clamp((e.beta - 45) / 90, -0.4, 0.4)
+    tilt.y = clamp(e.gamma / 90, -0.5, 0.5)
+  })
+  addEventListener('resize', () => {
+    renderer.setSize(innerWidth, innerHeight)
+    fitCamera()
+  })
+
+  // ---------- loop ----------
+  const clock = new THREE.Clock()
+  const G = new THREE.Vector3(0, -7, 0)
+  function tick() {
+    const dt = Math.min(clock.getDelta(), 0.05)
+    const t = clock.elapsedTime
+    const since = performance.now() - born
+
+    if (flower) {
+      // bloom-in
+      for (const p of petals) {
+        const k = clamp((since - p.userData.delay) / 700, 0, 1)
+        p.scale.setScalar(Math.max(0.001, easeOutBack(k)))
+      }
+      // sway, follow tilt, and a little recoil after each pluck
+      const kick = head.userData.kick || 0
+      const kd = head.userData.kickDir || new THREE.Vector3()
+      flower.rotation.x += ((tilt.x + Math.sin(t * 0.7) * 0.04 - kd.y * kick * 0.18) - flower.rotation.x) * 0.08
+      flower.rotation.y += ((tilt.y + Math.sin(t * 0.5) * 0.06 + kd.x * kick * 0.18) - flower.rotation.y) * 0.08
+      flower.rotation.z = Math.sin(t * 0.4) * 0.03
+      head.userData.kick = kick * 0.9
+      const grow = clamp(since / 500, 0, 1)
+      flower.scale.setScalar(0.85 + 0.15 * easeOutBack(grow))
+    }
+
+    for (let i = flying.length - 1; i >= 0; i--) {
+      const f = flying[i]
+      f.age += dt
+      f.vel.addScaledVector(G, dt * (f.heart ? 0.35 : 1))
+      f.vel.multiplyScalar(f.heart ? 0.985 : 0.995)
+      f.obj.position.addScaledVector(f.vel, dt)
+      f.obj.rotation.x += f.spin.x * dt
+      f.obj.rotation.y += f.spin.y * dt
+      f.obj.rotation.z += f.spin.z * dt
+      if (f.heart) f.obj.material.opacity = clamp(1 - (f.age - 1.2) / 0.8, 0, 1)
+      if (f.age > 3) {
+        scene.remove(f.obj)
+        f.obj.traverse((o) => { if (o.isMesh && f.heart) o.material.dispose() })
+        if (!f.heart) f.obj.traverse((o) => o.geometry?.dispose())
+        flying.splice(i, 1)
+      }
+    }
+
+    renderer.render(scene, camera)
+    requestAnimationFrame(tick)
+  }
+
+  buildFlower()
+  tick()
+  </script>
+</body>
+</html>

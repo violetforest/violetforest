@@ -111,6 +111,7 @@ export default function App() {
             {/* Old route — redirect so existing /girly links still work */}
             <Route path="/girly" element={<Navigate to="/mcblingee" replace />} />
             <Route path="/scroll-spiral" element={<NetArtIframe src={`${import.meta.env.BASE_URL}scroll-spiral/index.html`} title="scroll-spiral" />} />
+            <Route path="/loves-me" element={<NetArtIframe src={`${import.meta.env.BASE_URL}loves-me/index.html`} title="loves-me" docTitle="loves me, loves me not" />} />
             <Route path="/sludge-flower" element={<NetArtIframe src={`${import.meta.env.BASE_URL}sludge-flower/index.html`} title="sludge-flower" />} />
             <Route path="/tones" element={<NetArtIframe src={`${import.meta.env.BASE_URL}tones/index.html`} title="tones" />} />
             <Route path="/myspace" element={

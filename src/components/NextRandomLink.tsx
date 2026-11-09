@@ -6,6 +6,7 @@ const NET_ART_ROUTES = [
   '/webcore',
   '/scroll-spiral',
   '/tones',
+  '/loves-me',
 ]
 
 export function NextRandomLink() {
